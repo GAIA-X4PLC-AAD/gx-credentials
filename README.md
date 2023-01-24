@@ -1,1 +1,1 @@
-# Taquito testing with Vitejs
+# Generate Verifiable Credentials
