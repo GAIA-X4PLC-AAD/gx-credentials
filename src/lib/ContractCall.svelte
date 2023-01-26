@@ -12,6 +12,8 @@
   };
 </script>
 
+<button on:click={simpleParam}> Send transaction </button>
+
 <style>
   button {
     font-family: inherit;
@@ -35,5 +37,3 @@
     background-color: rgba(255, 62, 0, 0.2);
   }
 </style>
-
-<button on:click={simpleParam}> Send transaction </button>

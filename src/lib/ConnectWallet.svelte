@@ -1,10 +1,19 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher } from 'svelte';
+  import '../app.css';
 
   export let connected;
 
   const dispatch = createEventDispatcher();
 </script>
+
+{#if connected}
+  <button on:click={() => dispatch('disconnect-wallet')}>
+    Disconnect wallet
+  </button>
+{:else}
+  <button on:click={() => dispatch('connect-wallet')}> Connect wallet </button>
+{/if}
 
 <style>
   button {
@@ -29,11 +38,3 @@
     background-color: rgba(255, 62, 0, 0.2);
   }
 </style>
-
-{#if connected}
-  <button on:click={() => dispatch("disconnect-wallet")}>
-    Disconnect wallet
-  </button>
-{:else}
-  <button on:click={() => dispatch("connect-wallet")}> Connect wallet </button>
-{/if}
