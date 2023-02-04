@@ -1,5 +1,21 @@
 <script lang="ts">
   import { navigate } from 'svelte-navigator';
+  import { collection, getDocs, doc, updateDoc } from 'firebase/firestore/lite';
+  import { db } from '../Firebase';
+  import { onMount } from 'svelte';
+
+  let companyCredentials = [];
+  let employeeCredentials = [];
+
+  onMount(async () => {
+    const companyCol = collection(db, 'CompanyCredentials');
+    const companySnapshot = await getDocs(companyCol);
+    companyCredentials = companySnapshot.docs.map((doc) => doc.data());
+
+    const employeeCol = collection(db, 'EmployeeCredentials');
+    const employeeSnapshot = await getDocs(employeeCol);
+    employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
+  });
 </script>
 
 <main class="flex justify-center items-center h-screen">

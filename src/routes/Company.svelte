@@ -3,9 +3,7 @@
   import { useNavigate } from 'svelte-navigator';
   import { onMount } from 'svelte';
   import { db } from '../Firebase';
-  import { collection, getDocs } from 'firebase/firestore/lite';
-  import { addDoc, doc, setDoc } from 'firebase/firestore/lite';
-  import SuccessToast from '../lib/Modal.svelte';
+  import { doc, setDoc } from 'firebase/firestore/lite';
   import Modal from '../lib/Modal.svelte';
   const navigate = useNavigate();
 
@@ -24,11 +22,11 @@
   };
 
   function handleSubmit() {
-    // generateCredential($userData, company).then(() => console.log('done'));
     setDoc(doc(db, 'CompanyCredentials', $userData.account.address), {
       name: company.name,
       description: company.description,
       url: company.url,
+      address: $userData.account.address,
       status: 'pending',
     })
       .then(() => {

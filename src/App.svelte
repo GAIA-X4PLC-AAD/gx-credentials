@@ -4,6 +4,7 @@
   import './app.css';
   import Selection from './routes/Selection.svelte';
   import Employee from './routes/Employee.svelte';
+  import AdminWindow from './routes/AdminWindow.svelte';
 </script>
 
 <main>
@@ -19,6 +20,9 @@
     </Route>
     <Route path="/selection">
       <Selection />
+    </Route>
+    <Route path="/admin">
+      <AdminWindow />
     </Route>
   </Router>
 </main>

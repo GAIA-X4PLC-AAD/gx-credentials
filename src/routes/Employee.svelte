@@ -1,5 +1,5 @@
 <script>
-  import { generateCredential, userData } from '../store';
+  import { userData } from '../store';
   import { useNavigate } from 'svelte-navigator';
   const navigate = useNavigate();
 
