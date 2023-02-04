@@ -17,10 +17,14 @@ import {
   JWKFromTezos,
   prepareIssueCredential,
   verifyCredential,
-} from 'didkit-wasm';
-// const didkit = require('didkit-wasm-node');
-
+  verifyPresentation,
+} from '@spruceid/didkit-wasm';
 import { InMemorySigner } from '@taquito/signer';
+import {
+  completeIssuePresentation,
+  prepareIssuePresentation,
+} from '@spruceid/didkit-wasm';
+import { Employee } from './routes';
 
 const rpcUrl = 'https://ghostnet.ecadinfra.com';
 
@@ -71,7 +75,6 @@ export const initWallet = async () => {
       rpcUrl: rpcUrl,
     },
   };
-  let Tezos: TezosToolkit;
   let newWallet: BeaconWallet = new BeaconWallet(options);
   try {
     wallet.set(newWallet);
@@ -90,17 +93,19 @@ export const disconnectWallet = async () => {
   userData.set(null);
 };
 
-export const genrateSignature = async (userData, company: Company) => {
+export const generateSignature = async (
+  userData,
+  company: Company | Employee
+) => {
   const did = `did:pkh:tz:` + userData.account.address;
   const credential = {
     '@context': [
       'https://www.w3.org/2018/credentials/v1',
       {
-        alias: 'https://schema.org/name',
+        name: 'https://schema.org/name',
         description: 'https://schema.org/description',
         website: 'https://schema.org/url',
-        logo: 'https://schema.org/logo',
-        BasicProfile: 'https://tzprofiles.com/BasicProfile',
+        url: 'https://schema.org/logo',
       },
     ],
     id: 'urn:uuid:' + uuid(),
@@ -118,12 +123,16 @@ export const genrateSignature = async (userData, company: Company) => {
   let credentialString = JSON.stringify(credential);
   const proofOptions = {
     verificationMethod:
-      //did + '#TezosMethod2021',
       'did:pkh:tz:tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc#TezosMethod2021',
     proofPurpose: 'assertionMethod',
   };
-  const publicKeyJwkString = await JWKFromTezos(userData.account.publicKey);
-
+  //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+  const publicKeyJwkString = await JWKFromTezos(
+    'edpkuGHxcJDq9gutfaizFBQuFncLEhiLXKzPKVp5r1cwRpKnftDoD6'
+  );
+  console.log(userData.account.publicKey);
+  console.log(publicKeyJwkString);
+  console.log(credentialString);
   let prepStr = await prepareIssueCredential(
     credentialString,
     JSON.stringify(proofOptions),
@@ -140,18 +149,17 @@ export const genrateSignature = async (userData, company: Company) => {
   return { micheline, credentialString, prepStr };
 };
 
-export const generateCredential = async (userData, company: Company) => {
+export const generateCredential = async (
+  userData,
+  company: Company | Employee
+) => {
   try {
-    const { micheline, credentialString, prepStr } = await genrateSignature(
+    const { micheline, credentialString, prepStr } = await generateSignature(
       userData,
       company
     );
 
-    const payload: RequestSignPayloadInput = {
-      signingType: SigningType.MICHELINE,
-      payload: micheline,
-      sourceAddress: userData.account.address,
-    };
+    // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(
       'edskRhNtSa3b3hQVZG9FVRoF8QFBK8qXpWo26FrXAgAytXTMmUfCfuvbwTwpUMi8kW9FaPJLeoRKS6Jp8tri2r5WWmLxRS6yWF'
     );
@@ -163,6 +171,7 @@ export const generateCredential = async (userData, company: Company) => {
       prefixSig
     );
 
+    console.log('Credential verified. VC:', vcStr);
     const verifyOptionsString = '{}';
     const verifyResult = JSON.parse(
       await verifyCredential(vcStr, verifyOptionsString)
@@ -172,6 +181,63 @@ export const generateCredential = async (userData, company: Company) => {
     } else {
       console.log('Credential verified. VC:', vcStr);
     }
+
+    //public key of the holder and subject
+    // const publicKey1 = userData.account.publicKey;
+    // const publicKeyJwkString1 = await JWKFromTezos(publicKey1);
+    // const publicKeyJwkString1 = await JWKFromTezos(
+    //   'edpkuGHxcJDq9gutfaizFBQuFncLEhiLXKzPKVp5r1cwRpKnftDoD6'
+    // );
+
+    // let vpprep, vp;
+    // const did = `did:pkh:tz:${userData.account.address}`;
+    // const proofOptions1 = {
+    //   proofPurpose: 'assertionMethod',
+    // };
+
+    // const unsignedPresentation = {
+    //   '@context': ['https://www.w3.org/2018/credentials/v1'],
+    //   id: 'https://www.w3.org/2018/credentials/v1',
+    //   type: ['VerifiablePresentation'],
+    //   holder: did,
+    //   verifiableCredential: [JSON.parse(vcStr)],
+    // };
+    // //client as the holder of the credential
+    // const signer2 = new InMemorySigner(
+    //   'edskS2yjd6nzuYrX6AnHX3Sd5anGxYFRqcMKkcaNXyxcBW9W4rvmfh8EJdSAgj9GKzFPa7cRRgEPBRJXP2LSXvkD7dU2ykDZRh'
+    // );
+
+    // try {
+    //   vpprep = await prepareIssuePresentation(
+    //     JSON.stringify(unsignedPresentation),
+    //     JSON.stringify(proofOptions1),
+    //     publicKeyJwkString1
+    //   );
+
+    //   const preparation = JSON.parse(vpprep);
+    //   const { signingInput } = preparation;
+    //   const micheline = signingInput && signingInput.micheline;
+
+    //   const payload: RequestSignPayloadInput = {
+    //     signingType: SigningType.MICHELINE,
+    //     payload: micheline,
+    //     sourceAddress: userData.account.address,
+    //   };
+
+    //   const { signature } = await localWallet.client.requestSignPayload(
+    //     payload
+    //   );
+
+    //   vp = await completeIssuePresentation(
+    //     JSON.stringify(unsignedPresentation),
+    //     vpprep,
+    //     signature
+    //   );
+    // } catch (error) {
+    //   console.log('ERROR: ', error);
+    // }
+
+    // console.log('VP:', vp);
   } catch (error) {
     console.log('Error in generating Credential', error);
   }

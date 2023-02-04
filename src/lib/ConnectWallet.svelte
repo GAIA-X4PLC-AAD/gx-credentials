@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { fly } from 'svelte/transition';
   import '../app.css';
 
   export let connected;
@@ -8,11 +9,19 @@
 </script>
 
 {#if connected}
-  <button on:click={() => dispatch('disconnect-wallet')}>
+  <button
+    transition:fly={{ y: 200, duration: 2000 }}
+    on:click={() => dispatch('disconnect-wallet')}
+  >
     Disconnect wallet
   </button>
 {:else}
-  <button on:click={() => dispatch('connect-wallet')}> Connect wallet </button>
+  <button
+    transition:fly={{ y: 200, duration: 2000 }}
+    on:click={() => dispatch('connect-wallet')}
+  >
+    Connect wallet
+  </button>
 {/if}
 
 <style>
@@ -30,6 +39,9 @@
     cursor: pointer;
   }
 
+  button:hover {
+    background-color: rgba(255, 62, 0, 0.2);
+  }
   button:focus {
     border: 2px solid #ff3e00;
   }

@@ -3,3 +3,9 @@ export interface Company {
   description: string;
   url: string;
 }
+
+export interface Employee {
+  name: string;
+  email: string;
+  company: Company;
+}

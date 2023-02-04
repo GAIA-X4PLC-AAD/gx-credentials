@@ -1,35 +1,36 @@
-import { defineConfig, mergeConfig } from "vite";
-import path from "path";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { defineConfig, mergeConfig } from 'vite';
+import path from 'path';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import wasm from 'vite-plugin-wasm';
 
 // https://vitejs.dev/config/
 export default ({ command }) => {
-  const isBuild = command === "build";
+  const isBuild = command === 'build';
   return defineConfig({
-    plugins: [svelte()],
+    plugins: [svelte(), wasm()],
     define: {
-      global: {}
+      global: {},
     },
     build: {
-      target: "esnext",
+      target: 'esnext',
       commonjsOptions: {
-        transformMixedEsModules: true
-      }
+        transformMixedEsModules: true,
+      },
     },
     resolve: {
       alias: {
         // dedupe @airgap/beacon-sdk
         // I almost have no idea why it needs `cjs` on dev and `esm` on build, but this is how it works 🤷‍♂️
-        "@airgap/beacon-sdk": path.resolve(
+        '@airgap/beacon-sdk': path.resolve(
           path.resolve(),
           `./node_modules/@airgap/beacon-sdk/dist/${
-            isBuild ? "esm" : "cjs"
+            isBuild ? 'esm' : 'cjs'
           }/index.js`
         ),
         // polyfills
-        "readable-stream": "vite-compatible-readable-stream",
-        stream: "vite-compatible-readable-stream"
-      }
-    }
+        'readable-stream': 'vite-compatible-readable-stream',
+        stream: 'vite-compatible-readable-stream',
+      },
+    },
   });
 };
