@@ -10,6 +10,7 @@
   <h1 transition:fly={{ y: -200, duration: 2000 }} class="font-semibold">
     Verifiable Credentials Generation
   </h1>
+  <i class="fas fa-watch mr-2 fa-2x" />
   <br />
   <ConnectWallet
     connected={$userData?.connected}

@@ -5,6 +5,7 @@
   import { db } from '../Firebase';
   import { doc, setDoc } from 'firebase/firestore/lite';
   import Modal from '../lib/Modal.svelte';
+  import { fade } from 'svelte/transition';
   const navigate = useNavigate();
 
   let modalType = 'success';
@@ -27,7 +28,7 @@
       description: company.description,
       url: company.url,
       address: $userData.account.address,
-      status: 'pending',
+      status: 'Pending',
     })
       .then(() => {
         console.log('Document successfully written!');
@@ -46,7 +47,7 @@
   }
 </script>
 
-<main class="h-screen">
+<main class="h-screen" transition:fade={{ duration: 2000 }}>
   <form
     class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center"
     on:submit|preventDefault={handleSubmit}

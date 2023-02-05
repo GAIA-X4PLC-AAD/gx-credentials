@@ -1,6 +1,7 @@
 <script>
   import { userData } from '../store';
   import { useNavigate } from 'svelte-navigator';
+  import { fade } from 'svelte/transition';
   const navigate = useNavigate();
 
   if ($userData === null) {
@@ -18,7 +19,7 @@
   }
 </script>
 
-<div class="flex justify-center align-middle">
+<main class="h-screen" transition:fade={{ duration: 2000 }}>
   <form
     class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center"
     on:submit|preventDefault={handleSubmit}
@@ -50,4 +51,16 @@
       >Submit</button
     >
   </form>
-</div>
+</main>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1em;
+    margin: 0 auto;
+  }
+</style>
