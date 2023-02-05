@@ -116,7 +116,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
   };
   //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
   const publicKeyJwkString = await JWKFromTezos(
-    'edpkuGHxcJDq9gutfaizFBQuFncLEhiLXKzPKVp5r1cwRpKnftDoD6'
+    import.meta.env.ISSUER_PUBLIC_KEY
   );
   console.log(userData.publicKey);
   console.log(publicKeyJwkString);
@@ -147,9 +147,7 @@ export const generateCompanyCredential = async (company: Company) => {
       await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
-    const signer = new InMemorySigner(
-      'edskRhNtSa3b3hQVZG9FVRoF8QFBK8qXpWo26FrXAgAytXTMmUfCfuvbwTwpUMi8kW9FaPJLeoRKS6Jp8tri2r5WWmLxRS6yWF'
-    );
+    const signer = new InMemorySigner(import.meta.env.ISSUER_PRIVATE_KEY);
     const bytes = micheline;
     const { prefixSig } = await signer.sign(bytes);
     let vcStr = await completeIssueCredential(
