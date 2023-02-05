@@ -3,13 +3,16 @@
   import { db } from '../Firebase';
   import { collection, getDocs, doc, updateDoc } from 'firebase/firestore/lite';
   import { fade } from 'svelte/transition';
+  import { generateCompanyCredential } from '../store';
   let companyCredentials = [];
   let employeeCredentials = [];
+  import { userData } from '../store';
 
   const updateStatus = async (event, info, client) => {
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
+        await generateCompanyCredential(info);
         await updateDoc(docRef, { status: 'Approved' });
       }
       if (event.target.id === 'reject') {
@@ -24,8 +27,6 @@
           ));
     }
   };
-
-  $: console.log('companyCredentials: ', companyCredentials);
 
   onMount(async () => {
     const companyCol = collection(db, 'CompanyCredentials');

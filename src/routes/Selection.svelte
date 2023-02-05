@@ -3,7 +3,7 @@
   import { collection, getDocs } from 'firebase/firestore/lite';
   import { db } from '../Firebase';
   import { onMount } from 'svelte';
-  import { userData } from '../store';
+  import { userData, downloadCompanyVC, downloadEmployeeVC } from '../store';
   import { fade } from 'svelte/transition';
 
   let companyCredentials = [];
@@ -42,6 +42,7 @@
     <button
       class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64"
       transition:fade={{ duration: 3000 }}
+      on:click={() => downloadCompanyVC($userData?.account.address)}
     >
       <div class="flex items-center">
         <i class="fas fa-download text-white" />
@@ -82,7 +83,8 @@
 
   {#if employeeStatus === 'Approved'}
     <button
-      class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64"
+      class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
+      on:click={() => downloadEmployeeVC($userData?.account.address)}
       transition:fade={{ duration: 3000 }}
     >
       <div class="flex items-center">
@@ -92,7 +94,7 @@
     </button>
   {:else if employeeStatus === 'Rejected'}
     <button
-      class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64"
+      class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
       transition:fade={{ duration: 3000 }}
     >
       <div class="flex items-center">
@@ -102,7 +104,7 @@
     </button>
   {:else if employeeStatus === 'Pending'}
     <button
-      class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64"
+      class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
       transition:fade={{ duration: 3000 }}
     >
       <div class="flex items-center">

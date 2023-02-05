@@ -1,16 +1,14 @@
 <script>
-  import { generateCredential, userData } from '../store';
+  import { userData } from '../store';
   import { useNavigate } from 'svelte-navigator';
   import { onMount } from 'svelte';
   import { db } from '../Firebase';
   import { doc, setDoc } from 'firebase/firestore/lite';
-  import Modal from '../lib/Modal.svelte';
   import { fade } from 'svelte/transition';
   const navigate = useNavigate();
 
-  let modalType = 'success';
+  let type = 'success';
   let showModal = false;
-  let message = 'Your credentials have been submitted for review.';
 
   if ($userData === null) {
     navigate('/');
@@ -28,22 +26,22 @@
       description: company.description,
       url: company.url,
       address: $userData.account.address,
+      publicKey: $userData.account.publicKey,
       status: 'Pending',
     })
       .then(() => {
         console.log('Document successfully written!');
-        showModal = true;
-        setTimeout(() => {
-          showModal = false;
-          navigate('/selection');
-        }, 3000);
+        showModal = !showModal;
       })
       .catch((error) => {
-        showModal = true;
-        modalType = 'error';
-        message = 'There was an error adding your company credentials';
+        showModal = !showModal;
+        type = 'error';
         console.error('Error adding document: ', error);
       });
+    setTimeout(() => {
+      showModal = false;
+      navigate('/selection');
+    }, 3000);
   }
 </script>
 
@@ -88,7 +86,19 @@
     </div>
     <button>Submit</button>
   </form>
-  <Modal {modalType} {showModal} {message} />
+  {#if showModal}
+    <div class="fixed top-0 left-0 right-0 bottom-0 z-10 bg-white p-8">
+      <div class="text-center">
+        {#if type === 'success'}
+          <i class="fas fa-check text-green-500" />
+          <p class="text-green-500">Successfully applied for VC.</p>
+        {:else}
+          <i class="fas fa-times text-red-500" />
+          <p class="text-red-500">Error applying for VC.</p>
+        {/if}
+      </div>
+    </div>
+  {/if}
 </main>
 
 <style>

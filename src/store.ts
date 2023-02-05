@@ -1,9 +1,4 @@
-import {
-  BeaconEvent,
-  NetworkType,
-  SigningType,
-  type RequestSignPayloadInput,
-} from '@airgap/beacon-sdk';
+import { BeaconEvent, NetworkType } from '@airgap/beacon-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit } from '@taquito/taquito';
 import { Tzip16Module } from '@taquito/tzip16';
@@ -17,14 +12,10 @@ import {
   JWKFromTezos,
   prepareIssueCredential,
   verifyCredential,
-  verifyPresentation,
 } from '@spruceid/didkit-wasm';
 import { InMemorySigner } from '@taquito/signer';
-import {
-  completeIssuePresentation,
-  prepareIssuePresentation,
-} from '@spruceid/didkit-wasm';
-import { Employee } from './routes';
+import { db } from './Firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore/lite';
 
 const rpcUrl = 'https://ghostnet.ecadinfra.com';
 
@@ -93,11 +84,8 @@ export const disconnectWallet = async () => {
   userData.set(null);
 };
 
-export const generateSignature = async (
-  userData,
-  company: Company | Employee
-) => {
-  const did = `did:pkh:tz:` + userData.account.address;
+export const generateCompanySignature = async (userData, company: Company) => {
+  const did = `did:pkh:tz:` + userData.address;
   const credential = {
     '@context': [
       'https://www.w3.org/2018/credentials/v1',
@@ -130,7 +118,7 @@ export const generateSignature = async (
   const publicKeyJwkString = await JWKFromTezos(
     'edpkuGHxcJDq9gutfaizFBQuFncLEhiLXKzPKVp5r1cwRpKnftDoD6'
   );
-  console.log(userData.account.publicKey);
+  console.log(userData.publicKey);
   console.log(publicKeyJwkString);
   console.log(credentialString);
   let prepStr = await prepareIssueCredential(
@@ -149,15 +137,14 @@ export const generateSignature = async (
   return { micheline, credentialString, prepStr };
 };
 
-export const generateCredential = async (
-  userData,
-  company: Company | Employee
-) => {
+export const generateCompanyCredential = async (company: Company) => {
+  const userData = {
+    address: company.address,
+    publicKey: company.publicKey,
+  };
   try {
-    const { micheline, credentialString, prepStr } = await generateSignature(
-      userData,
-      company
-    );
+    const { micheline, credentialString, prepStr } =
+      await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(
@@ -178,10 +165,18 @@ export const generateCredential = async (
     );
     if (verifyResult.errors.length > 0) {
       console.log('Error in verifying Credential', verifyResult.errors);
-    } else {
-      console.log('Credential verified. VC:', vcStr);
+      throw new Error('Error in verifying Credential');
     }
 
+    const data = JSON.parse(vcStr);
+    console.log(data);
+    setDoc(doc(db, 'CompanyVC', userData.address), { ...data })
+      .then(() => {
+        console.log('Document successfully written!');
+      })
+      .catch((error) => {
+        console.error('Error adding document: ', error);
+      });
     //public key of the holder and subject
     // const publicKey1 = userData.account.publicKey;
     // const publicKeyJwkString1 = await JWKFromTezos(publicKey1);
@@ -239,6 +234,29 @@ export const generateCredential = async (
 
     // console.log('VP:', vp);
   } catch (error) {
-    console.log('Error in generating Credential', error);
+    console.log('Error in generating Credential. ', error);
   }
+};
+
+export const downloadCompanyVC = (user) => {
+  const docRef = doc(db, 'CompanyVC', user);
+  getDoc(docRef).then((doc) => {
+    const data = JSON.stringify(doc.data());
+    const blob = new Blob([data], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'CompanyVC.json';
+    link.click();
+  });
+};
+export const downloadEmployeeVC = (user) => {
+  const docRef = doc(db, 'EmployeeVC', user);
+  getDoc(docRef).then((doc) => {
+    const data = JSON.stringify(doc.data());
+    const blob = new Blob([data], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'EmployeeVC.json';
+    link.click();
+  });
 };

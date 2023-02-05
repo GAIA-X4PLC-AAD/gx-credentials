@@ -2,20 +2,43 @@
   import { userData } from '../store';
   import { useNavigate } from 'svelte-navigator';
   import { fade } from 'svelte/transition';
+  import { db } from '../Firebase';
+  import { doc, setDoc } from 'firebase/firestore/lite';
   const navigate = useNavigate();
 
   if ($userData === null) {
     navigate('/');
   }
 
+  let showModal = false;
+  let type = 'success';
+
   let employee = {
-    Name: '',
-    Company: '',
+    name: '',
+    company: '',
   };
   console.log('data: ', $userData);
 
   function handleSubmit() {
-    //   generateCredential($userData, employee).then(() => console.log('done'));
+    setDoc(doc(db, 'EmployeeCredentials', $userData.account.address), {
+      name: employee.name,
+      company: employee.company,
+      address: $userData.account.address,
+      publicKey: $userData.account.publicKey,
+      status: 'Pending',
+    })
+      .then(() => {
+        console.log('Document successfully written!');
+        showModal = !showModal;
+      })
+      .catch((error) => {
+        showModal = !showModal;
+        type = 'error';
+        console.error('Error adding document: ', error);
+      });
+    setTimeout(() => {
+      navigate('/selection');
+    }, 3000);
   }
 </script>
 
@@ -43,7 +66,7 @@
       <textarea
         class="border border-gray-400 p-2 rounded-lg w-full"
         id="company"
-        bind:value={employee.description}
+        bind:value={employee.company}
       />
     </div>
     <button
@@ -51,6 +74,19 @@
       >Submit</button
     >
   </form>
+  {#if showModal}
+    <div class="fixed top-0 left-0 right-0 bottom-0 z-10 bg-white p-8">
+      <div class="text-center">
+        {#if type === 'success'}
+          <i class="fas fa-check text-green-500" />
+          <p class="text-green-500">Successfully applied for VC.</p>
+        {:else}
+          <i class="fas fa-times text-red-500" />
+          <p class="text-red-500">Error applying for VC.</p>
+        {/if}
+      </div>
+    </div>
+  {/if}
 </main>
 
 <style>
