@@ -8,7 +8,7 @@
 
 <main class="flex flex-col justify-center items-center h-screen">
   <h1 transition:fly={{ y: -200, duration: 2000 }} class="font-semibold">
-    Verifiable Credentials Generation
+    gx-credentials
   </h1>
   <i class="fas fa-watch mr-2 fa-2x" />
   <br />
