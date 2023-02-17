@@ -1,0 +1,94 @@
+type statusEnum = ["Active"] | ["Revoked"];
+
+type EmployeeData = {
+    name: string,
+    employeeID: string,
+    status: statusEnum
+}
+
+type contractData = {
+    employees: map<address, EmployeeData>,
+    allowed_callers: set<address>
+}
+
+type entryData = {
+    id: address,
+    name: string,
+    employeeID: string
+}
+
+type parameter =
+| ["RevokeCredential", address]
+| ["ActivateCredential", address]
+| ["AddCredential", entryData]
+| ["AddCaller", address]
+| ["RemoveCaller", address];
+
+
+type storage = contractData;
+type return_ = [list <operation>, storage];
+
+const owner: address = "tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc" as address;
+
+const revokeCredential = ([id, store] : [address, storage]) : storage => {
+    if( !Set.mem(Tezos.get_source(), store.allowed_callers) ){
+        return failwith("Access denied.");
+    }
+    let updated_map: map<address, EmployeeData> = match(Map.find_opt (id, store.employees), {
+            None: () => failwith("No entry with this address exists."),
+            Some: (data: EmployeeData) => Map.update(id as address, (Some(({...data, status: Revoked()}) as EmployeeData)), store.employees)
+        });
+    return {...store, employees: updated_map};
+};
+
+const activateCredential = ([id, store] : [address, storage]) : storage => {
+    if( !Set.mem(Tezos.get_source(), store.allowed_callers) ){
+        return failwith("Access denied.");
+    }
+    let updated_map: map<address, EmployeeData> = match(Map.find_opt (id, store.employees), {
+            None: () => failwith("No entry with this address exists."),
+            Some: (data: EmployeeData) => Map.update(id as address, (Some(({...data, status: Active()}) as EmployeeData)), store.employees),
+        });
+    return {...store, employees: updated_map};
+};
+
+const addCredential = ([data, store] : [entryData, storage]) : storage => {
+    if( !Set.mem(Tezos.get_source(), store.allowed_callers) ){
+        return failwith("Access denied.");
+    }
+    const larger_map: map<address, EmployeeData> = match(Map.find_opt(data.id, store.employees), {
+        Some: (_: EmployeeData) => failwith("Entry already exists"),
+        None: () => Map.add(data.id, { name: data.name, employeeID: data.employeeID, status: Active() }, store.employees),
+    });
+    return {...store, employees: larger_map};
+};
+
+const removeCaller = ([id, store]: [address, storage]) : storage => {
+    if(Tezos.get_source() != owner) {
+        return failwith("Access denied. Only owner is allowed to remove callers.");
+    }
+    const smaller_set: set<address> = Set.remove(id, store.allowed_callers);
+    return {...store, allowed_callers: smaller_set};
+};
+
+const addCaller = ([id, store]: [address, storage]) : storage => {
+    if(Tezos.get_source() != owner) {
+        return failwith("Access denied. Only owner is allowed to add callers.");
+    }
+    const larger_set: set<address> = Set.add(id, store.allowed_callers);
+    return {...store, allowed_callers: larger_set};
+};
+
+/* Main access point that dispatches to the entrypoints according to
+   the smart contract parameter. */
+const main = ([action, store] : [parameter, storage]) : return_ => {
+ return [
+   (list([]) as list <operation>),    // No operations
+   (match (action, {
+    RevokeCredential: (id: address) => revokeCredential([id, store]),
+    ActivateCredential: (id: address) => activateCredential([id, store]),
+    AddCredential: (data : entryData) => addCredential([data, store]),
+    AddCaller: (id: address) => addCaller([id, store]),
+    RemoveCaller: (id: address) => removeCaller([id, store])}))
+  ]
+};
