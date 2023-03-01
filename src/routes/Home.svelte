@@ -28,6 +28,7 @@
     line-height: 1.1;
     margin: 2rem auto;
     max-width: 14rem;
+    outline: none;
   }
 
   @media (min-width: 480px) {

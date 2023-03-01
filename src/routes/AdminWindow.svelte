@@ -92,7 +92,6 @@
         <tr>
           <th>Name</th>
           <th>Description</th>
-          <th>URL</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -100,8 +99,7 @@
         {#each employeeCredentials as cred}
           <tr>
             <td>{cred.name}</td>
-            <td>{cred.description}</td>
-            <td>{cred.url}</td>
+            <td>{cred.company}</td>
             <td class="flex">
               <button
                 class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
@@ -130,6 +128,7 @@
     /* border-collapse: collapse; */
     width: 100%;
     border-radius: 5px;
+    outline: none;
   }
 
   th,
@@ -150,11 +149,13 @@
     line-height: 1.1;
     margin: 2rem auto;
     max-width: 14rem;
+    outline: none;
   }
 
   @media (min-width: 480px) {
     h3 {
       max-width: none;
+      outline: none;
     }
   }
 </style>

@@ -7,12 +7,12 @@
   import { fade } from 'svelte/transition';
   const navigate = useNavigate();
 
-  let type = 'success';
-  let showModal = false;
-
   if ($userData === null) {
     navigate('/');
   }
+
+  let type = 'success';
+  let showModal = false;
 
   let company = {
     name: '',
@@ -78,7 +78,6 @@
       <label class="block text-orange-600  mb-2" for="url">URL</label>
       <input
         class="border border-orange-600 p-2 rounded-lg w-full"
-        type="url"
         id="url"
         bind:value={company.url}
         required
@@ -124,6 +123,7 @@
     width: 200px;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
+    outline: none;
   }
   button:hover {
     background-color: rgba(255, 62, 0, 0.2);

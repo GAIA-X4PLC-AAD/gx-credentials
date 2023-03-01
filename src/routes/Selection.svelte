@@ -11,6 +11,10 @@
   let employeeStatus = 'NA'; //NA, Approved, Rejected
   let companyStatus = 'NA'; //NA, Approved, Rejected
 
+  if ($userData === null) {
+    navigate('/');
+  }
+
   onMount(async () => {
     const companyCol = collection(db, 'CompanyCredentials');
     const companySnapshot = await getDocs(companyCol);
