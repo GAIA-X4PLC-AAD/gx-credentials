@@ -1,1 +1,1 @@
-{employees: Map.empty, allowed_callers: Set.empty}
+{companyCreds: map<string, CompanyData>,employeeCreds: map<string, EmployeeData>,allowed_callers: set<address>,trusted_issuers: set<address>}

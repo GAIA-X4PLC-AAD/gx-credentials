@@ -281,6 +281,25 @@ export const addCompanyData = async (vcId: string, did: string) => {
     });
 };
 
+export const addTrustedIssuer = async (did: string) => {
+  Tezos.setSignerProvider(
+    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
+  );
+  Tezos.wallet
+    .at(import.meta.env.VITE_CONTRACT_ADDRESS)
+    .then((contract) => {
+      return contract.methods.addIssuer(did).send();
+    })
+    .then((op: any) => {
+      console.log('op: ', op);
+      console.log(`Waiting for ${op.hash} to be confirmed...`);
+      return op.confirmation(1).then(() => op.hash);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
 export const addEmployeeData = async (vcId: string, did: string) => {
   Tezos.setWalletProvider(localWallet);
   const params = [vcId, did];

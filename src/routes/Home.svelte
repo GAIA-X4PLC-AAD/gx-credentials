@@ -20,7 +20,7 @@
         const adminCol = collection(db, 'Admins');
         const adminSnapshot = await getDocs(adminCol);
         const admins = adminSnapshot.docs.map((doc) => doc.id);
-        if (!admins.includes($userData?.account.address)) {
+        if (admins.includes($userData?.account.address)) {
           navigate('/admin');
         } else {
           navigate('/selection');

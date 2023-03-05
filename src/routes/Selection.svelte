@@ -31,6 +31,7 @@
       if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
       }
+
       pendingApproval = pendingApproval.filter(
         (element) => element.address !== info.address
       );
@@ -47,13 +48,11 @@
     employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
   });
 
-  $: pendingApprovalList = pendingApproval;
-
-  $: employeeCredentials?.forEach((element) => {
-    if (element.company === $userData?.account.address) {
-      pendingApproval.push(element);
-    }
-  });
+  $: {
+    pendingApproval = employeeCredentials.filter(
+      (element) => element.company === $userData?.account.address
+    );
+  }
 </script>
 
 <main
@@ -152,7 +151,7 @@
   </div>
 
   <!-- Employee applied creds -->
-  {#if pendingApprovalList.length > 0}
+  {#if pendingApproval.length > 0}
     <div>
       <h3 class="font-semibold m-3">Employee Credential Applications</h3>
       <table>

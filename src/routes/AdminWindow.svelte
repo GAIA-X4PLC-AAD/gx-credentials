@@ -3,13 +3,14 @@
   import { db } from '../Firebase';
   import { collection, getDocs, doc, updateDoc } from 'firebase/firestore/lite';
   import { fade } from 'svelte/transition';
-  import { generateCompanyCredential } from '../store';
+  import { addTrustedIssuer, generateCompanyCredential } from '../store';
   let companyCredentials = [];
 
   const updateStatus = async (event, info, client) => {
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
+        await addTrustedIssuer(info.address);
         await generateCompanyCredential(info);
         await updateDoc(docRef, { status: 'Approved' });
       }
@@ -26,9 +27,9 @@
     const companyCol = collection(db, 'CompanyCredentials');
     const companySnapshot = await getDocs(companyCol);
     companyCredentials = companySnapshot.docs.map((doc) => doc.data());
-    // companyCredentials = companyCredentials.filter(
-    //   (element) => element.status === 'Pending'
-    // );
+    companyCredentials = companyCredentials.filter(
+      (element) => element.status === 'Pending'
+    );
   });
 </script>
 
