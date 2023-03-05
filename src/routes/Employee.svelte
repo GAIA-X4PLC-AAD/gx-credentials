@@ -44,7 +44,6 @@
   let trustedIssuers = [];
   onMount(async () => {
     trustedIssuers = await getTrustedIssuers();
-    console.log('finaly: ', trustedIssuers);
   });
 </script>
 
