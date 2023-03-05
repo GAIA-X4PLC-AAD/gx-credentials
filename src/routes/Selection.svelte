@@ -177,7 +177,7 @@
           {#each pendingApproval as cred}
             <tr>
               <td>{cred.name}</td>
-              <td>{cred.company}</td>
+              <td>{cred.address}</td>
               <td class="flex">
                 <button
                   class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
