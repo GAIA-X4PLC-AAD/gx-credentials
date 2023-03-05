@@ -96,7 +96,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
       },
     ],
     id: 'urn:uuid:' + uuid(),
-    issuer: 'did:pkh:tz:' + import.meta.env.VITE_ISSUER_PUBLIC_KEY,
+    issuer: 'did:pkh:tz:' + import.meta.env.VITE_ISSUER_ADDRESS,
     issuanceDate: new Date().toISOString(),
     type: ['VerifiableCredential', 'Company Credential'],
     credentialSubject: {
@@ -106,14 +106,14 @@ export const generateCompanySignature = async (userData, company: Company) => {
       gxId: company.gxId,
     },
   };
-
   let credentialString = JSON.stringify(credential);
   const proofOptions = {
-    verificationMethod:
-      'did:pkh:tz:tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc#TezosMethod2021',
+    verificationMethod: `did:pkh:tz:${
+      import.meta.env.VITE_ISSUER_ADDRESS
+    }#TezosMethod2021`,
     proofPurpose: 'assertionMethod',
   };
-  //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+  //public key of the issuer
   const publicKeyJwkString = await JWKFromTezos(
     import.meta.env.VITE_ISSUER_PUBLIC_KEY
   );
@@ -148,7 +148,7 @@ export const generateCompanyCredential = async (company: Company) => {
       prepStr,
     } = await generateCompanySignature(userData, company);
 
-    // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+    // private key of the issuer of the credential
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
     const bytes = micheline;
     const { prefixSig } = await signer.sign(bytes);
@@ -338,6 +338,7 @@ export const generateEmployeeSignature = async (
   userData,
   employee: Employee
 ) => {
+  console.log('HERE', employee);
   const did = `did:pkh:tz:` + userData.address;
   const credential = {
     '@context': [
@@ -348,13 +349,13 @@ export const generateEmployeeSignature = async (
       },
     ],
     id: 'urn:uuid:' + uuid(),
-    issuer: 'did:pkh:tz:tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc',
+    issuer: `did:pkh:tz:${employee.company.address}`,
     issuanceDate: new Date().toISOString(),
     type: ['VerifiableCredential', 'Company Credential'],
     credentialSubject: {
       id: did,
       name: employee.name,
-      company: employee.company,
+      company: employee.company.address,
     },
   };
 
@@ -363,7 +364,7 @@ export const generateEmployeeSignature = async (
     verificationMethod: 'did:pkh:tz:' + userData.address + '#TezosMethod2021',
     proofPurpose: 'assertionMethod',
   };
-  //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+  //public key of the issuer
   const publicKeyJwkString = await JWKFromTezos(userData.publicKey);
   let prepStr = await prepareIssueCredential(
     credentialString,
@@ -393,7 +394,7 @@ export const generateEmployeeCredential = async (employee: Employee) => {
       prepStr,
     } = await generateEmployeeSignature(userData, employee);
 
-    // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+    // private key of the issuer of the credential
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
     const bytes = micheline;
     const { prefixSig } = await signer.sign(bytes);
