@@ -96,7 +96,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
       },
     ],
     id: 'urn:uuid:' + uuid(),
-    issuer: 'did:pkh:tz:tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc',
+    issuer: 'did:pkh:tz:' + import.meta.env.VITE_ISSUER_PUBLIC_KEY,
     issuanceDate: new Date().toISOString(),
     type: ['VerifiableCredential', 'Company Credential'],
     credentialSubject: {
@@ -142,8 +142,11 @@ export const generateCompanyCredential = async (company: Company) => {
     publicKey: company.publicKey,
   };
   try {
-    const { micheline, credentialString, prepStr } =
-      await generateCompanySignature(userData, company);
+    const {
+      micheline,
+      credentialString,
+      prepStr,
+    } = await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
@@ -384,8 +387,11 @@ export const generateEmployeeCredential = async (employee: Employee) => {
     publicKey: employee.publicKey,
   };
   try {
-    const { micheline, credentialString, prepStr } =
-      await generateEmployeeSignature(userData, employee);
+    const {
+      micheline,
+      credentialString,
+      prepStr,
+    } = await generateEmployeeSignature(userData, employee);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);

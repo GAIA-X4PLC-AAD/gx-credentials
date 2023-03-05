@@ -10,8 +10,8 @@
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
-        await addTrustedIssuer(info.address);
         await generateCompanyCredential(info);
+        await addTrustedIssuer(info.address);
         await updateDoc(docRef, { status: 'Approved' });
       }
       if (event.target.id === 'reject') {
