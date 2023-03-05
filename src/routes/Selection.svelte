@@ -48,11 +48,22 @@
     employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
   });
 
-  $: {
-    pendingApproval = employeeCredentials.filter(
-      (element) => element.company === $userData?.account.address
-    );
-  }
+  $: companyCredentials?.forEach((element) => {
+    if (element.address === $userData?.account.address) {
+      companyStatus = element.status;
+    }
+  });
+
+  $: employeeCredentials?.forEach((element) => {
+    if (element.address === $userData?.account.address) {
+      employeeStatus = element.status;
+    }
+  });
+  $: employeeCredentials?.forEach((element) => {
+    if (element.company === $userData?.account.address) {
+      pendingApproval.push(element);
+    }
+  });
 </script>
 
 <main
