@@ -142,11 +142,8 @@ export const generateCompanyCredential = async (company: Company) => {
     publicKey: company.publicKey,
   };
   try {
-    const {
-      micheline,
-      credentialString,
-      prepStr,
-    } = await generateCompanySignature(userData, company);
+    const { micheline, credentialString, prepStr } =
+      await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
@@ -302,15 +299,13 @@ export const addTrustedIssuer = async (did: string) => {
 };
 
 export const addEmployeeData = async (vcId: string, did: string) => {
-  Tezos.setWalletProvider(localWallet);
-  const params = [vcId, did];
   Tezos.setSignerProvider(
     new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
   );
-  Tezos.wallet
+  Tezos.contract
     .at(import.meta.env.VITE_CONTRACT_ADDRESS)
     .then((contract) => {
-      return contract.methods.addEmployeeCredential(params).send();
+      return contract.methods.addEmployeeCredential(vcId, did).send();
     })
     .then((op: any) => {
       console.log('op: ', op);
@@ -388,11 +383,8 @@ export const generateEmployeeCredential = async (employee: Employee) => {
     publicKey: employee.publicKey,
   };
   try {
-    const {
-      micheline,
-      credentialString,
-      prepStr,
-    } = await generateEmployeeSignature(userData, employee);
+    const { micheline, credentialString, prepStr } =
+      await generateEmployeeSignature(userData, employee);
 
     // private key of the issuer of the credential
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
