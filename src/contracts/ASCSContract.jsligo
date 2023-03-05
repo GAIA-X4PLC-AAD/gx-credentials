@@ -39,7 +39,7 @@ type return_ =
    storage];
 
 const owner: address = 
-  "tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc" as address;
+  "tz1SeBqwwchFqGHPBpnNWbmjTHFC49mmn3uk" as address;
 
 const removeCaller = 
   ([id, store]: 
@@ -60,7 +60,8 @@ const addCaller =
 const removeIssuer = 
   ([id, store]: 
     [address,
-     storage]): storage => {if(Tezos.get_source() != owner) {return failwith("Access denied. Only owner is allowed to remove issuers.")};
+     storage]): storage => {if((Tezos.get_source() != owner) && (!Set.
+        mem(Tezos.get_source(), store.allowed_callers))) {return failwith("Access denied. Only owner and allowed callers is allowed to remove issuers.")};
    const smaller_set: set<address> = 
      Set.remove(id, store.trusted_issuers);
    return {...store, trusted_issuers: smaller_set}};
@@ -68,7 +69,8 @@ const removeIssuer =
 const addIssuer = 
   ([id, store]: 
     [address,
-     storage]): storage => {if(Tezos.get_source() != owner) {return failwith("Access denied. Only owner is allowed to add issuers.")};
+     storage]): storage => {if((Tezos.get_source() != owner) && (!Set.
+        mem(Tezos.get_source(), store.allowed_callers))) {return failwith("Access denied. Only owner and allowed callers is allowed to add issuers.")};
    const larger_set: set<address> = 
      Set.add(id, store.trusted_issuers);
    return {...store, trusted_issuers: larger_set}};
@@ -90,7 +92,7 @@ const addEmployeeCredential =
 const revokeEmployeeCredential = 
   ([vcId, store]: 
     [string,
-     storage]): storage => {if(!Set.mem(Tezos.get_source(), store.trusted_issuers)) {return failwith("Access denied.")};
+     storage]): storage => {if(!Set.mem(Tezos.get_source(), store.trusted_issuers)) {return failwith("Access denied. Caller is not in the list of trusted issuers.")};
    let updated_map: map<string, EmployeeData> = 
      match(Map.find_opt(vcId, store.employeeCreds), {None: () => 
         failwith("No entry with this VC-ID exists."),
@@ -103,7 +105,8 @@ const addCompanyCredential =
   ([vcId, _did, store]: 
     [string,
      address,
-     storage]): storage => {if(!Set.mem(Tezos.get_source(), store.allowed_callers)) {return failwith("Access denied. Caller is not in the list of trusted issuers.")};
+     storage]): storage => {if((Tezos.get_source() != owner) && (!Set.
+        mem(Tezos.get_source(), store.allowed_callers))) {return failwith("Access denied. Caller is not in the list of allowed callers or owner.")};
    const larger_map: map<string, CompanyData> = 
      match(Map.find_opt(vcId, store.companyCreds), {Some: (_: CompanyData) => 
         failwith("Entry already exists"),
@@ -114,7 +117,8 @@ const addCompanyCredential =
 const revokeCompanyCredential = 
   ([vcId, store]: 
     [string,
-     storage]): storage => {if(!Set.mem(Tezos.get_source(), store.allowed_callers)) {return failwith("Access denied.")};
+     storage]): storage => {if((Tezos.get_source() != owner) && (!Set.
+        mem(Tezos.get_source(), store.allowed_callers))) {return failwith("Access denied. Caller is not in the list of allowed callers or owner.")};
    let updated_map: map<string, CompanyData> = 
      match(Map.find_opt(vcId, store.companyCreds), {None: () => 
         failwith("No entry with this VC-ID exists."),
