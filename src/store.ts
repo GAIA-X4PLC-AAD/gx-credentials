@@ -5,7 +5,7 @@ import { Tzip16Module } from '@taquito/tzip16';
 import { encodeKey } from '@taquito/utils';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
-import type { Company } from './Interface';
+import type { Company, Employee } from './Interface';
 import { v4 as uuid } from 'uuid';
 import {
   completeIssueCredential,
@@ -262,13 +262,14 @@ export const downloadEmployeeVC = (user) => {
 };
 
 export const addCompanyData = async (vcId: string, did: string) => {
+  const params = [vcId, did];
   Tezos.setSignerProvider(
     new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
   );
   Tezos.wallet
     .at(import.meta.env.VITE_CONTRACT_ADDRESS)
     .then((contract) => {
-      return contract.methods.addCompanyCredential([did, vcId]).send();
+      return contract.methods.addEmployeeCredential(params).send();
     })
     .then((op: any) => {
       console.log('op: ', op);
@@ -278,4 +279,108 @@ export const addCompanyData = async (vcId: string, did: string) => {
     .catch((error) => {
       console.log(error);
     });
+};
+
+export const getTrustedIssuers = async (): Promise<string[]> => {
+  Tezos.setSignerProvider(
+    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
+  );
+  const contract = await Tezos.wallet.at(import.meta.env.VITE_CONTRACT_ADDRESS);
+  const storage: any = await contract.storage();
+  return storage.trusted_issuers;
+};
+
+// Employee
+
+export const generateEmployeeSignature = async (
+  userData,
+  employee: Employee
+) => {
+  const did = `did:pkh:tz:` + userData.address;
+  const credential = {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      {
+        name: 'https://schema.org/name',
+        description: 'https://schema.org/description',
+        website: 'https://schema.org/url',
+        url: 'https://schema.org/logo',
+      },
+    ],
+    id: 'urn:uuid:' + uuid(),
+    issuer: 'did:pkh:tz:tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc',
+    issuanceDate: new Date().toISOString(),
+    type: ['VerifiableCredential', 'Company Credential'],
+    credentialSubject: {
+      id: did,
+      name: employee.name,
+      company: employee.company,
+    },
+  };
+
+  let credentialString = JSON.stringify(credential);
+  const proofOptions = {
+    verificationMethod: 'did:pkh:tz:' + userData.address + '#TezosMethod2021',
+    proofPurpose: 'assertionMethod',
+  };
+  //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+  const publicKeyJwkString = await JWKFromTezos(userData.publicKey);
+  let prepStr = await prepareIssueCredential(
+    credentialString,
+    JSON.stringify(proofOptions),
+    publicKeyJwkString
+  );
+
+  const preparation = JSON.parse(prepStr);
+  const { signingInput } = preparation;
+  const micheline = signingInput && signingInput.micheline;
+  if (!micheline) {
+    throw new Error('Expected micheline signing input');
+  }
+
+  return { micheline, credentialString, prepStr };
+};
+
+export const generateEmployeeCredential = async (employee: Employee) => {
+  const userData = {
+    address: employee.address,
+    publicKey: employee.publicKey,
+  };
+  try {
+    const { micheline, credentialString, prepStr } =
+      await generateEmployeeSignature(userData, employee);
+
+    // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
+    const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
+    const bytes = micheline;
+    const { prefixSig } = await signer.sign(bytes);
+    let vcStr = await completeIssueCredential(
+      credentialString,
+      prepStr,
+      prefixSig
+    );
+
+    console.log('Credential verified. VC:', vcStr);
+    const verifyOptionsString = '{}';
+    const verifyResult = JSON.parse(
+      await verifyCredential(vcStr, verifyOptionsString)
+    );
+    if (verifyResult.errors.length > 0) {
+      console.log('Error in verifying Credential', verifyResult.errors);
+      throw new Error('Error in verifying Credential');
+    }
+
+    const data = JSON.parse(vcStr);
+    console.log(data);
+    await addCompanyData(data.id, userData.address);
+    setDoc(doc(db, 'EmployeeVC', userData.address), { ...data })
+      .then(() => {
+        console.log('Document successfully written!');
+      })
+      .catch((error) => {
+        console.error('Error adding document: ', error);
+      });
+  } catch (error) {
+    console.log('Error in generating Credential. ', error);
+  }
 };

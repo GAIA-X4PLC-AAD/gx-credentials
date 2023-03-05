@@ -8,7 +8,6 @@ export interface Company {
 
 export interface Employee {
   name: string;
-  email: string;
   company: Company;
   address: string;
   publicKey: string;

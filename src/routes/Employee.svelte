@@ -1,9 +1,10 @@
 <script>
-  import { userData } from '../store';
+  import { getTrustedIssuers, userData } from '../store';
   import { useNavigate } from 'svelte-navigator';
   import { fade } from 'svelte/transition';
   import { db } from '../Firebase';
   import { doc, setDoc } from 'firebase/firestore/lite';
+  import { onMount } from 'svelte';
   const navigate = useNavigate();
 
   if ($userData === null) {
@@ -40,6 +41,11 @@
       navigate('/selection');
     }, 3000);
   }
+  let trustedIssuers = [];
+  onMount(async () => {
+    trustedIssuers = await getTrustedIssuers();
+    console.log('finaly: ', trustedIssuers);
+  });
 </script>
 
 <main class="h-screen" transition:fade={{ duration: 2000 }}>
@@ -60,14 +66,19 @@
       />
     </div>
     <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2" for="company"
-        >Company</label
-      >
-      <textarea
-        class="border border-gray-400 p-2 rounded-lg w-full"
+      <label class="block font-medium text-gray-700 mb-2" for="company">
+        Companies
+      </label>
+      <select
         id="company"
+        name="company"
+        class="px-4 py-2 pr-8 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:bg-white focus:border-gray-500"
         bind:value={employee.company}
-      />
+      >
+        {#each trustedIssuers as issuer}
+          <option value={issuer}>{issuer}</option>
+        {/each}
+      </select>
     </div>
     <button
       class="bg-indigo-500 text-white py-2 px-4 rounded-lg hover:bg-indigo-600"

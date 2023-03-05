@@ -3,27 +3,25 @@
   import { fly } from 'svelte/transition';
   import '../app.css';
 
-  export let connected;
-
   const dispatch = createEventDispatcher();
 </script>
 
-{#if connected}
+<!-- {#if connected}
   <button
     in:fly={{ y: 200, duration: 2000 }}
     on:click={() => dispatch('disconnect-wallet')}
   >
     Disconnect wallet
   </button>
-{:else}
-  <button
-    in:fly={{ y: 200, duration: 2000 }}
-    on:click={() => dispatch('connect-wallet')}
-  >
-    Connect wallet
-  </button>
-{/if}
+{:else} -->
+<button
+  in:fly={{ y: 200, duration: 2000 }}
+  on:click={() => dispatch('connect-wallet')}
+>
+  Connect wallet
+</button>
 
+<!-- {/if} -->
 <style>
   button {
     font-family: inherit;
