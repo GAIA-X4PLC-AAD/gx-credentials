@@ -17,14 +17,14 @@
   let company = {
     name: '',
     description: '',
-    url: '',
+    gxId: '',
   };
 
   function handleSubmit() {
     setDoc(doc(db, 'CompanyCredentials', $userData.account.address), {
       name: company.name,
       description: company.description,
-      url: company.url,
+      gxId: company.gxId,
       address: $userData.account.address,
       publicKey: $userData.account.publicKey,
       status: 'Pending',
@@ -50,7 +50,9 @@
     class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center"
     on:submit|preventDefault={handleSubmit}
   >
-    <h2 class="text-2xl font-medium mb-4 text-orange-600 ">Add Your Company</h2>
+    <h2 class="text-2xl font-medium mb-4 text-orange-600 ">
+      Company Credential
+    </h2>
     <div class="mb-4">
       <label class="block text-orange-600 mb-2" for="company-name"
         >Company Name</label
@@ -60,6 +62,15 @@
         type="text"
         id="company-name"
         bind:value={company.name}
+        required
+      />
+    </div>
+    <div class="mb-4">
+      <label class="block text-orange-600 mb-2" for="gxId">GX-ID</label>
+      <input
+        class="border border-orange-600 p-2 rounded-lg w-full"
+        id="gxId"
+        bind:value={company.gxId}
         required
       />
     </div>
@@ -74,15 +85,7 @@
         required
       />
     </div>
-    <div class="mb-4">
-      <label class="block text-orange-600  mb-2" for="url">URL</label>
-      <input
-        class="border border-orange-600 p-2 rounded-lg w-full"
-        id="url"
-        bind:value={company.url}
-        required
-      />
-    </div>
+
     <button>Submit</button>
   </form>
   {#if showModal}

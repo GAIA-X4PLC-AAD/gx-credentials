@@ -41,7 +41,7 @@
         <tr>
           <th>Name</th>
           <th>Description</th>
-          <th>URL</th>
+          <th>GX-ID</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -50,21 +50,21 @@
           <tr transition:fade>
             <td>{cred.name}</td>
             <td>{cred.description}</td>
-            <td>{cred.url}</td>
+            <td>{cred.gxId}</td>
             <td class="flex">
               <button
-                class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
-                id="accept"
-                on:click={(event) =>
-                  updateStatus(event, cred, 'CompanyCredentials')}
-                >Approve</button
-              >
-              <button
-                class="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-600"
+                class="bg-red-500 px-4 py-2 mr-4 text-white rounded hover:bg-red-600"
                 id="reject"
                 on:click={(event) =>
                   updateStatus(event, cred, 'CompanyCredentials')}
                 >Reject</button
+              >
+              <button
+                class="bg-green-500 px-4 py-2 text-white rounded hover:bg-green-600"
+                id="accept"
+                on:click={(event) =>
+                  updateStatus(event, cred, 'CompanyCredentials')}
+                >Approve</button
               >
             </td>
           </tr>

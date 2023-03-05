@@ -92,8 +92,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
       {
         name: 'https://schema.org/name',
         description: 'https://schema.org/description',
-        website: 'https://schema.org/url',
-        url: 'https://schema.org/logo',
+        gxId: 'https://schema.org/gxId',
       },
     ],
     id: 'urn:uuid:' + uuid(),
@@ -104,7 +103,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
       id: did,
       name: company.name,
       description: company.description,
-      url: company.url,
+      gxId: company.gxId,
     },
   };
 
@@ -143,8 +142,11 @@ export const generateCompanyCredential = async (company: Company) => {
     publicKey: company.publicKey,
   };
   try {
-    const { micheline, credentialString, prepStr } =
-      await generateCompanySignature(userData, company);
+    const {
+      micheline,
+      credentialString,
+      prepStr,
+    } = await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
@@ -343,9 +345,7 @@ export const generateEmployeeSignature = async (
       'https://www.w3.org/2018/credentials/v1',
       {
         name: 'https://schema.org/name',
-        description: 'https://schema.org/description',
-        website: 'https://schema.org/url',
-        url: 'https://schema.org/logo',
+        company: 'https://schema.org/description',
       },
     ],
     id: 'urn:uuid:' + uuid(),
@@ -388,8 +388,11 @@ export const generateEmployeeCredential = async (employee: Employee) => {
     publicKey: employee.publicKey,
   };
   try {
-    const { micheline, credentialString, prepStr } =
-      await generateEmployeeSignature(userData, employee);
+    const {
+      micheline,
+      credentialString,
+      prepStr,
+    } = await generateEmployeeSignature(userData, employee);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
     const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
