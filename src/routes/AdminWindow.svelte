@@ -5,8 +5,6 @@
   import { fade } from 'svelte/transition';
   import { generateCompanyCredential } from '../store';
   let companyCredentials = [];
-  let employeeCredentials = [];
-  import { userData } from '../store';
 
   const updateStatus = async (event, info, client) => {
     const docRef = doc(db, client, info.address);
@@ -18,13 +16,9 @@
       if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
       }
-      client === 'CompanyCredentials'
-        ? (companyCredentials = companyCredentials.filter(
-            (element) => element.address !== info.address
-          ))
-        : (employeeCredentials = employeeCredentials.filter(
-            (element) => element.address !== info.address
-          ));
+      companyCredentials = companyCredentials.filter(
+        (element) => element.address !== info.address
+      );
     }
   };
 
@@ -35,13 +29,6 @@
     // companyCredentials = companyCredentials.filter(
     //   (element) => element.status === 'Pending'
     // );
-
-    const employeeCol = collection(db, 'EmployeeCredentials');
-    const employeeSnapshot = await getDocs(employeeCol);
-    employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
-    employeeCredentials = employeeCredentials.filter(
-      (element) => element.status === 'Pending'
-    );
   });
 </script>
 
@@ -88,42 +75,6 @@
   <br />
   <br />
   <!-- Employee credentials table starts here -->
-  <div>
-    <h3 class="font-semibold">Employee Credential Applications</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each employeeCredentials as cred}
-          <tr>
-            <td>{cred.name}</td>
-            <td>{cred.company}</td>
-            <td class="flex">
-              <button
-                class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
-                id="accept"
-                on:click={(event) =>
-                  updateStatus(event, cred, 'EmployeeCredentials')}
-                >Approve</button
-              >
-              <button
-                class="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-600"
-                id="reject"
-                on:click={(event) =>
-                  updateStatus(event, cred, 'EmployeeCredentials')}
-                >Reject</button
-              >
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
 </main>
 
 <style>

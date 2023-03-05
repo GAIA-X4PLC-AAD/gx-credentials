@@ -39,7 +39,7 @@
       });
     setTimeout(() => {
       navigate('/selection');
-    }, 3000);
+    }, 2000);
   }
   let trustedIssuers = [];
   onMount(async () => {

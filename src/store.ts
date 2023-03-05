@@ -269,6 +269,27 @@ export const addCompanyData = async (vcId: string, did: string) => {
   Tezos.wallet
     .at(import.meta.env.VITE_CONTRACT_ADDRESS)
     .then((contract) => {
+      return contract.methods.addCompanyCredential(vcId, did).send();
+    })
+    .then((op: any) => {
+      console.log('op: ', op);
+      console.log(`Waiting for ${op.hash} to be confirmed...`);
+      return op.confirmation(1).then(() => op.hash);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export const addEmployeeData = async (vcId: string, did: string) => {
+  Tezos.setWalletProvider(localWallet);
+  const params = [vcId, did];
+  Tezos.setSignerProvider(
+    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
+  );
+  Tezos.wallet
+    .at(import.meta.env.VITE_CONTRACT_ADDRESS)
+    .then((contract) => {
       return contract.methods.addEmployeeCredential(params).send();
     })
     .then((op: any) => {
@@ -282,9 +303,10 @@ export const addCompanyData = async (vcId: string, did: string) => {
 };
 
 export const getTrustedIssuers = async (): Promise<string[]> => {
-  Tezos.setSignerProvider(
-    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
-  );
+  // Tezos.setSignerProvider(
+  //   new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
+  // );
+  Tezos.setWalletProvider(localWallet);
   const contract = await Tezos.wallet.at(import.meta.env.VITE_CONTRACT_ADDRESS);
   const storage: any = await contract.storage();
   return storage.trusted_issuers;

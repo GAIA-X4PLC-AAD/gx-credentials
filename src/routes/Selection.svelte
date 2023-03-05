@@ -25,7 +25,7 @@
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
-        // await generateEmployeeCredential(info);
+        await generateEmployeeCredential(info);
         await updateDoc(docRef, { status: 'Approved' });
       }
       if (event.target.id === 'reject') {
@@ -47,17 +47,8 @@
     employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
   });
 
-  $: companyCredentials?.forEach((element) => {
-    if (element.address === $userData?.account.address) {
-      companyStatus = element.status;
-    }
-  });
+  $: pendingApprovalList = pendingApproval;
 
-  $: employeeCredentials?.forEach((element) => {
-    if (element.address === $userData?.account.address) {
-      employeeStatus = element.status;
-    }
-  });
   $: employeeCredentials?.forEach((element) => {
     if (element.company === $userData?.account.address) {
       pendingApproval.push(element);
@@ -161,9 +152,9 @@
   </div>
 
   <!-- Employee applied creds -->
-  {#if pendingApproval.length > 0}
+  {#if pendingApprovalList.length > 0}
     <div>
-      <h3 class="font-semibold">Employee Credential Applications</h3>
+      <h3 class="font-semibold m-3">Employee Credential Applications</h3>
       <table>
         <thead>
           <tr>

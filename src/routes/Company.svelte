@@ -41,7 +41,7 @@
     setTimeout(() => {
       showModal = false;
       navigate('/selection');
-    }, 3000);
+    }, 2000);
   }
 </script>
 
