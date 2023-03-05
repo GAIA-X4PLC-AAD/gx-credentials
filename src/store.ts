@@ -18,6 +18,8 @@ import { db } from './Firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore/lite';
 
 const rpcUrl = 'https://ghostnet.ecadinfra.com';
+const Tezos = new TezosToolkit(rpcUrl);
+Tezos.addExtension(new Tzip16Module());
 
 // Global variables used in the store with the writable API
 // The end user's wallet
@@ -70,8 +72,6 @@ export const initWallet = async () => {
   try {
     wallet.set(newWallet);
     await newWallet.requestPermissions(requestPermissionsInput);
-    const Tezos = new TezosToolkit(rpcUrl);
-    Tezos.addExtension(new Tzip16Module());
     Tezos.setWalletProvider(newWallet);
   } catch (e) {
     wallet.set(null);
@@ -116,7 +116,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
   };
   //public key of the issuer - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
   const publicKeyJwkString = await JWKFromTezos(
-    import.meta.env.ISSUER_PUBLIC_KEY
+    import.meta.env.VITE_ISSUER_PUBLIC_KEY
   );
   console.log(userData.publicKey);
   console.log(publicKeyJwkString);
@@ -147,7 +147,7 @@ export const generateCompanyCredential = async (company: Company) => {
       await generateCompanySignature(userData, company);
 
     // private key of the issuer of the credential - tz1ZDSnwGrvRWDYG2sGt5vzHGQFfVAq3VxJc
-    const signer = new InMemorySigner(import.meta.env.ISSUER_PRIVATE_KEY);
+    const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
     const bytes = micheline;
     const { prefixSig } = await signer.sign(bytes);
     let vcStr = await completeIssueCredential(
@@ -168,6 +168,7 @@ export const generateCompanyCredential = async (company: Company) => {
 
     const data = JSON.parse(vcStr);
     console.log(data);
+    await addCompanyData(data.id, userData.address);
     setDoc(doc(db, 'CompanyVC', userData.address), { ...data })
       .then(() => {
         console.log('Document successfully written!');
@@ -247,6 +248,7 @@ export const downloadCompanyVC = (user) => {
     link.click();
   });
 };
+
 export const downloadEmployeeVC = (user) => {
   const docRef = doc(db, 'EmployeeVC', user);
   getDoc(docRef).then((doc) => {
@@ -257,4 +259,23 @@ export const downloadEmployeeVC = (user) => {
     link.download = 'EmployeeVC.json';
     link.click();
   });
+};
+
+export const addCompanyData = async (vcId: string, did: string) => {
+  Tezos.setSignerProvider(
+    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
+  );
+  Tezos.wallet
+    .at(import.meta.env.VITE_CONTRACT_ADDRESS)
+    .then((contract) => {
+      return contract.methods.addCompanyCredential([did, vcId]).send();
+    })
+    .then((op: any) => {
+      console.log('op: ', op);
+      console.log(`Waiting for ${op.hash} to be confirmed...`);
+      return op.confirmation(1).then(() => op.hash);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 };

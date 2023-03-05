@@ -1,13 +1,30 @@
 <script lang="ts">
-  import { Router, Route } from 'svelte-navigator';
+  import { Router, Route, navigate } from 'svelte-navigator';
   import { Company, Home } from './routes';
   import './app.css';
   import Selection from './routes/Selection.svelte';
   import Employee from './routes/Employee.svelte';
   import AdminWindow from './routes/AdminWindow.svelte';
+  import { disconnectWallet, userData } from './store';
 </script>
 
 <main>
+  {#if $userData !== null}
+    <header class="bg-white w-screen h-10">
+      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 flex justify-end">
+        <button
+          class="bg-orange-500 text-white hover:text-orange-500 hover:bg-white rounded-full py-2 px-4"
+          on:click={() => {
+            disconnectWallet();
+            navigate('/');
+          }}
+        >
+          Disconnect Wallet
+        </button>
+      </div>
+    </header>
+  {/if}
+
   <Router>
     <Route path="/">
       <Home />

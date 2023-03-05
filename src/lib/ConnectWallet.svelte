@@ -10,14 +10,14 @@
 
 {#if connected}
   <button
-    transition:fly={{ y: 200, duration: 2000 }}
+    in:fly={{ y: 200, duration: 2000 }}
     on:click={() => dispatch('disconnect-wallet')}
   >
     Disconnect wallet
   </button>
 {:else}
   <button
-    transition:fly={{ y: 200, duration: 2000 }}
+    in:fly={{ y: 200, duration: 2000 }}
     on:click={() => dispatch('connect-wallet')}
   >
     Connect wallet

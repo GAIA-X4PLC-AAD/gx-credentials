@@ -32,17 +32,20 @@
     const companyCol = collection(db, 'CompanyCredentials');
     const companySnapshot = await getDocs(companyCol);
     companyCredentials = companySnapshot.docs.map((doc) => doc.data());
+    // companyCredentials = companyCredentials.filter(
+    //   (element) => element.status === 'Pending'
+    // );
 
     const employeeCol = collection(db, 'EmployeeCredentials');
     const employeeSnapshot = await getDocs(employeeCol);
     employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
+    employeeCredentials = employeeCredentials.filter(
+      (element) => element.status === 'Pending'
+    );
   });
 </script>
 
-<main
-  class="h-screen flex flex-col align-middle justify-center"
-  transition:fade
->
+<main class="h-screen flex flex-col align-middle justify-center">
   <div>
     <h3 class="font-semibold">Company Credential Applications</h3>
     <table>
