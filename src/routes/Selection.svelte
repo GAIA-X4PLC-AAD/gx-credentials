@@ -66,14 +66,14 @@
 
 <main
   class="flex flex-col justify-center items-center h-screen"
-  transition:fade={{ duration: 2000 }}
+  transition:fade={{ duration: 1000 }}
 >
   <div class="flex mb-4">
     {#if employeeStatus !== 'Approved' && employeeStatus !== 'Pending'}
       {#if companyStatus === 'Approved'}
         <button
           class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
           on:click={() => downloadCompanyVC($userData?.account.address)}
         >
           <div class="flex items-center">
@@ -84,19 +84,26 @@
           </div>
         </button>
       {:else if companyStatus === 'Rejected'}
-        <button
+        <!-- <button
           class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
+        > -->
+        <button
+          on:click={() => navigate('/company')}
+          class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
+          transition:fade={{ duration: 1000 }}
         >
-          <div class="flex items-center">
+          Apply to Company Credential
+        </button>
+        <!-- <div class="flex items-center">
             <i class="fas fa-times text-white" />
             <span class="text-white">Company Credentials Rejected.</span>
-          </div>
-        </button>
+          </div> -->
+        <!-- </button> -->
       {:else if companyStatus === 'Pending'}
         <button
           class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           <div class="flex items-center">
             <i class="fa fa-clock text-white mr-2" />
@@ -109,7 +116,7 @@
         <button
           on:click={() => navigate('/company')}
           class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           Apply to Company Credential
         </button>
@@ -122,7 +129,7 @@
         <button
           class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
           on:click={() => downloadEmployeeVC($userData?.account.address)}
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           <div class="flex items-center">
             <i class="fas fa-download text-white " />
@@ -134,7 +141,7 @@
       {:else if employeeStatus === 'Rejected'}
         <button
           class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           <div class="flex items-center">
             <i class="fas fa-times text-white" />
@@ -144,7 +151,7 @@
       {:else if employeeStatus === 'Pending'}
         <button
           class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           <div class="flex items-center">
             <i class="fa fa-clock text-white mr-2" />
@@ -157,7 +164,7 @@
         <button
           on:click={() => navigate('/employee')}
           class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
-          transition:fade={{ duration: 2000 }}
+          transition:fade={{ duration: 1000 }}
         >
           Apply to Employee Credential
         </button>
@@ -209,7 +216,7 @@
                     <span
                       class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
                     >
-                      COMPLETED
+                      PROCESSED
                     </span>
                   </td>
                 {/if}

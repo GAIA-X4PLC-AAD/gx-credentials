@@ -13,6 +13,12 @@
     <header class="bg-white w-screen h-10">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 flex justify-end">
         <button
+          class="bg-white-500 text-orange-500 rounded-full py-2 px-4"
+          disabled
+        >
+          User: {$userData.account.address}
+        </button>
+        <button
           class="bg-orange-500 text-white hover:text-orange-500 hover:bg-white rounded-full py-2 px-4"
           on:click={() => {
             disconnectWallet();
