@@ -3,11 +3,7 @@
   import { db } from '../Firebase';
   import { collection, getDocs, doc, updateDoc } from 'firebase/firestore/lite';
   import { fade } from 'svelte/transition';
-  import {
-    addTrustedIssuer,
-    generateCompanyCredential,
-    userData,
-  } from '../store';
+  import { generateCompanyCredential, userData } from '../store';
   let companyCredentials = [];
 
   const updateStatus = async (event, info, client) => {
@@ -15,7 +11,6 @@
     if (docRef) {
       if (event.target.id === 'accept') {
         await generateCompanyCredential(info);
-        await addTrustedIssuer(info.address);
         await updateDoc(docRef, { status: 'Approved' });
         companyCredentials.forEach((element) => {
           if (element.address === info.address) {

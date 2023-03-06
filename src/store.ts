@@ -49,6 +49,11 @@ wallet.subscribe((x) => {
   localWallet = x;
 });
 
+let localUserData;
+userData.subscribe((x) => {
+  localUserData = x;
+});
+
 wallet.subscribe((w) => {
   if (w) {
     w.client.subscribeToEvent(
@@ -107,7 +112,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
       },
     ],
     id: 'urn:uuid:' + uuid(),
-    issuer: 'did:pkh:tz:' + import.meta.env.VITE_ISSUER_ADDRESS,
+    issuer: 'did:pkh:tz:' + localUserData.account.address,
     issuanceDate: new Date().toISOString(),
     type: ['VerifiableCredential', 'Company Credential'],
     credentialSubject: {
@@ -119,9 +124,7 @@ export const generateCompanySignature = async (userData, company: Company) => {
   };
   let credentialString = JSON.stringify(credential);
   const proofOptions = {
-    verificationMethod: `did:pkh:tz:${
-      import.meta.env.VITE_ISSUER_ADDRESS
-    }#TezosMethod2021`,
+    verificationMethod: `did:pkh:tz:${localUserData.account.address}#TezosMethod2021`,
     proofPurpose: 'assertionMethod',
   };
   //public key of the issuer
@@ -148,22 +151,30 @@ export const generateCompanySignature = async (userData, company: Company) => {
 };
 
 export const generateCompanyCredential = async (company: Company) => {
-  const userData = {
+  console.log('localuserdata: ', localUserData);
+  const userData2 = {
     address: company.address,
     publicKey: company.publicKey,
   };
   try {
     const { micheline, credentialString, prepStr } =
-      await generateCompanySignature(userData, company);
+      await generateCompanySignature(userData2, company);
 
     // private key of the issuer of the credential
-    const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
-    const bytes = micheline;
-    const { prefixSig } = await signer.sign(bytes);
+    // const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
+    // const bytes = micheline;
+    // const { prefixSig } = await signer.sign(bytes);
+    const payload: RequestSignPayloadInput = {
+      signingType: SigningType.MICHELINE,
+      payload: micheline,
+      sourceAddress: localUserData.account.address,
+    };
+
+    const { signature } = await localWallet.client.requestSignPayload(payload);
     let vcStr = await completeIssueCredential(
       credentialString,
       prepStr,
-      prefixSig
+      signature
     );
 
     console.log('Credential verified. VC:', vcStr);
@@ -178,8 +189,8 @@ export const generateCompanyCredential = async (company: Company) => {
 
     const data = JSON.parse(vcStr);
     console.log(data);
-    await addCompanyData(data.id, userData.address);
-    setDoc(doc(db, 'CompanyVC', userData.address), { ...data })
+    await addCompanyDataAndTrustedIssuer(data.id, userData2.address);
+    setDoc(doc(db, 'CompanyVC', userData2.address), { ...data })
       .then(() => {
         console.log('Document successfully written!');
       })
@@ -271,42 +282,21 @@ export const downloadEmployeeVC = (user) => {
   });
 };
 
-export const addCompanyData = async (vcId: string, did: string) => {
-  Tezos.setSignerProvider(
-    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
-  );
-  Tezos.contract
-    .at(import.meta.env.VITE_CONTRACT_ADDRESS)
-    .then((contract) => {
-      return contract.methods.addCompanyCredential(vcId, did).send();
-    })
-    .then((op: any) => {
-      console.log('op: ', op);
-      console.log(`Waiting for ${op.hash} to be confirmed...`);
-      return op.confirmation(1).then(() => op.hash);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+export const addCompanyDataAndTrustedIssuer = async (
+  vcId: string,
+  did: string
+) => {
+  Tezos.setWalletProvider(localWallet);
+  const contract = await Tezos.wallet.at(import.meta.env.VITE_CONTRACT_ADDRESS);
 
-export const addTrustedIssuer = async (did: string) => {
-  Tezos.setSignerProvider(
-    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
-  );
-  Tezos.contract
-    .at(import.meta.env.VITE_CONTRACT_ADDRESS)
-    .then((contract) => {
-      return contract.methods.addIssuer(did).send();
-    })
-    .then((op: any) => {
-      console.log('op: ', op);
-      console.log(`Waiting for ${op.hash} to be confirmed...`);
-      return op.confirmation(1).then(() => op.hash);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const batch = await Tezos.wallet
+    .batch()
+    .withContractCall(contract.methods.addCompanyCredential(vcId, did))
+    .withContractCall(contract.methods.addIssuer(did));
+
+  const op = await batch.send();
+  const hash = await op.confirmation(1);
+  console.log('Hash of the confirmed transaction ', hash);
 };
 
 export const addEmployeeData = async (vcId: string, did: string) => {
@@ -327,6 +317,7 @@ export const addEmployeeData = async (vcId: string, did: string) => {
 };
 
 export const getTrustedIssuers = async (): Promise<string[]> => {
+  console.log('userdata', userData);
   const companyCol = collection(db, 'CompanyCredentials');
   const companySnapshot = await getDocs(companyCol);
   const companyCredentials = companySnapshot.docs.map((doc) => doc.data());
