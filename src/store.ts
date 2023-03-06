@@ -334,7 +334,11 @@ export const getTrustedIssuers = async (): Promise<string[]> => {
 
   let retVal = [];
   companyCredentials.forEach((credential) => {
-    if (credential.status === 'Approved') retVal.push(credential.name);
+    if (credential.status === 'Approved')
+      retVal.push({
+        companyName: credential.name,
+        companyAddress: credential.address,
+      });
   });
 
   return Promise.resolve(retVal);

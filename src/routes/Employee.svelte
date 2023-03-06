@@ -75,7 +75,7 @@
         bind:value={employee.company}
       >
         {#each trustedIssuers as issuer}
-          <option value={issuer}>{issuer}</option>
+          <option value={issuer.companyAddress}>{issuer.companyName}</option>
         {/each}
       </select>
     </div>
