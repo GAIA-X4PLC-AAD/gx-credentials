@@ -15,7 +15,7 @@
   let employeeCredentials = [];
   let employeeStatus = 'NA'; //NA, Approved, Rejected
   let companyStatus = 'NA'; //NA, Approved, Rejected
-  let pendingApproval = [];
+  let filteredCredentials = [];
 
   if ($userData === null) {
     navigate('/');
@@ -25,16 +25,12 @@
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
-        await generateEmployeeCredential(info);
+        await generateEmployeeCredential(info, $userData?.account.publicKey);
         await updateDoc(docRef, { status: 'Approved' });
       }
       if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
       }
-
-      pendingApproval = pendingApproval.filter(
-        (element) => element.address !== info.address
-      );
     }
   };
 
@@ -54,16 +50,18 @@
     }
   });
 
-  $: employeeCredentials?.forEach((element) => {
-    if (element.address === $userData?.account.address) {
-      employeeStatus = element.status;
-    }
-  });
-  $: employeeCredentials?.forEach((element) => {
-    if (element.company === $userData?.account.address) {
-      pendingApproval.push(element);
-    }
-  });
+  $: {
+    employeeCredentials?.forEach((element) => {
+      if (element.address === $userData?.account.address) {
+        employeeStatus = element.status;
+      }
+      if (element.company === $userData?.account.address) {
+        filteredCredentials.push(element);
+      }
+    });
+    filteredCredentials = filteredCredentials;
+  }
+  $: console.log(filteredCredentials);
 </script>
 
 <main
@@ -160,44 +158,97 @@
       </button>
     {/if}
   </div>
-
+  <br />
+  <br />
+  <br />
   <!-- Employee applied creds -->
-  {#if pendingApproval.length > 0}
-    <div>
-      <h3 class="font-semibold m-3">Employee Credential Applications</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each pendingApproval as cred}
+  {#await filteredCredentials}
+    <p>Loading...</p>
+  {:then data}
+    {#if data.length > 0}
+      <div>
+        <h2 class="font-semibold m-3">Employee Credentials</h2>
+        <table>
+          <thead>
             <tr>
-              <td>{cred.name}</td>
-              <td>{cred.address}</td>
-              <td class="flex">
-                <button
-                  class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
-                  id="accept"
-                  on:click={(event) =>
-                    updateStatus(event, cred, 'EmployeeCredentials')}
-                  >Approve</button
-                >
-                <button
-                  class="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-600"
-                  id="reject"
-                  on:click={(event) =>
-                    updateStatus(event, cred, 'EmployeeCredentials')}
-                  >Reject</button
-                >
-              </td>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Actions</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-  {/if}
+          </thead>
+          <tbody>
+            {#each data as cred}
+              <tr>
+                <td>{cred.name}</td>
+                <td>{cred.address}</td>
+                {#if cred.status === 'Pending'}
+                  <td class="flex">
+                    <button
+                      class="bg-green-500 px-4 py-2 text-white mr-4 rounded hover:bg-green-600"
+                      id="accept"
+                      on:click={(event) =>
+                        updateStatus(event, cred, 'EmployeeCredentials')}
+                      >Approve</button
+                    >
+                    <button
+                      class="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-600"
+                      id="reject"
+                      on:click={(event) =>
+                        updateStatus(event, cred, 'EmployeeCredentials')}
+                      >Reject</button
+                    >
+                  </td>
+                {:else}
+                  <td class="flex">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                    >
+                      COMPLETED
+                    </span>
+                  </td>
+                {/if}
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
+  {/await}
 </main>
+
+<style>
+  table {
+    /* border-collapse: collapse; */
+    width: 100%;
+    border-radius: 5px;
+    outline: none;
+  }
+
+  th,
+  td {
+    /* border: 1px rgba(255, 62, 0, 0.2); */
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: rgba(255, 62, 0, 0.2);
+  }
+  h2 {
+    color: #ff3e00;
+    text-transform: uppercase;
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.1;
+    margin: 2rem auto;
+    max-width: 14rem;
+    outline: none;
+  }
+
+  @media (min-width: 480px) {
+    h2 {
+      max-width: none;
+      outline: none;
+    }
+  }
+</style>

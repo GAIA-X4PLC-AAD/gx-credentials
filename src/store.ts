@@ -1,4 +1,9 @@
-import { BeaconEvent, NetworkType } from '@airgap/beacon-sdk';
+import {
+  BeaconEvent,
+  NetworkType,
+  SigningType,
+  type RequestSignPayloadInput,
+} from '@airgap/beacon-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit } from '@taquito/taquito';
 import { Tzip16Module } from '@taquito/tzip16';
@@ -299,10 +304,8 @@ export const addTrustedIssuer = async (did: string) => {
 };
 
 export const addEmployeeData = async (vcId: string, did: string) => {
-  Tezos.setSignerProvider(
-    new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
-  );
-  Tezos.contract
+  Tezos.setWalletProvider(localWallet);
+  Tezos.wallet
     .at(import.meta.env.VITE_CONTRACT_ADDRESS)
     .then((contract) => {
       return contract.methods.addEmployeeCredential(vcId, did).send();
@@ -318,9 +321,6 @@ export const addEmployeeData = async (vcId: string, did: string) => {
 };
 
 export const getTrustedIssuers = async (): Promise<string[]> => {
-  // Tezos.setSignerProvider(
-  //   new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY)
-  // );
   Tezos.setWalletProvider(localWallet);
   const contract = await Tezos.wallet.at(import.meta.env.VITE_CONTRACT_ADDRESS);
   const storage: any = await contract.storage();
@@ -331,7 +331,8 @@ export const getTrustedIssuers = async (): Promise<string[]> => {
 
 export const generateEmployeeSignature = async (
   userData,
-  employee: Employee
+  employee: Employee,
+  issuerPk: string
 ) => {
   console.log('HERE', employee);
   const did = `did:pkh:tz:` + userData.address;
@@ -344,23 +345,24 @@ export const generateEmployeeSignature = async (
       },
     ],
     id: 'urn:uuid:' + uuid(),
-    issuer: `did:pkh:tz:${employee.company.address}`,
+    issuer: `did:pkh:tz:${employee.company}`,
     issuanceDate: new Date().toISOString(),
-    type: ['VerifiableCredential', 'Company Credential'],
+    type: ['VerifiableCredential', 'Employee Credential'],
     credentialSubject: {
       id: did,
       name: employee.name,
-      company: employee.company.address,
+      company: employee.company,
     },
   };
 
   let credentialString = JSON.stringify(credential);
+  //address of the issuer
   const proofOptions = {
-    verificationMethod: 'did:pkh:tz:' + userData.address + '#TezosMethod2021',
+    verificationMethod: 'did:pkh:tz:' + employee.company + '#TezosMethod2021',
     proofPurpose: 'assertionMethod',
   };
   //public key of the issuer
-  const publicKeyJwkString = await JWKFromTezos(userData.publicKey);
+  const publicKeyJwkString = await JWKFromTezos(issuerPk);
   let prepStr = await prepareIssueCredential(
     credentialString,
     JSON.stringify(proofOptions),
@@ -377,23 +379,33 @@ export const generateEmployeeSignature = async (
   return { micheline, credentialString, prepStr };
 };
 
-export const generateEmployeeCredential = async (employee: Employee) => {
+export const generateEmployeeCredential = async (
+  employee: Employee,
+  issuerPk: string
+) => {
   const userData = {
     address: employee.address,
     publicKey: employee.publicKey,
   };
   try {
     const { micheline, credentialString, prepStr } =
-      await generateEmployeeSignature(userData, employee);
+      await generateEmployeeSignature(userData, employee, issuerPk);
 
     // private key of the issuer of the credential
-    const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
-    const bytes = micheline;
-    const { prefixSig } = await signer.sign(bytes);
+    // const signer = new InMemorySigner(import.meta.env.VITE_ISSUER_PRIVATE_KEY);
+    // const bytes = micheline;
+    // const { prefixSig } = await signer.sign(bytes);
+    const payload: RequestSignPayloadInput = {
+      signingType: SigningType.MICHELINE,
+      payload: micheline,
+      sourceAddress: employee.company,
+    };
+
+    const { signature } = await localWallet.client.requestSignPayload(payload);
     let vcStr = await completeIssueCredential(
       credentialString,
       prepStr,
-      prefixSig
+      signature
     );
 
     console.log('Credential verified. VC:', vcStr);
@@ -408,7 +420,7 @@ export const generateEmployeeCredential = async (employee: Employee) => {
 
     const data = JSON.parse(vcStr);
     console.log(data);
-    await addCompanyData(data.id, userData.address);
+    await addEmployeeData(data.id, userData.address);
     setDoc(doc(db, 'EmployeeVC', userData.address), { ...data })
       .then(() => {
         console.log('Document successfully written!');
