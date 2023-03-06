@@ -17,9 +17,21 @@
         await generateCompanyCredential(info);
         await addTrustedIssuer(info.address);
         await updateDoc(docRef, { status: 'Approved' });
+        companyCredentials.forEach((element) => {
+          if (element.address === info.address) {
+            element.status = 'Approved';
+          }
+        });
+        companyCredentials = companyCredentials;
       }
       if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
+        companyCredentials.forEach((element) => {
+          if (element.address === info.address) {
+            element.status = 'Rejected';
+          }
+        });
+        companyCredentials = companyCredentials;
       }
     }
   };
@@ -29,6 +41,7 @@
     const companySnapshot = await getDocs(companyCol);
     companyCredentials = companySnapshot.docs.map((doc) => doc.data());
   });
+  $: companyCredentials = companyCredentials;
 </script>
 
 <main class="h-screen flex flex-col align-middle justify-center">
