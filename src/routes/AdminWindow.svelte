@@ -80,7 +80,7 @@
   <br />
   <br />
   <div>
-    <h3 class="font-semibold">Approved Application Credentials</h3>
+    <h3 class="font-semibold">Approved Company Credentials</h3>
     <table>
       <thead>
         <tr>
