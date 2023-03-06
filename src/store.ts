@@ -20,7 +20,13 @@ import {
 } from '@spruceid/didkit-wasm';
 import { InMemorySigner } from '@taquito/signer';
 import { db } from './Firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore/lite';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+} from 'firebase/firestore/lite';
 
 const rpcUrl = 'https://ghostnet.ecadinfra.com';
 const Tezos = new TezosToolkit(rpcUrl);
@@ -321,10 +327,17 @@ export const addEmployeeData = async (vcId: string, did: string) => {
 };
 
 export const getTrustedIssuers = async (): Promise<string[]> => {
-  Tezos.setWalletProvider(localWallet);
-  const contract = await Tezos.wallet.at(import.meta.env.VITE_CONTRACT_ADDRESS);
-  const storage: any = await contract.storage();
-  return storage.trusted_issuers;
+  const companyCol = collection(db, 'CompanyCredentials');
+  const companySnapshot = await getDocs(companyCol);
+  const companyCredentials = companySnapshot.docs.map((doc) => doc.data());
+  console.log('ss', companyCredentials);
+
+  let retVal = [];
+  companyCredentials.forEach((credential) => {
+    if (credential.status === 'Approved') retVal.push(credential.name);
+  });
+
+  return Promise.resolve(retVal);
 };
 
 // Employee
