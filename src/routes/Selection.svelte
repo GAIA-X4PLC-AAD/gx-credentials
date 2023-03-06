@@ -69,93 +69,99 @@
   transition:fade={{ duration: 2000 }}
 >
   <div class="flex mb-4">
-    {#if companyStatus === 'Approved'}
-      <button
-        class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64"
-        transition:fade={{ duration: 2000 }}
-        on:click={() => downloadCompanyVC($userData?.account.address)}
-      >
-        <div class="flex items-center">
-          <i class="fas fa-download text-white" />
-          <span class="text-white">Download Approved Company Credentials.</span>
-        </div>
-      </button>
-    {:else if companyStatus === 'Rejected'}
-      <button
-        class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64"
-        transition:fade={{ duration: 2000 }}
-      >
-        <div class="flex items-center">
-          <i class="fas fa-times text-white" />
-          <span class="text-white">Company Credentials Rejected.</span>
-        </div>
-      </button>
-    {:else if companyStatus === 'Pending'}
-      <button
-        class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64"
-        transition:fade={{ duration: 2000 }}
-      >
-        <div class="flex items-center">
-          <i class="fa fa-clock text-white mr-2" />
-          <span class="text-white"
-            >Pending Approval for Company Credentials</span
-          >
-        </div>
-      </button>
-    {:else}
-      <button
-        on:click={() => navigate('/company')}
-        class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
-        transition:fade={{ duration: 2000 }}
-      >
-        Apply to Company Credential
-      </button>
+    {#if employeeStatus !== 'Approved' && employeeStatus !== 'Pending'}
+      {#if companyStatus === 'Approved'}
+        <button
+          class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64"
+          transition:fade={{ duration: 2000 }}
+          on:click={() => downloadCompanyVC($userData?.account.address)}
+        >
+          <div class="flex items-center">
+            <i class="fas fa-download text-white" />
+            <span class="text-white"
+              >Download Approved Company Credentials.</span
+            >
+          </div>
+        </button>
+      {:else if companyStatus === 'Rejected'}
+        <button
+          class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64"
+          transition:fade={{ duration: 2000 }}
+        >
+          <div class="flex items-center">
+            <i class="fas fa-times text-white" />
+            <span class="text-white">Company Credentials Rejected.</span>
+          </div>
+        </button>
+      {:else if companyStatus === 'Pending'}
+        <button
+          class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64"
+          transition:fade={{ duration: 2000 }}
+        >
+          <div class="flex items-center">
+            <i class="fa fa-clock text-white mr-2" />
+            <span class="text-white"
+              >Pending Approval for Company Credentials</span
+            >
+          </div>
+        </button>
+      {:else}
+        <button
+          on:click={() => navigate('/company')}
+          class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
+          transition:fade={{ duration: 2000 }}
+        >
+          Apply to Company Credential
+        </button>
+      {/if}
     {/if}
 
     <!-- Checking employee status -->
-
-    {#if employeeStatus === 'Approved'}
-      <button
-        class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
-        on:click={() => downloadEmployeeVC($userData?.account.address)}
-        transition:fade={{ duration: 2000 }}
-      >
-        <div class="flex items-center">
-          <i class="fas fa-download text-white " />
-          <span class="text-white">Download Approved Employee Credentials.</span
-          >
-        </div>
-      </button>
-    {:else if employeeStatus === 'Rejected'}
-      <button
-        class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
-        transition:fade={{ duration: 2000 }}
-      >
-        <div class="flex items-center">
-          <i class="fas fa-times text-white" />
-          <span class="text-white">Employee Credentials Rejected</span>
-        </div>
-      </button>
-    {:else if employeeStatus === 'Pending'}
-      <button
-        class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
-        transition:fade={{ duration: 2000 }}
-      >
-        <div class="flex items-center">
-          <i class="fa fa-clock text-white mr-2" />
-          <span class="text-white"
-            >Pending Approval for Employee Credentials</span
-          >
-        </div>
-      </button>
-    {:else}
-      <button
-        on:click={() => navigate('/employee')}
-        class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
-        transition:fade={{ duration: 2000 }}
-      >
-        Apply to Employee Credential
-      </button>
+    {#if companyStatus !== 'Approved' && companyStatus !== 'Pending'}
+      {#if employeeStatus === 'Approved'}
+        <button
+          class="p-8 bg-green-500 hover:bg-green-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
+          on:click={() => downloadEmployeeVC($userData?.account.address)}
+          transition:fade={{ duration: 2000 }}
+        >
+          <div class="flex items-center">
+            <i class="fas fa-download text-white " />
+            <span class="text-white"
+              >Download Approved Employee Credentials.</span
+            >
+          </div>
+        </button>
+      {:else if employeeStatus === 'Rejected'}
+        <button
+          class="p-8 bg-red-500 hover:bg-red-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
+          transition:fade={{ duration: 2000 }}
+        >
+          <div class="flex items-center">
+            <i class="fas fa-times text-white" />
+            <span class="text-white">Employee Credentials Rejected</span>
+          </div>
+        </button>
+      {:else if employeeStatus === 'Pending'}
+        <button
+          class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8"
+          transition:fade={{ duration: 2000 }}
+        >
+          <div class="flex items-center">
+            <i class="fa fa-clock text-white mr-2" />
+            <span class="text-white"
+              >Pending Approval for Employee Credentials</span
+            >
+          </div>
+        </button>
+      {:else}
+        <button
+          on:click={() => navigate('/employee')}
+          class="p-8 bg-orange-500 hover:bg-orange-600 shadow-lg rounded-lg text-center text-white w-64 ml-8 transition duration-300 ease-in-out transform hover:scale-105"
+          transition:fade={{ duration: 2000 }}
+        >
+          Apply to Employee Credential
+        </button>
+      {/if}
     {/if}
   </div>
   <br />
