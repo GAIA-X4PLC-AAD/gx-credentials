@@ -27,9 +27,20 @@
       if (event.target.id === 'accept') {
         await generateEmployeeCredential(info, $userData?.account.publicKey);
         await updateDoc(docRef, { status: 'Approved' });
-      }
-      if (event.target.id === 'reject') {
+        filteredCredentials.forEach((element) => {
+          if (element.address === info.address) {
+            element.status = 'Approved';
+          }
+        });
+        filteredCredentials = filteredCredentials;
+      } else if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
+        filteredCredentials.forEach((element) => {
+          if (element.address === info.address) {
+            element.status = 'Rejected';
+          }
+        });
+        filteredCredentials = filteredCredentials;
       }
     }
   };
@@ -42,15 +53,6 @@
     const employeeCol = collection(db, 'EmployeeCredentials');
     const employeeSnapshot = await getDocs(employeeCol);
     employeeCredentials = employeeSnapshot.docs.map((doc) => doc.data());
-  });
-
-  $: companyCredentials?.forEach((element) => {
-    if (element.address === $userData?.account.address) {
-      companyStatus = element.status;
-    }
-  });
-
-  $: {
     employeeCredentials?.forEach((element) => {
       if (element.address === $userData?.account.address) {
         employeeStatus = element.status;
@@ -60,7 +62,13 @@
       }
     });
     filteredCredentials = filteredCredentials;
-  }
+  });
+
+  $: companyCredentials?.forEach((element) => {
+    if (element.address === $userData?.account.address) {
+      companyStatus = element.status;
+    }
+  });
   $: console.log(filteredCredentials);
 </script>
 
