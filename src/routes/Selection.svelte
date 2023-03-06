@@ -25,14 +25,19 @@
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
-        await generateEmployeeCredential(info, $userData?.account.publicKey);
-        await updateDoc(docRef, { status: 'Approved' });
-        filteredCredentials.forEach((element) => {
-          if (element.address === info.address) {
-            element.status = 'Approved';
-          }
-        });
-        filteredCredentials = filteredCredentials;
+        const retVal = await generateEmployeeCredential(
+          info,
+          $userData?.account.publicKey
+        );
+        if (retVal === 0) {
+          await updateDoc(docRef, { status: 'Approved' });
+          filteredCredentials.forEach((element) => {
+            if (element.address === info.address) {
+              element.status = 'Approved';
+            }
+          });
+          filteredCredentials = filteredCredentials;
+        }
       } else if (event.target.id === 'reject') {
         await updateDoc(docRef, { status: 'Rejected' });
         filteredCredentials.forEach((element) => {

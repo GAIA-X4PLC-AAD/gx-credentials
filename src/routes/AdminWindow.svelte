@@ -10,13 +10,15 @@
     const docRef = doc(db, client, info.address);
     if (docRef) {
       if (event.target.id === 'accept') {
-        await generateCompanyCredential(info);
-        await updateDoc(docRef, { status: 'Approved' });
-        companyCredentials.forEach((element) => {
-          if (element.address === info.address) {
-            element.status = 'Approved';
-          }
-        });
+        const retVal = await generateCompanyCredential(info);
+        if (retVal === 0) {
+          await updateDoc(docRef, { status: 'Approved' });
+          companyCredentials.forEach((element) => {
+            if (element.address === info.address) {
+              element.status = 'Approved';
+            }
+          });
+        }
         companyCredentials = companyCredentials;
       }
       if (event.target.id === 'reject') {

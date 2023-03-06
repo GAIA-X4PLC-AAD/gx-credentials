@@ -196,7 +196,9 @@ export const generateCompanyCredential = async (company: Company) => {
       })
       .catch((error) => {
         console.error('Error adding document: ', error);
+        return 1;
       });
+    return 0;
     //public key of the holder and subject
     // const publicKey1 = userData.account.publicKey;
     // const publicKeyJwkString1 = await JWKFromTezos(publicKey1);
@@ -438,5 +440,7 @@ export const generateEmployeeCredential = async (
       });
   } catch (error) {
     console.log('Error in generating Credential. ', error);
+    return 1;
   }
+  return 0;
 };
