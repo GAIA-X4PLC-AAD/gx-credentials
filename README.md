@@ -1,3 +1,43 @@
+# Use Cases
+
+A company admin applies to a Company Credential in the first use case (UC1). This credential is then reviewed and issued by the ASCS admin. Companies require this credential to become a trusted issuer (recorded on the smart contract). In the second use case, a company employee applies for an Employee Credential. This credential's reviewer and issuer is the respective company admin (not ASCS).
+ 
+For both types of credentials, a record is placed on the smart contract to indicate the status (active or revoked). While a company credential only has a DID and status, an employee credential also has an issuer DID. When a company issues an employee credential, the company DID is automatically (i.e., DID taken from the caller address) assigned to the issuer DID field (this way, we prevent a company from issuing an employee credential with another company’s DID as the issuer DID.). A similar check is also done for credential revoking.
+ 
+An employee credential can only be placed on the contract by the companies in the trusted issuers list (remember that a company gets into the list when ASCS issues them a company credential). This is required to prevent any random account from adding employee credentials to the contract. Moreover, a company credential can only be added to the contract by the ASCS admin account or any other allowed callers.
+ 
+## UC1
+ 
+1. Company admin applies for a credential
+- *Admin connects Temple wallet*
+- *Applies to the relevant credential*
+2. ASCS admin monitors applications
+- *Admin connects Temple wallet*
+3. ASCS admin accepts/rejects an application
+- *Signs the credential to generate a proof*
+- *Issues a transaction to update the contract (add trusted issuer, add company credential)*
+- *The contract storage gets updated (companyCreds, trusted_issuers)*
+4. Company admin downloads the issued credential JSON file
+ 
+## UC2
+ 
+1. Company employee applies for a credential
+- *BMW employee connects Temple wallet*
+- *Applies to the relevant credential*
+2. Company admin monitors/accepts/rejects employee applications
+- *BMW admin connects Temple wallet*
+- *Signs the credential to generate a proof*
+- *Issues a transaction to update the contract (add employee credential)*
+- *The contract storage gets updated (employeeCreds)*
+3. Company employee downloads the issued credential JSON file
+ 
+## Some notes
+ 
+- We use Tezos address (public key hash) as the default DID
+- We use Firebase to store the full credentials for now. Users can download their credentials and use them freely. Remember that having a copy a credential doesn’t mean that any can present it. Only the holder of keys associated with the credential’s DID can generate a valid signature. Nonetheless, we believe employee credentials should not be stored like this in the future due to GDPR issues.
+- The issued credentials are verified by our verifier backend in the EDC-Interface. This component checks whether a presented credential has a trusted issuer and its status is not revoked.
+- Smart Contract Deployed Instance [Better Call Dev](https://better-call.dev/ghostnet/KT1AgNNsgQRigNTmLcQrhGPZafvdmvnLXXAZ/storage)
+
 # Generate Verifiable Credentials
 
 ## Build and Running instructions
