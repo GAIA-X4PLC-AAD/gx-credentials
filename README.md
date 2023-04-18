@@ -97,4 +97,11 @@ Usage:
 - Go to route '/admin' to see the list of applications. You can Approve/Reject.
 - After approving, the subject can download the VC after logging in.
 
+## Firebase Tables
+- **Admins**: List of tezos addresses with admin rights.
+- **CompanyCredentials**: Stores the application for a company credentials and updates the status when it is approved/rejected.
+- **CompanyVC**: Stores the Verifiable Credential after it is approved by the admin.
+- **EmployeeCredentials**: Stores the application for a employee credentials and updates the status when it is approved/rejected.
+- **EmployeeVC**: Stores the Verifiable Credential for an employee after it is approved by the company.
+
 
