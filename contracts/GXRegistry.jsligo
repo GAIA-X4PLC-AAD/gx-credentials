@@ -1,0 +1,100 @@
+type credential_status = ["Active"] | ["Revoked"];
+
+type credential_log_entry = {issuer: address, issuance_time: timestamp, status: credential_status};
+
+type partner = {gx_id: string, name: string, description: string, owner: address, issuers: list<address>};
+
+type parameter =
+| ["Add_Registrar", address]
+| ["Remove_Registrar", address]
+| ["Log_Issuance", string]
+| ["Revoke_Issuance", string]
+| ["Add_Partner", [string, string, string, address]];
+
+type storage = {
+    owner: address,
+    registrars: set<address>,
+    partners: map<string, partner>, // mapping gxid to partner info
+    log: map<string, credential_log_entry> // mapping credential hashes to their status
+};
+
+// storage init
+/*
+{owner:"tz1YeiPapCiHfpwVcEUjMaSC3TDh9iMzkAKr" as address,registrars: Set.empty,partners: Map.empty,log: Map.empty}
+*/
+
+type return_ = [list<operation>, storage];
+
+const add_registrar = (acc : address, store : storage) : return_ => {
+    if (Tezos.get_sender() != store.owner) { return failwith("Access denied."); }
+    else { return [list([]), {...store, registrars: Set.add(acc, store.registrars)}]; };
+}
+
+const remove_registrar = (acc : address, store : storage) : return_ => {
+    if (Tezos.get_sender() != store.owner) { return failwith("Access denied."); }
+    else { return [list([]), {...store, registrars: Set.remove(acc, store.registrars)}]; };
+}
+
+// no access control could lead to spam at worst
+const log_issuance = (hash: string, store : storage) : return_ => {
+    const entry : credential_log_entry = {
+        issuer: Tezos.get_sender(),
+        issuance_time: Tezos.get_now(),
+        status: Active()
+    };
+    return [list([]), {...store, log: Map.add(hash, entry, store.log)}];
+}
+
+const revoke_issuance = (hash: string, store : storage) : return_ => {
+    return match(Map.find_opt(hash, store.log), {
+        Some: (entry:credential_log_entry) => {
+            if (Tezos.get_sender() != entry.issuer) { return failwith("Access denied."); }
+            else { 
+                const e : credential_log_entry = {...entry, status: Revoked()};
+                return [list([]), {...store, log: Map.update(hash, Some(e), store.log)}];
+            };
+        },
+        None: () => failwith("No issuance found.")
+    });
+}
+
+const add_partner = (gx_id: string, name: string, description: string, owner: address, store : storage) : return_ => {
+    if (Tezos.get_sender() != store.owner && Set.mem(Tezos.get_sender(), store.registrars)) { return failwith("Access denied."); }
+    return match(Map.find_opt(gx_id, store.partners), {
+        Some: (_) => failwith("Partner exists."),
+        None: () => {
+            const partner : partner = {
+                gx_id: gx_id,
+                name: name,
+                description: description,
+                owner: owner,
+                issuers: list([]) as list<address>
+            };
+            return [list([]), {...store, partners: Map.add(gx_id, partner, store.partners)}];
+        }
+    });
+}
+
+const remove_partner = (store : storage) : return_ => {
+    // TODO
+    return [list([]), store];
+}
+
+const add_partner_issuer = (store : storage) : return_ => {
+    // TODO
+    return [list([]), store];
+}
+
+const remove_partner_issuer = (store : storage) : return_ => {
+    // TODO
+    return [list([]), store];
+}
+
+const main = (action: parameter, store: storage): return_ =>
+  match(action, {
+    Add_Registrar: a => add_registrar(a, store),
+    Remove_Registrar: a => remove_registrar(a, store),
+    Log_Issuance: h => log_issuance(h, store),
+    Revoke_Issuance: h => revoke_issuance(h, store),
+    Add_Partner: (i,n,d,o) => add_partner(i, n, d, o, store)
+  });
