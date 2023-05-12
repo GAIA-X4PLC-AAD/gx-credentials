@@ -1,6 +1,7 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
+import Link from "next/link";
 import { useProtected } from "../hooks/useProtected";
 
 export default function Apply() {
@@ -8,9 +9,12 @@ export default function Apply() {
   const { data: session } = useSession();
 
   return (
-    <main>
+    <main className="ml-20 mt-10">
       <h1>Apply for Credentials</h1>
       <div>{session?.user?.pkh}</div>
+      <button>
+        <Link href="/apply/applyAsCompany">Apply as Company</Link>
+      </button>
       <button onClick={handleSignout}>Logout</button>
     </main>
   );

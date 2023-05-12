@@ -1,6 +1,6 @@
 import { useSession, signOut } from "next-auth/react";
 import { useEffect } from "react";
-import { dAppClient } from "./../pages/api/wallet";
+import { dAppClient } from "../config/wallet";
 
 export function useProtected() {
   // TODO: can the session be terminated somehow from the wallet side?

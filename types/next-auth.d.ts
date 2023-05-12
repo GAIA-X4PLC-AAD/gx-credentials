@@ -1,11 +1,9 @@
-import "next-auth";
+import NextAuth from "next-auth";
 
 declare module "next-auth" {
-  interface User {
-    pkh: string;
-  }
-
   interface Session {
-    user: User;
+    user: {
+      pkh: string;
+    };
   }
 }

@@ -1,8 +1,8 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import { validateAddress } from "@taquito/utils";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export default NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -36,11 +36,13 @@ export default NextAuth({
       return session;
     },
   },
-  secret: process.env.NEXT_AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/",
     signOut: "/",
     error: "/",
     newUser: "/",
   },
-});
+};
+
+export default NextAuth(authOptions);

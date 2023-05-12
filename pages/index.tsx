@@ -1,5 +1,5 @@
 import { signIn } from "next-auth/react";
-import { dAppClient } from "./api/wallet";
+import { dAppClient } from "../config/wallet";
 
 export default function Home() {
   const handleLogin = async () => {
