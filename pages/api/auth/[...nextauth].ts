@@ -35,6 +35,12 @@ export const authOptions: AuthOptions = {
       session.user.pkh = token.sub as string;
       return session;
     },
+    async jwt({ token, user, account, profile }) {
+      if (user) {
+        token.user = user;
+      }
+      return token;
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
