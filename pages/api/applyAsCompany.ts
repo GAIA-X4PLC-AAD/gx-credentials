@@ -2,8 +2,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore/lite";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<any>
+) {
   const session = await getServerSession(req, res, authOptions);
   console.log(session);
   if (session) {
@@ -14,6 +18,7 @@ export default async function handler(req, res) {
         gx_id: req.body.gx_id,
         description: req.body.description,
         address: session.user!.pkh,
+        status: "pending",
       };
       if (await writeCompanyApplication(ca)) res.status(200);
       else res.status(500);
@@ -32,10 +37,11 @@ type CompanyApplication = {
   gx_id: string;
   description: string;
   address: string;
+  status: string;
 };
 
 const writeCompanyApplication = async (ca: CompanyApplication) => {
-  return setDoc(doc(db, "CompanyApplication", ca.address), { ...ca })
+  return setDoc(doc(db, "CompanyApplications", ca.address), { ...ca })
     .then(() => {
       console.log("Document successfully written!");
       return true;
