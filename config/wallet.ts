@@ -4,11 +4,18 @@ const globalForWallet = global as unknown as {
   dAppClient: DAppClient | undefined;
 };
 
+function isServer() {
+  if (typeof window === "undefined") return true;
+  return false;
+}
+
 export const dAppClient =
   globalForWallet.dAppClient ??
-  new DAppClient({
-    name: "GX Credentials",
-    preferredNetwork: NetworkType.GHOSTNET,
-  });
+  (isServer()
+    ? undefined
+    : new DAppClient({
+        name: "GX Credentials",
+        preferredNetwork: NetworkType.GHOSTNET,
+      }));
 
 globalForWallet.dAppClient = dAppClient;

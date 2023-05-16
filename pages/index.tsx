@@ -5,7 +5,7 @@ export default function Home() {
   const handleLogin = async () => {
     try {
       const callbackUrl = "/apply";
-      const permissions = await dAppClient.requestPermissions();
+      const permissions = await dAppClient!.requestPermissions();
       signIn("credentials", { pkh: permissions.address, callbackUrl });
     } catch (error) {
       window.alert(error);

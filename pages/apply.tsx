@@ -41,7 +41,6 @@ export async function getServerSideProps(context: NextPageContext) {
   }
 
   const registrars = await getRegistrars();
-  console.log(registrars);
   if (registrars.includes(session.user.pkh)) {
     return {
       redirect: {
