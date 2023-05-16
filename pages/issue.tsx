@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useProtected } from "../hooks/useProtected";
 import { db } from "../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore/lite";
+import { issueCompanyCredential } from "../lib/credentials";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
@@ -58,7 +59,12 @@ export default function Issue(props: any) {
                         {application.description}
                       </td>
                       <td className="whitespace-nowrap  px-6 py-4">
-                        <button className="mr-2">Accept</button>
+                        <button
+                          onClick={() => issueCompanyCredential(application)}
+                          className="mr-2"
+                        >
+                          Accept
+                        </button>
                         <button>Reject</button>
                       </td>
                     </tr>

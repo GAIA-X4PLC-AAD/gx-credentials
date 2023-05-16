@@ -3,6 +3,7 @@ import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { CompanyApplication } from "../../types/CompanyApplication";
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,14 +32,6 @@ export default async function handler(
   }
   res.end();
 }
-
-type CompanyApplication = {
-  name: string;
-  gx_id: string;
-  description: string;
-  address: string;
-  status: string;
-};
 
 const writeCompanyApplication = async (ca: CompanyApplication) => {
   return setDoc(doc(db, "CompanyApplications", ca.address), { ...ca })

@@ -9,6 +9,10 @@ const nextConfig = {
       poll: 1000,
       aggregateTimeout: 500,
     },
+    experiments: {
+      layers: true,
+      asyncWebAssembly: true,
+    },
   }),
 };
 

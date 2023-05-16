@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@airgap/beacon-sdk": "^4.0.1",
+    "@spruceid/didkit-wasm": "^0.2.1",
     "@taquito/taquito": "^16.1.2",
     "@taquito/utils": "^16.1.2",
     "@types/node": "18.15.13",
@@ -29,6 +30,7 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "^1.7.0",
     "eslint-plugin-react-hooks": "^4.6.0"
   }
 }
