@@ -2,6 +2,7 @@ import {
   completeIssueCredential,
   JWKFromTezos,
   prepareIssueCredential,
+  verifyCredential,
 } from "@spruceid/didkit-wasm";
 import type { CompanyApplication } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
@@ -15,33 +16,33 @@ export const issueCompanyCredential = async (
   const rawCredential = {
     "@context": [
       "https://www.w3.org/2018/credentials/v1",
-      "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#",
+      // TODO why can't didkit resolve external contexts?
+      //"https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#",
     ],
     type: ["VerifiableCredential"],
     id: "urn:uuid:" + crypto.randomUUID(),
     issuer: did,
     issuanceDate: new Date().toISOString(),
     credentialSubject: {
-      //TODO
-      id: "did:web:raw.githubusercontent.com:egavard:payload-sign:master",
+      id: `did:pkh:tz:` + companyApplication.address,
       type: "gx:LegalParticipant",
-      "gx:legalName": "Gaia-X European Association for Data and Cloud AISBL",
+      "gx:legalName": companyApplication.name,
       "gx:legalRegistrationNumber": {
-        "gx:vatID": "FR0762747721",
+        "gx:vatID": companyApplication.gx_id,
       },
       "gx:headquarterAddress": {
-        "gx:countrySubdivisionCode": "BE-BRU",
+        "gx:countrySubdivisionCode": "DE-BY",
       },
       "gx:legalAddress": {
-        "gx:countrySubdivisionCode": "BE-BRU",
+        "gx:countrySubdivisionCode": "DE-BY",
       },
       "gx-terms-and-conditions:gaiaxTermsAndConditions":
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },
   };
-  const credential = issueCredential(rawCredential);
+  const credential = await issueCredential(rawCredential);
   console.log(credential);
-  // TODO deposit somewhere for later download
+  return credential;
 };
 
 const issueCredential = async (rawCredential: any) => {
@@ -65,6 +66,7 @@ const issueCredential = async (rawCredential: any) => {
     throw new Error("Expected micheline signing input");
   }
 
+  let credentialString;
   try {
     const payload: RequestSignPayloadInput = {
       signingType: SigningType.MICHELINE,
@@ -72,13 +74,23 @@ const issueCredential = async (rawCredential: any) => {
       sourceAddress: account!.address,
     };
     const { signature } = await dAppClient!.requestSignPayload(payload);
-    let credentialString = await completeIssueCredential(
+    credentialString = await completeIssueCredential(
       rawCredentialString,
       prepStr,
       signature
     );
-    return credentialString;
   } catch (error) {
     console.log("Error generating credential. ", error);
   }
+
+  const verifyOptionsString = "{}";
+  const verifyResult = JSON.parse(
+    await verifyCredential(credentialString, verifyOptionsString)
+  );
+  if (verifyResult.errors.length > 0) {
+    console.log("Error verifying new credential: ", verifyResult.errors);
+    throw new Error("Error verifying new credential");
+  }
+
+  return JSON.parse(credentialString);
 };

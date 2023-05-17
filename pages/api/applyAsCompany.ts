@@ -19,6 +19,7 @@ export default async function handler(
         gx_id: req.body.gx_id,
         description: req.body.description,
         address: session.user!.pkh,
+        timestamp: new Date().getTime().toString(),
         status: "pending",
       };
       if (await writeCompanyApplication(ca)) res.status(200);
@@ -34,7 +35,7 @@ export default async function handler(
 }
 
 const writeCompanyApplication = async (ca: CompanyApplication) => {
-  return setDoc(doc(db, "CompanyApplications", ca.address), { ...ca })
+  return setDoc(doc(db, "CompanyApplications", ca.timestamp), { ...ca })
     .then(() => {
       console.log("Document successfully written!");
       return true;

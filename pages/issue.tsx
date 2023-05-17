@@ -1,15 +1,32 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import Link from "next/link";
 import { useProtected } from "../hooks/useProtected";
 import { db } from "../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import { issueCompanyCredential } from "../lib/credentials";
+import { CompanyApplication } from "@/types/CompanyApplication";
+import axios from "axios";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
   const { data: session } = useSession();
+
+  const handleCompanyIssuance = async (application: CompanyApplication) => {
+    const credential = await issueCompanyCredential(application);
+    axios
+      .post("/api/publishIssuerCredential", {
+        credential: credential,
+        role: "company",
+        applicationKey: application.timestamp
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   return (
     <main className="ml-20 mt-10">
@@ -60,7 +77,7 @@ export default function Issue(props: any) {
                       </td>
                       <td className="whitespace-nowrap  px-6 py-4">
                         <button
-                          onClick={() => issueCompanyCredential(application)}
+                          onClick={() => handleCompanyIssuance(application)}
                           className="mr-2"
                         >
                           Accept
