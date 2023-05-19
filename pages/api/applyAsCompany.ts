@@ -35,7 +35,10 @@ export default async function handler(
 }
 
 const writeCompanyApplication = async (ca: CompanyApplication) => {
-  return setDoc(doc(db, "CompanyApplications", ca.timestamp), { ...ca })
+  return setDoc(
+    doc(db, "CompanyApplications", ca.address + "-" + ca.timestamp),
+    { ...ca }
+  )
     .then(() => {
       console.log("Document successfully written!");
       return true;

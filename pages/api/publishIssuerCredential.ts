@@ -3,7 +3,6 @@ import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc, updateDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { CompanyApplication } from "@/types/CompanyApplication";
 
 export default async function handler(
   req: NextApiRequest,
@@ -44,7 +43,7 @@ const writeTrustedIssuerCredential = async (cred: any) => {
 };
 
 const updateApplicationStatus = async (
-  key: CompanyApplication["timestamp"],
+  key: string,
   role: string
 ) => {
   let collection = "";

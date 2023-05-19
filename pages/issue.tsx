@@ -7,10 +7,12 @@ import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import { issueCompanyCredential } from "../lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const handleCompanyIssuance = async (application: CompanyApplication) => {
     const credential = await issueCompanyCredential(application);
@@ -18,9 +20,10 @@ export default function Issue(props: any) {
       .post("/api/publishIssuerCredential", {
         credential: credential,
         role: "company",
-        applicationKey: application.timestamp
+        applicationKey: application.address + "-" + application.timestamp,
       })
       .then(function (response) {
+        router.reload();
         console.log(response);
       })
       .catch(function (error) {
