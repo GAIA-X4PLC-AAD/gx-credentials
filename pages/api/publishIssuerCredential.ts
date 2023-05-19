@@ -34,7 +34,11 @@ export default async function handler(
 
 const writeTrustedIssuerCredential = async (cred: any) => {
   try {
-    await setDoc(doc(db, "TrustedIssuerCredentials", cred.id), cred);
+    const dbObj = {
+      address: cred.credentialSubject.id.split(":").pop(),
+      credential: cred,
+    };
+    await setDoc(doc(db, "TrustedIssuerCredentials", cred.id), dbObj);
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
@@ -42,10 +46,7 @@ const writeTrustedIssuerCredential = async (cred: any) => {
   }
 };
 
-const updateApplicationStatus = async (
-  key: string,
-  role: string
-) => {
+const updateApplicationStatus = async (key: string, role: string) => {
   let collection = "";
   switch (role) {
     case "company":

@@ -4,7 +4,7 @@ import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
 
-export default function Apply() {
+export default function ApplyAsCompany() {
   const handleSignout = useProtected();
   const { data: session } = useSession();
 
