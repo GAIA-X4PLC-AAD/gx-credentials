@@ -1,38 +1,69 @@
+This project provides a proof of concept for a Gaia-X identity provider. It can roll out Self-Sovereign Identities to represent companies and employees. The operator of this application hosts it as a trust anchor to enable identity managment among a dataspace or consortium. The operator only directly certifies company identities. This application supports companies in employee credential issuance, but that could always be done fully inside each company with custom software.
+
+## Stakeholders
+
+
+
+## User Stories
+
+
+
+
+## Development Setup
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+### Prerequisites
 
-First, run the development server:
+Install a tunneling tool like [ngrok](https://ngrok.com). You will need it to easily use a smartphone wallet with the application or to demo the application to someone outside your local network.
+
+Install a wallet software that supports the Beacon protocol. For the best experience, we currently recomment using [Altme](https://altme.io). Be aware that you can choose a wallet that is not SSI compatible. Then you are excluded from any functionality using Verifiable Credentials.
+
+A Firebase Firestore is used to provide traditional database storage. It needs the following (initially empty) collections:
+- CompanyApplications
+- EmployeeApplications
+- TrustedIssuerCredentials
+
+This project uses the Tezos blockchain to provide secure timestamped consensus on valid issuers and certificate status. The registry smart contract in the ```contracts``` folder needs to be deployed on your preferred testnet. For quick delpoyment, you could use the online IDE [here](https://ide.ligolang.org/local).
+
+We recommend using [VS Code](https://code.visualstudio.com) with [DevContainers](https://code.visualstudio.com/docs/devcontainers/containers). This project comes with configuration that ensures your Node.js environment container is setup properly. This requires [Docker](https://www.docker.com) to be installed and running. If opening the project does not immediately launch the container, execute the command "Reopen in Container".
+
+An environment file ```.env``` of the following form is required:
+```
+NEXTAUTH_SECRET=somereallysecretsecret
+JWT_SECRET=itshouldbealsoverysecret
+NEXTAUTH_URL=http://localhost:3000
+
+FIREBASE_API_KEY=yourAPIkey
+FIREBASE_MESSAGING_SENDER_ID=yourSenderID
+FIREBASE_APP_ID=yourAppID
+
+TEZOS_RPC_URL=linkToPreferredNode
+TEZOS_REGISTRY_CONTRACT=deployedContract
+
+GLOBAL_SERVER_URL=yourTunnelURL
+```
+
+Initialize dependencies by executing:
+```bash
+npm install
+```
+
+### Starting the Development Server
+
+First, run the tunnel to get a globally accessible URL for the development server:
+
+```bash
+ngrok http 3000
+```
+
+In the environment file ```.env``` make sure that the ```GLOBAL_SERVER_URL``` corresponds to your current tunnel URL.
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
