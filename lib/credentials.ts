@@ -8,6 +8,45 @@ import type { CompanyApplication } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 
+export const credentialOutputDescriptor = {
+  id: "Gaia-X Identity Credential",
+  schema: "Gaia-X Credentials",
+  display: {
+    title: {
+      path: [],
+      schema: {
+        type: "string",
+      },
+      fallback: "GX Participant",
+    },
+    subtitle: {
+      path: ["$.credentialSubject.gx:legalName"],
+      schema: {
+        type: "string",
+      },
+      fallback: "Name Unknown",
+    },
+    description: {
+      path: [],
+      schema: {
+        type: "string",
+      },
+      fallback:
+        "This VC identifies a Gaia-X participant. It can be used to access federation services.",
+    },
+    properties: [
+      {
+        path: ["$.credentialSubject.id"],
+        schema: {
+          type: "string",
+        },
+        fallback: "Unknown",
+        label: "Participant DID",
+      },
+    ],
+  },
+};
+
 export const issueCompanyCredential = async (
   companyApplication: CompanyApplication
 ) => {

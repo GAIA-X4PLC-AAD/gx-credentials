@@ -1,6 +1,7 @@
 import { db } from "../../config/firebase";
 import { doc, getDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { credentialOutputDescriptor } from "../../lib/credentials";
 
 // TODO change this endpoint to already request a specific credential urn in the URL
 export default async function handler(
@@ -33,6 +34,7 @@ export default async function handler(
           issuer: "did:pkh:tz:",
         },
         credential_manifest: {
+          output_descriptors: [credentialOutputDescriptor],
           presentation_definition: {
             input_descriptors: [
               {
