@@ -3,7 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import Link from "next/link";
 import { useProtected } from "../hooks/useProtected";
-import { getRegistrars } from "../lib/registryReader";
+import { getRegistrars } from "../lib/registryInteraction";
 import { getIssuerCredentials } from "../lib/database";
 
 export default function Apply() {
