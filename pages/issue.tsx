@@ -8,7 +8,7 @@ import { issueCompanyCredential } from "../lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { writeTrusterIssuerLog } from "@/lib/registryInteraction";
+import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
@@ -17,7 +17,7 @@ export default function Issue(props: any) {
 
   const handleCompanyIssuance = async (application: CompanyApplication) => {
     const credential = await issueCompanyCredential(application);
-    await writeTrusterIssuerLog(application);
+    await writeTrustedIssuerLog(application);
     axios
       .post("/api/publishIssuerCredential", {
         credential: credential,

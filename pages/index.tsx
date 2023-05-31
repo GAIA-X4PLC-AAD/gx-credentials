@@ -1,11 +1,11 @@
 import { signIn } from "next-auth/react";
-import { dAppClient } from "../config/wallet";
+import { requestRequiredPermissions } from "../config/wallet";
 
 export default function Home() {
   const handleLogin = async () => {
     try {
       const callbackUrl = "/apply";
-      const permissions = await dAppClient!.requestPermissions();
+      const permissions = await requestRequiredPermissions();
       signIn("credentials", { pkh: permissions.address, callbackUrl });
     } catch (error) {
       window.alert(error);
