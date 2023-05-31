@@ -33,6 +33,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.1",
     "@wasm-tool/wasm-pack-plugin": "^1.7.0",
     "eslint-plugin-react-hooks": "^4.6.0"
   }
