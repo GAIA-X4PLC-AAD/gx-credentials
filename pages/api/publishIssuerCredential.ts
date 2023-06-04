@@ -6,7 +6,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<any>,
 ) {
   const session = await getServerSession(req, res, authOptions);
   console.log(session);

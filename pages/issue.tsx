@@ -16,8 +16,25 @@ export default function Issue(props: any) {
   const router = useRouter();
 
   const handleCompanyIssuance = async (application: CompanyApplication) => {
-    const credential = await issueCompanyCredential(application);
-    await writeTrustedIssuerLog(application);
+    let credential = null;
+    try {
+      // Issue credential
+      credential = await issueCompanyCredential(application);
+      console.log("credential: ", credential);
+    } catch (error) {
+      console.log("Error issuing credential: ", error);
+      return;
+    }
+
+    try {
+      // Publish credential to issuer registry
+      await writeTrustedIssuerLog(application.address);
+    } catch (error) {
+      console.log("Error publishing credential to issuer registry: ", error);
+      return;
+    }
+
+    // Update database with credential issuance
     axios
       .post("/api/publishIssuerCredential", {
         credential: credential,
@@ -116,7 +133,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   const q = query(
     collection(db, "CompanyApplications"),
-    where("status", "==", "pending")
+    where("status", "==", "pending"),
   );
   const querySnapshot = await getDocs(q);
 

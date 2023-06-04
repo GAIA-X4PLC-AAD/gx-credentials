@@ -6,23 +6,23 @@ import { getIssuerCredentials } from "../../lib/database";
 import { dAppClient } from "@/config/wallet";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/[...nextauth]";
-import nextConnect from 'next-connect';
+import nextConnect from "next-connect";
 import multer from "multer";
 import { verifyPresentationUtil } from "@/lib/verifyPresentation";
 
-//
+// Multer is a middleware for handling multipart/form-data, which is primarily used for uploading files.
 const upload = multer();
 
 // This array will contain the middleware functions for each form field
 let uploadMiddleware = upload.fields([
-  { name: 'subject_id', maxCount: 1 },
-  { name: 'presentation', maxCount: 1 },
+  { name: "subject_id", maxCount: 1 },
+  { name: "presentation", maxCount: 1 },
 ]);
 
 // TODO change this endpoint to already request a specific credential urn in the URL
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<any>,
 ) {
   // No traditional login session possible
   try {
@@ -75,12 +75,8 @@ export default async function handler(
         },
       });
     } else if (method === "POST") {
-      // TODO check the incoming vp
-      // TODO return actual VC from db
       console.log("API POST");
-      // Fetch credentials from the database
-
-      return new Promise( async (resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         uploadMiddleware(req, res, async (err: Error | null) => {
           if (err) {
             // An error occurred when uploading
@@ -91,11 +87,26 @@ export default async function handler(
 
           // Parse the JSON string into a JavaScript object
           const presentation = JSON.parse(req.body.presentation);
-          console.log("Presentation: ",presentation);
-          verifyPresentationUtil(presentation);
-          const address = presentation["verifiableCredential"]["credentialSubject"]["associatedAddress"];
+          console.log("Presentation: ", presentation);
+
+          // Verify the presentation and the status of the credential
+          if (await verifyPresentationUtil(presentation)) {
+            console.log("Presentation verified");
+          } else {
+            console.log("Presentation invalid");
+            res.status(500);
+            res.end();
+            return;
+          }
+
+          // Get the address of the user
+          const address =
+            presentation["verifiableCredential"]["credentialSubject"][
+              "associatedAddress"
+            ];
+
+          // Get the credentials from the database
           const credentials = await getIssuerCredentials(address);
-          console.log("Credentials: ",credentials[0].credential);
           res.status(200).json(credentials[0].credential);
           resolve();
         });

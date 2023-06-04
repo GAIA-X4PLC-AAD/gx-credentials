@@ -1,8 +1,9 @@
-import { ContractAbstraction } from "@taquito/taquito";
+import { ContractAbstraction, MichelsonMap } from "@taquito/taquito";
 import { tezos } from "../config/tezos";
 import { v5 as uuidv5 } from "uuid";
 import { dAppClient } from "@/config/wallet";
 import { TezosOperationType } from "@airgap/beacon-sdk";
+import { log } from "console";
 
 const contractAddress = process.env
   .NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT as string;
@@ -17,13 +18,11 @@ export const getRegistrars = async () => {
 
 export const writeTrustedIssuerLog = async (address: any) => {
   try {
-    console.log("my namespace: ", process.env.NEXT_PUBLIC_MY_NAMESPACE);
-    console.log("my address: ", address);
-
     const hash = uuidv5(
       address,
-      process.env.NEXT_PUBLIC_MY_NAMESPACE as string
+      process.env.NEXT_PUBLIC_MY_NAMESPACE as string,
     );
+    console.log("Hash of address: ", hash);
 
     const result = await dAppClient?.requestOperation({
       operationDetails: [
@@ -45,10 +44,21 @@ export const writeTrustedIssuerLog = async (address: any) => {
   }
 };
 
-export const getCredentialStatus = async (address: any) => {
-  tezos.contract.at(contractAddress).then((contract) => {
-    return contract.storage().then((storage: any) => {
-      console.log("Storage: ", storage);
-    });
-  });
+export const getCredentialStatus = async (
+  address: string,
+): Promise<boolean> => {
+  const contract = await tezos.contract.at(contractAddress);
+  const storage: any = await contract.storage<{
+    log: MichelsonMap<
+      string,
+      { issuance_time: string; issuer: string; status: Symbol }
+    >;
+    owner: string;
+    registrars: string[];
+  }>();
+  console.log("Address: ", address);
+  const hash = uuidv5(address, process.env.NEXT_PUBLIC_MY_NAMESPACE as string);
+  console.log("Hash: ", hash);
+
+  return storage.log.get(hash)?.status.active ? true : false;
 };

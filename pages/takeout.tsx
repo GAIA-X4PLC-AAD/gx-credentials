@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../hooks/useProtected";
 import { getIssuerCredentials } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
+import { getCredentialStatus } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
   const handleSignout = useProtected();
@@ -19,13 +20,17 @@ export default function Takeout(props: any) {
     link.click();
   };
 
-  const transferCredentialToWallet = async (credential) => {
+  const transferCredentialToWallet = async () => {
     const signature = await dAppClient!.requestSignPayload({
       signingType: SigningType.RAW,
       payload:
         "Get your GX Credential! #" + props.apiHost + "/api/takeoutCredential",
     });
   };
+
+  // useEffect(() => {
+  //   getCredentialStatus(session?.user?.pkh as string);
+  // }, []);
 
   return (
     <main className="ml-20 mt-10">
@@ -112,7 +117,7 @@ export async function getServerSideProps(context: NextPageContext) {
   return {
     props: {
       userCredentials: (await getIssuerCredentials(session.user!.pkh)).map(
-        (wrapper) => wrapper.credential
+        (wrapper) => wrapper.credential,
       ),
       apiHost: process.env.GLOBAL_SERVER_URL,
     },

@@ -7,7 +7,7 @@ import type { CompanyApplication } from "../../types/CompanyApplication";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<any>,
 ) {
   const session = await getServerSession(req, res, authOptions);
   console.log(session);
@@ -37,7 +37,7 @@ export default async function handler(
 const writeCompanyApplication = async (ca: CompanyApplication) => {
   return setDoc(
     doc(db, "CompanyApplications", ca.address + "-" + ca.timestamp),
-    { ...ca }
+    { ...ca },
   )
     .then(() => {
       console.log("Document successfully written!");

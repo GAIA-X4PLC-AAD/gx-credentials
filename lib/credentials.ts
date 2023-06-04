@@ -48,7 +48,7 @@ export const credentialOutputDescriptor = {
 };
 
 export const issueCompanyCredential = async (
-  companyApplication: CompanyApplication
+  companyApplication: CompanyApplication,
 ) => {
   const account = await dAppClient!.getActiveAccount();
   const did = `did:pkh:tz:` + account!.address;
@@ -58,7 +58,7 @@ export const issueCompanyCredential = async (
       // TODO why can't didkit resolve external contexts?
       //"https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#",
     ],
-    type: ["VerifiableCredential"],
+    type: ["VerifiableCredential", "Company Credential"],
     id: "urn:uuid:" + crypto.randomUUID(),
     issuer: did,
     issuanceDate: new Date().toISOString(),
@@ -91,11 +91,13 @@ const issueCredential = async (rawCredential: any) => {
     verificationMethod: `did:pkh:tz:${account!.address}#TezosMethod2021`,
     proofPurpose: "assertionMethod",
   };
+
+  //public key of the issuer
   const publicKeyJwkString = await JWKFromTezos(account!.publicKey);
   let prepStr = await prepareIssueCredential(
     rawCredentialString,
     JSON.stringify(proofOptions),
-    publicKeyJwkString
+    publicKeyJwkString,
   );
 
   const preparation = JSON.parse(prepStr);
@@ -116,7 +118,7 @@ const issueCredential = async (rawCredential: any) => {
     credentialString = await completeIssueCredential(
       rawCredentialString,
       prepStr,
-      signature
+      signature,
     );
   } catch (error) {
     console.log("Error generating credential. ", error);
@@ -124,7 +126,7 @@ const issueCredential = async (rawCredential: any) => {
 
   const verifyOptionsString = "{}";
   const verifyResult = JSON.parse(
-    await verifyCredential(credentialString, verifyOptionsString)
+    await verifyCredential(credentialString, verifyOptionsString),
   );
   if (verifyResult.errors.length > 0) {
     console.log("Error verifying new credential: ", verifyResult.errors);

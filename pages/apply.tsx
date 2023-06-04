@@ -53,7 +53,6 @@ export async function getServerSideProps(context: NextPageContext) {
 
   // TODO should first redirect to issuance page for companies with optional link to cred takeout
   const userIssuerCredentials = await getIssuerCredentials(session.user.pkh);
-  console.log(userIssuerCredentials);
   if (userIssuerCredentials.length > 0) {
     return {
       redirect: {
