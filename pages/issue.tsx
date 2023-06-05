@@ -15,6 +15,12 @@ export default function Issue(props: any) {
   const { data: session } = useSession();
   const router = useRouter();
 
+  function delay(milliseconds: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
+  }
+
   const handleCompanyIssuance = async (application: CompanyApplication) => {
     let credential = null;
     try {
@@ -25,6 +31,8 @@ export default function Issue(props: any) {
       console.log("Error issuing credential: ", error);
       return;
     }
+
+    await delay(2000);
 
     try {
       // Publish credential to issuer registry
