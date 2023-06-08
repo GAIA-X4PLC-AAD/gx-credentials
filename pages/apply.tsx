@@ -45,7 +45,7 @@ export async function getServerSideProps(context: NextPageContext) {
   if (registrars.includes(session.user.pkh)) {
     return {
       redirect: {
-        destination: "/issue",
+        destination: "/issueCompany",
         permanent: false,
       },
     };
