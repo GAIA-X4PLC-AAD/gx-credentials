@@ -40,53 +40,53 @@ export const verifyPresentationUtil = async (VP: any) => {
 
 const verifyPresentationHelper = async (VC: any, VP: any): Promise<boolean> => {
   // Check if the subject is the holder of the VP
-  //   if (VP?.holder === VC?.credentialSubject?.id) {
-  // Check if the credential is active in the registry
-  if (
-    await getCredentialStatus(
-      VP?.verifiableCredential?.credentialSubject?.associatedAddress,
-    )
-  ) {
-    // Verify the issuer's identity
-    // const issuer = VC?.issuer;
-    // const isIssuerTrusted = await getIssuerStatusByDID(issuer);
-    // if (isIssuerTrusted) {
-    // Verify the signature on the VC
-    const verifyOptionsString = "{}";
-    const verifyResult = JSON.parse(
-      await verifyCredential(JSON.stringify(VC), verifyOptionsString),
-    );
-    // If credential verification is successful, verify the presentation
-    if (verifyResult?.errors?.length === 0) {
-      const res = JSON.parse(
-        await verifyPresentation(JSON.stringify(VP), verifyOptionsString),
+  if (VP?.holder === VC?.credentialSubject?.id) {
+    // Check if the credential is active in the registry
+    if (
+      await getCredentialStatus(
+        VP?.verifiableCredential?.credentialSubject?.associatedAddress,
+      )
+    ) {
+      // Verify the issuer's identity
+      // const issuer = VC?.issuer;
+      // const isIssuerTrusted = await getIssuerStatusByDID(issuer);
+      // if (isIssuerTrusted) {
+      // Verify the signature on the VC
+      const verifyOptionsString = "{}";
+      const verifyResult = JSON.parse(
+        await verifyCredential(JSON.stringify(VC), verifyOptionsString),
       );
-      // If verification is successful
-      if (res.errors.length === 0) {
-        return true;
+      // If credential verification is successful, verify the presentation
+      if (verifyResult?.errors?.length === 0) {
+        const res = JSON.parse(
+          await verifyPresentation(JSON.stringify(VP), verifyOptionsString),
+        );
+        // If verification is successful
+        if (res.errors.length === 0) {
+          return true;
+        } else {
+          const errorMessage = `Unable to verify presentation: ${res.errors.join(
+            ", ",
+          )}`;
+          console.error(errorMessage);
+        }
       } else {
-        const errorMessage = `Unable to verify presentation: ${res.errors.join(
+        const errorMessage = `Unable to verify credential: ${verifyResult.errors.join(
           ", ",
         )}`;
         console.error(errorMessage);
       }
+      // } else {
+      //   const errorMessage = 'Unable to find the issuer in the trusted issuers registry.';
+      //   console.error(errorMessage);
+      // }
     } else {
-      const errorMessage = `Unable to verify credential: ${verifyResult.errors.join(
-        ", ",
-      )}`;
+      const errorMessage = "Unable to detect a log about the credential.";
       console.error(errorMessage);
     }
-    // } else {
-    //   const errorMessage = 'Unable to find the issuer in the trusted issuers registry.';
-    //   console.error(errorMessage);
-    // }
   } else {
-    const errorMessage = "Unable to detect a log about the credential.";
+    const errorMessage = "The credential subject does not match the VP holder.";
     console.error(errorMessage);
   }
-  //   } else {
-  //     const errorMessage = 'The credential subject does not match the VP holder.';
-  //     console.error(errorMessage);
-  //   }
   return false;
 };

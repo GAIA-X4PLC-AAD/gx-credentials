@@ -44,7 +44,7 @@ export default function Issue(props: any) {
 
     // Update database with credential issuance
     axios
-      .post("/api/publishIssuerCredential", {
+      .post("/api/publishCredential", {
         credential: credential,
         role: "company",
         applicationKey: application.address + "-" + application.timestamp,

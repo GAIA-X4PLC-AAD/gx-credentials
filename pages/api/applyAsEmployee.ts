@@ -3,7 +3,10 @@ import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { CompanyApplication } from "../../types/CompanyApplication";
+import type {
+  CompanyApplication,
+  EmployeeApplication,
+} from "../../types/CompanyApplication";
 import { writeApplicationToDatabase } from "@/lib/database";
 
 export default async function handler(
@@ -15,15 +18,16 @@ export default async function handler(
   if (session) {
     // Signed in
     try {
-      const ca: CompanyApplication = {
+      const ea: EmployeeApplication = {
         name: req.body.name,
-        gx_id: req.body.gx_id,
-        description: req.body.description,
+        employeeId: req.body.employeeId,
+        companyId: req.body.companyId,
+        companyName: req.body.companyName,
         address: session.user!.pkh,
         timestamp: new Date().getTime().toString(),
         status: "pending",
       };
-      if (await writeApplicationToDatabase(ca)) res.status(200);
+      if (await writeApplicationToDatabase(ea)) res.status(200);
       else res.status(500);
     } catch (e) {
       res.status(500);

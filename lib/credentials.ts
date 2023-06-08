@@ -4,7 +4,10 @@ import {
   prepareIssueCredential,
   verifyCredential,
 } from "@spruceid/didkit-wasm";
-import type { CompanyApplication } from "../types/CompanyApplication";
+import type {
+  CompanyApplication,
+  EmployeeApplication,
+} from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 
@@ -75,6 +78,39 @@ export const issueCompanyCredential = async (
       "gx:legalAddress": {
         "gx:countrySubdivisionCode": "DE-BY",
       },
+      "gx-terms-and-conditions:gaiaxTermsAndConditions":
+        "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
+    },
+  };
+  const credential = await issueCredential(rawCredential);
+  console.log(credential);
+  return credential;
+};
+
+export const issueEmployeeCredential = async (
+  employeeApplication: EmployeeApplication,
+) => {
+  const account = await dAppClient!.getActiveAccount();
+  const did = `did:pkh:tz:` + account!.address;
+  const rawCredential = {
+    "@context": [
+      "https://www.w3.org/2018/credentials/v1",
+      // TODO why can't didkit resolve external contexts?
+      //"https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#",
+    ],
+    type: ["VerifiableCredential", "Employee Credential"],
+    id: "urn:uuid:" + crypto.randomUUID(),
+    issuer: did,
+    issuanceDate: new Date().toISOString(),
+    credentialSubject: {
+      id: `did:pkh:tz:` + employeeApplication.address,
+      type: "gx:LegalParticipant",
+      "gx:legalName": employeeApplication.name,
+      "gx:legalRegistrationNumber": {
+        "gx:vatID": employeeApplication.employeeId,
+      },
+      "gx:issuerCompanyName": employeeApplication.companyName,
+      "gx:issuerCompanyID": employeeApplication.companyId,
       "gx-terms-and-conditions:gaiaxTermsAndConditions":
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },

@@ -1,27 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
+import { getTrustedIssuers } from "@/lib/database";
 
-export default function ApplyAsCompany() {
+export default function ApplyAsEmployee() {
   const handleSignout = useProtected();
   const { data: session } = useSession();
 
   const [name, setName] = useState<string>("");
-  const [gx_id, setGX_ID] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-
+  const [employeeId, setEmployeeId] = useState<string>("");
+  const [companyId, setCompanyId] = useState<string>("");
+  const [companies, setCompanies] = useState(new Map());
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const [companyName, setCompanyName] = useState<string>("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const issuers = await getTrustedIssuers();
+      setCompanies(issuers);
+    };
+
+    fetchData();
+  }, []);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault(); // avoid default behaviour
-
     axios
-      .post("/api/applyAsCompany", {
+      .post("/api/applyAsEmployee", {
         name: name,
-        gx_id: gx_id,
-        description: description,
+        employeeId: employeeId,
+        companyId: companyId,
+        companyName: companyName,
       })
       .then(function (response) {
         setSubmitted(true);
@@ -52,14 +63,13 @@ export default function ApplyAsCompany() {
           />
         </div>
       </div>
-
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4">
           <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            className="block text-gray-200 font-bold  md:text-left mb-1 md:mb-0 pr-4"
             htmlFor="inline-gx-id"
           >
-            GX ID
+            Employee ID
           </label>
         </div>
         <div className="md:w-3/4">
@@ -67,29 +77,37 @@ export default function ApplyAsCompany() {
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
             id="inline-gx-id"
             type="text"
-            onChange={(e) => setGX_ID(e.target.value)}
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
           />
         </div>
       </div>
-
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4">
           <label
             className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
             htmlFor="inline-description"
           >
-            Description
+            CompanyName
           </label>
         </div>
         <div className="md:w-3/4">
-          <textarea
+          <select
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-description"
-            onChange={(e) => setDescription(e.target.value)}
-          />
+            value={companyName}
+            onChange={(e) => {
+              setCompanyName(e.target.value);
+              setCompanyId(companies.get(e.target.value));
+            }}
+          >
+            {Array.from(companies.keys()).map((key) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
-
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4">
           <label
@@ -112,7 +130,7 @@ export default function ApplyAsCompany() {
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4"></div>
         <div className="md:w-3/4">
-          <button>Apply for Company Registration</button>
+          <button>Apply for Employee Registration</button>
         </div>
       </div>
     </form>
@@ -127,12 +145,9 @@ export default function ApplyAsCompany() {
   return (
     <div className="flex justify-center min-h-screen">
       <main className="md:w-2/4 mt-10">
-        <h1>Register Your Company</h1>
+        <h1>Register as an Employee</h1>
         <p className="mb-4">
-          Registering your company here will allo w you to issue employee
-          credentials to your employees that are trusted by all other members of
-          this consortium. For convenience, issuers can optionally use this web
-          application to handle the process of issuing employee credentials.
+          Register as an Employee for one of the registered companies.
         </p>
         <div>
           {submitted ? submissionConfirmation : form}
@@ -146,6 +161,7 @@ export default function ApplyAsCompany() {
 
 export async function getServerSideProps(context: NextPageContext) {
   const session = await getSession(context);
+  console.log("session", session);
   if (!session) {
     return {
       redirect: {

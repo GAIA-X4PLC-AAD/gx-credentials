@@ -14,7 +14,12 @@ export default async function handler(
     // Signed in
     try {
       // write credential to db
-      if (!(await writeTrustedIssuerCredential(req.body.credential)))
+      if (
+        !(await writeTrustedIssuerCredential(
+          req.body.credential,
+          req.body.role,
+        ))
+      )
         res.status(500);
       // update application for that credential on db
       if (
@@ -32,13 +37,21 @@ export default async function handler(
   res.end();
 }
 
-const writeTrustedIssuerCredential = async (cred: any) => {
+const writeTrustedIssuerCredential = async (cred: any, role: string) => {
   try {
     const dbObj = {
       address: cred.credentialSubject.id.split(":").pop(),
       credential: cred,
     };
-    await setDoc(doc(db, "TrustedIssuerCredentials", cred.id), dbObj);
+    let collection = "";
+    switch (role) {
+      case "company":
+        collection = "TrustedIssuerCredentials";
+      case "employee":
+        collection = "TrustedEmployeeCredentials";
+    }
+
+    await setDoc(doc(db, collection, cred.id), dbObj);
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
@@ -51,6 +64,8 @@ const updateApplicationStatus = async (key: string, role: string) => {
   switch (role) {
     case "company":
       collection = "CompanyApplications";
+    case "employee":
+      collection = "EmployeeApplications";
   }
   if (!role) return false;
   updateDoc(doc(db, collection, key), {
