@@ -8,10 +8,7 @@ import { SigningType } from "@airgap/beacon-sdk";
 import { getCredentialStatus } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
-  const handleSignout = useProtected();
-  const { data: session } = useSession();
-
-  const downloadCredential = (credential) => {
+  const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
     const link = document.createElement("a");
@@ -28,16 +25,8 @@ export default function Takeout(props: any) {
     });
   };
 
-  // useEffect(() => {
-  //   getCredentialStatus(session?.user?.pkh as string);
-  // }, []);
-
   return (
     <main className="ml-20 mt-10">
-      <h1>
-        Hello <b className="text-blue-500">{session?.user?.pkh}</b>!
-      </h1>
-
       <div className="flex flex-col w-5/6">
         <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -78,7 +67,7 @@ export default function Takeout(props: any) {
                       </td>
                       <td className="whitespace-nowrap  px-6 py-4">
                         <button
-                          onClick={() => transferCredentialToWallet(credential)}
+                          onClick={transferCredentialToWallet}
                           className="mr-2"
                         >
                           Beacon Wallet
@@ -95,10 +84,6 @@ export default function Takeout(props: any) {
           </div>
         </div>
       </div>
-
-      <button>Load into Altme Wallet</button>
-      <button>Raw File Download</button>
-      <button onClick={handleSignout}>Logout</button>
     </main>
   );
 }

@@ -12,9 +12,6 @@ export default function Apply() {
 
   return (
     <main className="ml-20 mt-10">
-      <h1>
-        Hello <b className="text-blue-500">{session?.user?.pkh}</b>!
-      </h1>
       <p>
         You are still unknown to our system. Do you wish to apply for a specific
         credential?
@@ -25,7 +22,6 @@ export default function Apply() {
       <button>
         <Link href="/apply/applyAsEmployee">Apply as Employee</Link>
       </button>
-      <button onClick={handleSignout}>Logout</button>
     </main>
   );
 }

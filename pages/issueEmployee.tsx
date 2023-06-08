@@ -66,10 +66,6 @@ export default function Issue(props: any) {
 
   return (
     <main className="ml-20 mt-10">
-      <h1>
-        Hello <b className="text-blue-500">{session?.user?.pkh}</b>!
-      </h1>
-
       <h2>Pending Employee Applications</h2>
       <div className="flex flex-col w-5/6">
         <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -128,8 +124,6 @@ export default function Issue(props: any) {
           </div>
         </div>
       </div>
-
-      <button onClick={handleSignout}>Logout</button>
     </main>
   );
 }
