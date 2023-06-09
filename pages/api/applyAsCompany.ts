@@ -4,7 +4,7 @@ import { db } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { CompanyApplication } from "../../types/CompanyApplication";
-import { writeApplicationToDatabase } from "@/lib/database";
+import { setAddressRole, writeApplicationToDatabase } from "@/lib/database";
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,7 +23,11 @@ export default async function handler(
         timestamp: new Date().getTime().toString(),
         status: "pending",
       };
-      if (await writeApplicationToDatabase(ca)) res.status(200);
+      if (
+        (await writeApplicationToDatabase(ca)) &&
+        (await setAddressRole(ca.address, "companyApplied"))
+      )
+        res.status(200);
       else res.status(500);
     } catch (e) {
       res.status(500);

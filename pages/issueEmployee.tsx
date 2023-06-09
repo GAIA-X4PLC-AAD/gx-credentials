@@ -14,7 +14,16 @@ import {
 } from "@/types/CompanyApplication";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
+import {
+  getRegistrars,
+  writeTrustedIssuerLog,
+} from "@/lib/registryInteraction";
+import {
+  getAddressRoles,
+  getPendingApplications,
+  getPendingEmployeeApplications,
+  getTrustedIssuers,
+} from "@/lib/database";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
@@ -90,34 +99,39 @@ export default function Issue(props: any) {
                   </tr>
                 </thead>
                 <tbody>
-                  {props.pendingEmployeeApplications.map((application: any) => (
-                    <tr
-                      className="border-b border-neutral-500"
-                      key={application.address}
-                    >
-                      <td className="whitespace-nowrap  px-6 py-4 font-medium">
-                        {application.employeeId}
-                      </td>
-                      <td className="whitespace-nowrap  px-6 py-4">
-                        {application.name}
-                      </td>
-                      <td className="whitespace-nowrap  px-6 py-4">
-                        {application.companyName}
-                      </td>
-                      <td className="whitespace-nowrap  px-6 py-4">
-                        {application.address}
-                      </td>
-                      <td className="whitespace-nowrap  px-6 py-4">
-                        <button
-                          onClick={() => handleEmmployeeIssuance(application)}
-                          className="mr-2"
-                        >
-                          Accept
-                        </button>
-                        <button>Reject</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {props.pendingEmployeeApplications
+                    .filter(
+                      (application: any) =>
+                        session?.user?.pkh === application.companyId,
+                    )
+                    .map((application: any) => (
+                      <tr
+                        className="border-b border-neutral-500"
+                        key={application.address}
+                      >
+                        <td className="whitespace-nowrap  px-6 py-4 font-medium">
+                          {application.employeeId}
+                        </td>
+                        <td className="whitespace-nowrap  px-6 py-4">
+                          {application.name}
+                        </td>
+                        <td className="whitespace-nowrap  px-6 py-4">
+                          {application.companyName}
+                        </td>
+                        <td className="whitespace-nowrap  px-6 py-4">
+                          {application.address}
+                        </td>
+                        <td className="whitespace-nowrap  px-6 py-4">
+                          <button
+                            onClick={() => handleEmmployeeIssuance(application)}
+                            className="mr-2"
+                          >
+                            Accept
+                          </button>
+                          <button>Reject</button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -139,15 +153,21 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const q = query(
-    collection(db, "EmployeeApplications"),
-    where("status", "==", "pending"),
-  );
-  const querySnapshot = await getDocs(q);
+  const addressRole: string[] | null = await getAddressRoles(session.user?.pkh);
+  if (!(addressRole[0].address === "companyApproved")) {
+    return {
+      redirect: {
+        destination: "/unauthorised",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
-      pendingEmployeeApplications: querySnapshot.docs.map((doc) => doc.data()),
+      pendingEmployeeApplications: getPendingApplications(
+        "EmployeeApplications",
+      ),
     },
   };
 }

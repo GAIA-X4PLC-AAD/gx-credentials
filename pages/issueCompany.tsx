@@ -8,7 +8,14 @@ import { issueCompanyCredential } from "../lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
+import {
+  getRegistrars,
+  writeTrustedIssuerLog,
+} from "@/lib/registryInteraction";
+import {
+  getPendingApplications,
+  getPendingCompanyApplications,
+} from "@/lib/database";
 
 export default function Issue(props: any) {
   const router = useRouter();
@@ -131,15 +138,19 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const q = query(
-    collection(db, "CompanyApplications"),
-    where("status", "==", "pending"),
-  );
-  const querySnapshot = await getDocs(q);
+  const registrars = await getRegistrars();
+  if (!registrars.includes(session.user?.pkh)) {
+    return {
+      redirect: {
+        destination: "/unauthorised",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
-      pendingCompanyApplications: querySnapshot.docs.map((doc) => doc.data()),
+      pendingCompanyApplications: getPendingApplications("CompanyApplications"),
     },
   };
 }

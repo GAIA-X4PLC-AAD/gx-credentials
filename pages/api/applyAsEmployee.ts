@@ -7,7 +7,7 @@ import type {
   CompanyApplication,
   EmployeeApplication,
 } from "../../types/CompanyApplication";
-import { writeApplicationToDatabase } from "@/lib/database";
+import { setAddressRole, writeApplicationToDatabase } from "@/lib/database";
 
 export default async function handler(
   req: NextApiRequest,
@@ -27,7 +27,11 @@ export default async function handler(
         timestamp: new Date().getTime().toString(),
         status: "pending",
       };
-      if (await writeApplicationToDatabase(ea)) res.status(200);
+      if (
+        (await writeApplicationToDatabase(ea)) &&
+        (await setAddressRole(ea.address, "employeeApplied"))
+      )
+        res.status(200);
       else res.status(500);
     } catch (e) {
       res.status(500);

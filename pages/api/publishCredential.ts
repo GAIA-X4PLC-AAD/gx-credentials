@@ -3,6 +3,7 @@ import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc, updateDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { setAddressRole } from "@/lib/database";
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,11 +48,14 @@ const writeTrustedIssuerCredential = async (cred: any, role: string) => {
     switch (role) {
       case "company":
         collection = "TrustedIssuerCredentials";
+        break;
       case "employee":
         collection = "TrustedEmployeeCredentials";
+        break;
     }
 
     await setDoc(doc(db, collection, cred.id), dbObj);
+    await setAddressRole(dbObj.address, role + "Approved");
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
@@ -64,8 +68,10 @@ const updateApplicationStatus = async (key: string, role: string) => {
   switch (role) {
     case "company":
       collection = "CompanyApplications";
+      break;
     case "employee":
       collection = "EmployeeApplications";
+      break;
   }
   if (!role) return false;
   updateDoc(doc(db, collection, key), {
