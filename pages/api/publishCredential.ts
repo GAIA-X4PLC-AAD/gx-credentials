@@ -3,7 +3,16 @@ import { authOptions } from "./auth/[...nextauth]";
 import { db } from "../../config/firebase";
 import { doc, setDoc, updateDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { setAddressRole } from "@/lib/database";
+import {
+  addCredentialInDb,
+  setAddressRoleInDb,
+  updateApplicationStatusInDb,
+} from "@/lib/database";
+import {
+  ADDRESS_ROLES,
+  APPLICATION_STATUS,
+  COLLECTIONS,
+} from "@/constants/constants";
 
 export default async function handler(
   req: NextApiRequest,
@@ -38,24 +47,26 @@ export default async function handler(
   res.end();
 }
 
-const writeTrustedIssuerCredential = async (cred: any, role: string) => {
+const writeTrustedIssuerCredential = async (credential: any, role: string) => {
   try {
-    const dbObj = {
-      address: cred.credentialSubject.id.split(":").pop(),
-      credential: cred,
-    };
-    let collection = "";
+    let collection = "",
+      addressRoleStatus = "";
     switch (role) {
       case "company":
-        collection = "TrustedIssuerCredentials";
+        collection = COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
+        addressRoleStatus = ADDRESS_ROLES.COMPANY_APPROVED;
         break;
       case "employee":
-        collection = "TrustedEmployeeCredentials";
+        collection = COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS;
+        addressRoleStatus = ADDRESS_ROLES.EMPLOYEE_APPROVED;
         break;
     }
 
-    await setDoc(doc(db, collection, cred.id), dbObj);
-    await setAddressRole(dbObj.address, role + "Approved");
+    await addCredentialInDb(collection, credential);
+    await setAddressRoleInDb(
+      credential.credentialSubject.id.split(":").pop(),
+      addressRoleStatus,
+    );
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
@@ -67,22 +78,18 @@ const updateApplicationStatus = async (key: string, role: string) => {
   let collection = "";
   switch (role) {
     case "company":
-      collection = "CompanyApplications";
+      collection = COLLECTIONS.COMPANY_APPLICATIONS;
       break;
     case "employee":
-      collection = "EmployeeApplications";
+      collection = COLLECTIONS.EMPLOYEE_APPLICATIONS;
       break;
   }
   if (!role) return false;
-  updateDoc(doc(db, collection, key), {
-    status: "approved",
-  })
-    .then(() => {
-      console.log("Document successfully written!");
-      return true;
-    })
-    .catch((error) => {
-      console.error("Error adding document: ", error);
-      return false;
-    });
+  try {
+    await updateApplicationStatusInDb(collection, key);
+    return true;
+  } catch (error) {
+    console.error("Error updating application status: ", error);
+    return false;
+  }
 };

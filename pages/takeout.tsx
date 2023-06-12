@@ -2,10 +2,11 @@ import React, { useEffect } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../hooks/useProtected";
-import { getIssuerCredentials } from "../lib/database";
+import { getCredentialsFromDb } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
 import { getCredentialStatus } from "@/lib/registryInteraction";
+import { COLLECTIONS } from "@/constants/constants";
 
 export default function Takeout(props: any) {
   const downloadCredential = (credential: any) => {
@@ -101,9 +102,12 @@ export async function getServerSideProps(context: NextPageContext) {
 
   return {
     props: {
-      userCredentials: (await getIssuerCredentials(session.user!.pkh)).map(
-        (wrapper) => wrapper.credential,
-      ),
+      userCredentials: (
+        await getCredentialsFromDb(
+          session.user!.pkh,
+          COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+        )
+      ).map((wrapper) => wrapper.credential),
       apiHost: process.env.GLOBAL_SERVER_URL,
     },
   };

@@ -4,10 +4,7 @@ import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import { db } from "../../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore/lite";
-import {
-  issueCompanyCredential,
-  issueEmployeeCredential,
-} from "../../lib/credentials";
+import { issueEmployeeCredential } from "../../lib/credentials";
 import {
   CompanyApplication,
   EmployeeApplication,
@@ -18,7 +15,8 @@ import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import { getAddressRoles, getApplications } from "@/lib/database";
+import { getAddressRolesFromDb, getApplicationsFromDb } from "@/lib/database";
+import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
@@ -157,7 +155,7 @@ export async function getServerSideProps(context: NextPageContext) {
   try {
     const session = await getSession(context);
     // If the user is not a company that has been approved by the registrars, redirect to unauthorised page
-    const addressRole: any = await getAddressRoles(session?.user?.pkh);
+    const addressRole: any = await getAddressRolesFromDb(session?.user?.pkh);
     if (!session || !addressRole) {
       return {
         redirect: {
@@ -178,15 +176,14 @@ export async function getServerSideProps(context: NextPageContext) {
     }
 
     console.log("addressRole: ", addressRole);
-
-    if (addressRole[0].role === "pendingCompany") {
+    if (addressRole[0].role === ADDRESS_ROLES.COMPANY_APPLIED) {
       return {
         redirect: {
           destination: "/common/pending",
           permanent: false,
         },
       };
-    } else if (addressRole[0].role === "rejectedCompany") {
+    } else if (addressRole[0].role === ADDRESS_ROLES.COMPANY_REJECTED) {
       return {
         redirect: {
           destination: "/common/rejected",
@@ -197,7 +194,9 @@ export async function getServerSideProps(context: NextPageContext) {
 
     return {
       props: {
-        employeeApplications: await getApplications("EmployeeApplications"),
+        employeeApplications: await getApplicationsFromDb(
+          COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        ),
       },
     };
   } catch (error) {

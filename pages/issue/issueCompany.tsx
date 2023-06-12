@@ -12,7 +12,7 @@ import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import { getApplications } from "@/lib/database";
+import { getApplicationsFromDb } from "@/lib/database";
 
 export default function Issue(props: any) {
   const router = useRouter();
@@ -23,7 +23,9 @@ export default function Issue(props: any) {
     });
   }
 
-  const handleCompanyIssuance = async (application: CompanyApplication) => {
+  const handleAcceptCompanyIssuance = async (
+    application: CompanyApplication,
+  ) => {
     let credential = null;
     try {
       // Issue credential
@@ -58,6 +60,13 @@ export default function Issue(props: any) {
       .catch(function (error) {
         console.log(error);
       });
+  };
+
+  const handleRejectCompanyIssuance = async (
+    application: CompanyApplication,
+  ) => {
+    // Update database with credential issuance
+    // axios
   };
 
   return (
@@ -106,7 +115,9 @@ export default function Issue(props: any) {
                       {application.status === "pending" ? (
                         <td className="whitespace-nowrap px-6 py-4">
                           <button
-                            onClick={() => handleCompanyIssuance(application)}
+                            onClick={() =>
+                              handleAcceptCompanyIssuance(application)
+                            }
                             className="mr-2"
                           >
                             Accept
@@ -162,7 +173,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
     return {
       props: {
-        pendingCompanyApplications: await getApplications(
+        pendingCompanyApplications: await getApplicationsFromDb(
           "CompanyApplications",
         ),
       },

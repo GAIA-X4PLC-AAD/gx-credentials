@@ -15,20 +15,11 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore/lite";
-
-// Return the credentials of an issuer from the TrustedIssuerCredentials collection based on the address
-export const getIssuerCredentials = async (address: string) => {
-  const q = query(
-    collection(db, "TrustedIssuerCredentials"),
-    where("address", "==", address),
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => doc.data());
-};
+import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
-export const getTrustedIssuers = async () => {
-  const q = query(collection(db, "TrustedIssuerCredentials"));
+export const getTrustedIssuersFromDb = async () => {
+  const q = query(collection(db, COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS));
   const querySnapshot = await getDocs(q);
 
   const resultMap = new Map();
@@ -44,12 +35,12 @@ export const getTrustedIssuers = async () => {
 };
 
 // Add a new application to the database
-export const writeApplicationToDatabase = async (
+export const writeApplicationToDb = async (
   application: CompanyApplication | EmployeeApplication,
 ) => {
   let collection = (application as EmployeeApplication).employeeId
-    ? "EmployeeApplications"
-    : "CompanyApplications";
+    ? COLLECTIONS.EMPLOYEE_APPLICATIONS
+    : COLLECTIONS.COMPANY_APPLICATIONS;
 
   return setDoc(
     doc(db, collection, application.address + "-" + application.timestamp),
@@ -66,7 +57,10 @@ export const writeApplicationToDatabase = async (
 };
 
 // Return pending applications from the database based on the collection name
-export const getApplications = async (coll: string, companyId?: string) => {
+export const getApplicationsFromDb = async (
+  coll: string,
+  companyId?: string,
+) => {
   const q = companyId
     ? query(collection(db, coll), where("companyId", "==", companyId))
     : query(collection(db, coll));
@@ -75,17 +69,17 @@ export const getApplications = async (coll: string, companyId?: string) => {
 };
 
 // Return the verified credentials from the database based on the collection name
-export const getCredentials = async (coll: string) => {
-  const q = query(collection(db, coll));
+export const getCredentialsFromDb = async (coll: string, address: string) => {
+  const q = query(collection(db, coll), where("address", "==", address));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => doc.data());
 };
 
 // Function to add or update an address-role document in Firestore
-export async function setAddressRole(address: string, role: string) {
+export async function setAddressRoleInDb(address: string, role: string) {
   try {
     // Get a reference to the document with the given address
-    const docRef = doc(db, "AddressRole", address);
+    const docRef = doc(db, COLLECTIONS.ADDRESS_ROLES, address);
     const docSnap: DocumentSnapshot = await getDoc(docRef);
 
     // If the document exists, update it. If it does not exist, create it.
@@ -103,12 +97,12 @@ export async function setAddressRole(address: string, role: string) {
   return true;
 }
 
-export async function getAddressRoles(address?: string) {
+export async function getAddressRolesFromDb(address?: string) {
   try {
     // If an address is provided, get the document with the given address
     // If no address is provided, get all documents in the collection
     if (address) {
-      const docRef = doc(db, "AddressRole", address);
+      const docRef = doc(db, COLLECTIONS.ADDRESS_ROLES, address);
       const docSnap: DocumentSnapshot = await getDoc(docRef);
 
       // If the document exists, return its data. Otherwise, return null.
@@ -118,7 +112,7 @@ export async function getAddressRoles(address?: string) {
         return null;
       }
     } else {
-      const collectionRef = collection(db, "AddressRole");
+      const collectionRef = collection(db, COLLECTIONS.ADDRESS_ROLES);
       const querySnapshot: QuerySnapshot = await getDocs(collectionRef);
 
       // Return all documents in the collection. If there are no documents, return an empty array.
@@ -129,3 +123,33 @@ export async function getAddressRoles(address?: string) {
     return null;
   }
 }
+
+export const updateApplicationStatusInDb = async (
+  collection: string,
+  key: string,
+) => {
+  try {
+    await updateDoc(doc(db, collection, key), {
+      status: APPLICATION_STATUS.APPROVED,
+    });
+    console.log("Document successfully written!");
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addCredentialInDb = async (
+  collection: string,
+  credential: any,
+) => {
+  const dbObj = {
+    address: credential.credentialSubject.id.split(":").pop(),
+    credential: credential,
+  };
+  try {
+    await setDoc(doc(db, collection, credential.id), dbObj);
+    console.log("Document successfully written!");
+  } catch (error) {
+    throw error;
+  }
+};

@@ -3,7 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
-import { getTrustedIssuers } from "@/lib/database";
+import { getTrustedIssuersFromDb } from "@/lib/database";
 import { useRouter } from "next/router";
 
 export default function ApplyAsEmployee() {
@@ -20,7 +20,7 @@ export default function ApplyAsEmployee() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const issuers = await getTrustedIssuers();
+      const issuers = await getTrustedIssuersFromDb();
       setCompanies(issuers);
     };
 

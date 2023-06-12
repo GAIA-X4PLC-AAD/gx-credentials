@@ -10,6 +10,7 @@ import type {
 } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
+import { setAddressRole } from "./database";
 
 export const credentialOutputDescriptor = {
   id: "Gaia-X Identity Credential",
@@ -82,9 +83,14 @@ export const issueCompanyCredential = async (
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },
   };
-  const credential = await issueCredential(rawCredential);
-  console.log(credential);
-  return credential;
+  try {
+    const credential = await issueCredential(rawCredential);
+    await setAddressRole(companyApplication.address, "companyApproved");
+    console.log(credential);
+    return credential;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const issueEmployeeCredential = async (
@@ -115,9 +121,14 @@ export const issueEmployeeCredential = async (
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },
   };
-  const credential = await issueCredential(rawCredential);
-  console.log(credential);
-  return credential;
+  try {
+    const credential = await issueCredential(rawCredential);
+    await setAddressRole(employeeApplication.address, "employeeApproved");
+    console.log(credential);
+    return credential;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const issueCredential = async (rawCredential: any) => {

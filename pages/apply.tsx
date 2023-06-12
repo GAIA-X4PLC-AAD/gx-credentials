@@ -4,7 +4,8 @@ import { NextPageContext } from "next";
 import Link from "next/link";
 import { useProtected } from "../hooks/useProtected";
 import { getRegistrars } from "../lib/registryInteraction";
-import { getIssuerCredentials } from "../lib/database";
+import { getCredentialsFromDb } from "../lib/database";
+import { COLLECTIONS } from "@/constants/constants";
 
 export default function Apply() {
   const handleSignout = useProtected();
@@ -48,7 +49,10 @@ export async function getServerSideProps(context: NextPageContext) {
   }
 
   // TODO should first redirect to issuance page for companies with optional link to cred takeout
-  const userIssuerCredentials = await getIssuerCredentials(session.user.pkh);
+  const userIssuerCredentials = await getCredentialsFromDb(
+    session.user.pkh,
+    COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+  );
   if (userIssuerCredentials.length > 0) {
     return {
       redirect: {

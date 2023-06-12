@@ -1,14 +1,9 @@
-import { db } from "../../config/firebase";
-import { doc, getDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { credentialOutputDescriptor } from "../../lib/credentials";
-import { getIssuerCredentials } from "../../lib/database";
-import { dAppClient } from "@/config/wallet";
-import { getServerSession } from "next-auth";
-import { authOptions } from "./auth/[...nextauth]";
-import nextConnect from "next-connect";
+import { getCredentialsFromDb } from "../../lib/database";
 import multer from "multer";
 import { verifyPresentationUtil } from "@/lib/verifyPresentation";
+import { COLLECTIONS } from "@/constants/constants";
 
 // Multer is a middleware for handling multipart/form-data, which is primarily used for uploading files.
 const upload = multer();
@@ -106,7 +101,10 @@ export default async function handler(
             ];
 
           // Get the credentials from the database
-          const credentials = await getIssuerCredentials(address);
+          const credentials = await getCredentialsFromDb(
+            address,
+            COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+          );
           res.status(200).json(credentials[0].credential);
           resolve();
         });
