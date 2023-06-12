@@ -4,6 +4,7 @@ import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
 import { getTrustedIssuers } from "@/lib/database";
+import { useRouter } from "next/router";
 
 export default function ApplyAsEmployee() {
   const handleSignout = useProtected();
@@ -15,6 +16,7 @@ export default function ApplyAsEmployee() {
   const [companies, setCompanies] = useState(new Map());
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [companyName, setCompanyName] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +39,9 @@ export default function ApplyAsEmployee() {
       .then(function (response) {
         setSubmitted(true);
         console.log(response);
+      })
+      .then(() => {
+        router.push("/common/pending");
       })
       .catch(function (error) {
         console.log(error);
@@ -136,12 +141,6 @@ export default function ApplyAsEmployee() {
     </form>
   );
 
-  const submissionConfirmation = (
-    <div>
-      <b>Thank you for submitting your request.</b>
-    </div>
-  );
-
   return (
     <div className="flex justify-center min-h-screen">
       <main className="md:w-2/4 mt-10">
@@ -149,11 +148,7 @@ export default function ApplyAsEmployee() {
         <p className="mb-4">
           Register as an Employee for one of the registered companies.
         </p>
-        <div>
-          {submitted ? submissionConfirmation : form}
-
-          <button onClick={handleSignout}>Logout</button>
-        </div>
+        {form}
       </main>
     </div>
   );

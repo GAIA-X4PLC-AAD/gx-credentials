@@ -1,13 +1,13 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../hooks/useProtected";
-import { db } from "../config/firebase";
+import { useProtected } from "../../hooks/useProtected";
+import { db } from "../../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import {
   issueCompanyCredential,
   issueEmployeeCredential,
-} from "../lib/credentials";
+} from "../../lib/credentials";
 import {
   CompanyApplication,
   EmployeeApplication,
@@ -18,12 +18,7 @@ import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import {
-  getAddressRoles,
-  getPendingApplications,
-  getPendingEmployeeApplications,
-  getTrustedIssuers,
-} from "@/lib/database";
+import { getAddressRoles, getApplications } from "@/lib/database";
 
 export default function Issue(props: any) {
   const handleSignout = useProtected();
@@ -75,7 +70,7 @@ export default function Issue(props: any) {
 
   return (
     <main className="ml-20 mt-10">
-      <h2>Pending Employee Applications</h2>
+      <h2>Employee Applications</h2>
       <div className="flex flex-col w-5/6">
         <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -121,15 +116,31 @@ export default function Issue(props: any) {
                         <td className="whitespace-nowrap  px-6 py-4">
                           {application.address}
                         </td>
-                        <td className="whitespace-nowrap  px-6 py-4">
-                          <button
-                            onClick={() => handleEmmployeeIssuance(application)}
-                            className="mr-2"
-                          >
-                            Accept
-                          </button>
-                          <button>Reject</button>
-                        </td>
+                        {application.status === "pending" ? (
+                          <td className="whitespace-nowrap px-6 py-4">
+                            <button
+                              onClick={() =>
+                                handleEmmployeeIssuance(application)
+                              }
+                              className="mr-2"
+                            >
+                              Accept
+                            </button>
+                            <button>Reject</button>
+                          </td>
+                        ) : application.status === "approved" ? (
+                          <td>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">
+                              Approved
+                            </span>
+                          </td>
+                        ) : (
+                          <td>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  bg-red-200 text-red-700">
+                              Rejected
+                            </span>
+                          </td>
+                        )}
                       </tr>
                     ))}
                 </tbody>
@@ -143,31 +154,58 @@ export default function Issue(props: any) {
 }
 
 export async function getServerSideProps(context: NextPageContext) {
-  const session = await getSession(context);
-  if (!session) {
+  try {
+    const session = await getSession(context);
+    // If the user is not a company that has been approved by the registrars, redirect to unauthorised page
+    const addressRole: any = await getAddressRoles(session?.user?.pkh);
+    if (!session || !addressRole) {
+      return {
+        redirect: {
+          destination: "/",
+          permanent: false,
+        },
+      };
+    }
+
+    // Logging in first time
+    if (addressRole.length === 0) {
+      return {
+        redirect: {
+          destination: "/apply",
+          permanent: false,
+        },
+      };
+    }
+
+    console.log("addressRole: ", addressRole);
+
+    if (addressRole[0].role === "pendingCompany") {
+      return {
+        redirect: {
+          destination: "/common/pending",
+          permanent: false,
+        },
+      };
+    } else if (addressRole[0].role === "rejectedCompany") {
+      return {
+        redirect: {
+          destination: "/common/rejected",
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        employeeApplications: await getApplications("EmployeeApplications"),
+      },
+    };
+  } catch (error) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/common/error",
         permanent: false,
       },
     };
   }
-
-  const addressRole: string[] | null = await getAddressRoles(session.user?.pkh);
-  if (!(addressRole[0].address === "companyApproved")) {
-    return {
-      redirect: {
-        destination: "/unauthorised",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      pendingEmployeeApplications: getPendingApplications(
-        "EmployeeApplications",
-      ),
-    },
-  };
 }

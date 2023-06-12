@@ -1,10 +1,10 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../hooks/useProtected";
-import { db } from "../config/firebase";
+import { useProtected } from "../../hooks/useProtected";
+import { db } from "../../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore/lite";
-import { issueCompanyCredential } from "../lib/credentials";
+import { issueCompanyCredential } from "../../lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -12,10 +12,7 @@ import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import {
-  getPendingApplications,
-  getPendingCompanyApplications,
-} from "@/lib/database";
+import { getApplications } from "@/lib/database";
 
 export default function Issue(props: any) {
   const router = useRouter();
@@ -106,15 +103,29 @@ export default function Issue(props: any) {
                       <td className="whitespace-nowrap  px-6 py-4">
                         {application.description}
                       </td>
-                      <td className="whitespace-nowrap  px-6 py-4">
-                        <button
-                          onClick={() => handleCompanyIssuance(application)}
-                          className="mr-2"
-                        >
-                          Accept
-                        </button>
-                        <button>Reject</button>
-                      </td>
+                      {application.status === "pending" ? (
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <button
+                            onClick={() => handleCompanyIssuance(application)}
+                            className="mr-2"
+                          >
+                            Accept
+                          </button>
+                          <button>Reject</button>
+                        </td>
+                      ) : application.status === "approved" ? (
+                        <td>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">
+                            Approved
+                          </span>
+                        </td>
+                      ) : (
+                        <td>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  bg-red-200 text-red-700">
+                            Rejected
+                          </span>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -128,29 +139,40 @@ export default function Issue(props: any) {
 }
 
 export async function getServerSideProps(context: NextPageContext) {
-  const session = await getSession(context);
-  if (!session) {
+  try {
+    const session = await getSession(context);
+    const registrars = await getRegistrars();
+    if (!session || !session) {
+      return {
+        redirect: {
+          destination: "/",
+          permanent: false,
+        },
+      };
+    }
+
+    if (!registrars.includes(session.user?.pkh)) {
+      return {
+        redirect: {
+          destination: "/unauthorised",
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        pendingCompanyApplications: await getApplications(
+          "CompanyApplications",
+        ),
+      },
+    };
+  } catch (error) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/common/error",
         permanent: false,
       },
     };
   }
-
-  const registrars = await getRegistrars();
-  if (!registrars.includes(session.user?.pkh)) {
-    return {
-      redirect: {
-        destination: "/unauthorised",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      pendingCompanyApplications: getPendingApplications("CompanyApplications"),
-    },
-  };
 }

@@ -3,16 +3,15 @@ import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function ApplyAsCompany() {
-  const handleSignout = useProtected();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const [name, setName] = useState<string>("");
   const [gx_id, setGX_ID] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-
-  const [submitted, setSubmitted] = useState<boolean>(false);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault(); // avoid default behaviour
@@ -24,8 +23,10 @@ export default function ApplyAsCompany() {
         description: description,
       })
       .then(function (response) {
-        setSubmitted(true);
         console.log(response);
+      })
+      .then(() => {
+        router.push("/common/pending");
       })
       .catch(function (error) {
         console.log(error);
@@ -118,12 +119,6 @@ export default function ApplyAsCompany() {
     </form>
   );
 
-  const submissionConfirmation = (
-    <div>
-      <b>Thank you for submitting your request.</b>
-    </div>
-  );
-
   return (
     <div className="flex justify-center min-h-screen">
       <main className="md:w-2/4 mt-10">
@@ -134,11 +129,7 @@ export default function ApplyAsCompany() {
           this consortium. For convenience, issuers can optionally use this web
           application to handle the process of issuing employee credentials.
         </p>
-        <div>
-          {submitted ? submissionConfirmation : form}
-
-          <button onClick={handleSignout}>Logout</button>
-        </div>
+        <div>{form}</div>
       </main>
     </div>
   );

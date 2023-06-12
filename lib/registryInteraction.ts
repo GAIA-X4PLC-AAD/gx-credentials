@@ -9,11 +9,14 @@ const contractAddress = process.env
   .NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT as string;
 
 export const getRegistrars = async () => {
-  return tezos.contract.at(contractAddress).then((contract) => {
-    return contract.storage().then((storage: any) => {
-      return [...storage.registrars, storage.owner];
-    });
-  });
+  try {
+    const contract = await tezos.contract.at(contractAddress);
+    const storage: any = await contract.storage();
+    return [...storage.registrars, storage.owner];
+  } catch (error) {
+    console.error("Failed to get registrars: ", error);
+    throw error;
+  }
 };
 
 export const writeTrustedIssuerLog = async (address: any) => {

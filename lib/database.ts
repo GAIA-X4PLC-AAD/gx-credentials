@@ -66,8 +66,10 @@ export const writeApplicationToDatabase = async (
 };
 
 // Return pending applications from the database based on the collection name
-export const getPendingApplications = async (coll: string) => {
-  const q = query(collection(db, coll), where("status", "==", "pending"));
+export const getApplications = async (coll: string, companyId?: string) => {
+  const q = companyId
+    ? query(collection(db, coll), where("companyId", "==", companyId))
+    : query(collection(db, coll));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => doc.data());
 };
