@@ -171,3 +171,18 @@ export const addCredentialInDb = async (
     throw new Error(String(error));
   }
 };
+
+export const revokeCredentialInDb = async (
+  collection: string,
+  credentialId: string,
+) => {
+  try {
+    await updateDoc(doc(db, collection, credentialId), {
+      status: APPLICATION_STATUS.REVOKED,
+    });
+    console.log("Document successfully written!");
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
+};

@@ -11,6 +11,7 @@ export const APPLICATION_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
   REJECTED: "rejected",
+  REVOKED: "revoked",
 };
 
 export const COLLECTIONS = {

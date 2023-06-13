@@ -18,6 +18,7 @@ export default function ApplyAsEmployee() {
   useEffect(() => {
     const fetchData = async () => {
       const issuers = await getTrustedIssuersFromDb();
+
       setCompanies(issuers);
     };
 
@@ -61,6 +62,7 @@ export default function ApplyAsEmployee() {
             id="inline-full-name"
             type="text"
             onChange={(e) => setName(e.target.value)}
+            required
           />
         </div>
       </div>
@@ -80,6 +82,7 @@ export default function ApplyAsEmployee() {
             type="text"
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
+            required
           />
         </div>
       </div>
@@ -97,10 +100,16 @@ export default function ApplyAsEmployee() {
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
             value={companyName}
             onChange={(e) => {
+              console.log(e.target.value);
+
               setCompanyName(e.target.value);
               setCompanyId(companies.get(e.target.value));
             }}
+            required
           >
+            <option value="" disabled>
+              Select a company
+            </option>
             {Array.from(companies.keys()).map((key) => (
               <option key={key} value={key}>
                 {key}

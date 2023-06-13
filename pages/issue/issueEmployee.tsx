@@ -21,7 +21,7 @@ import {
 export default function Issue(props: any) {
   const { data: session } = useSession();
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
-    props.pendiong,
+    props.employeeApplications,
   );
 
   function delay(milliseconds: number) {
@@ -88,7 +88,7 @@ export default function Issue(props: any) {
       console.log("Error updating application status: ", error);
     }
   };
-
+  console.log("Applications: ", applications);
   return (
     <main className="ml-20 mt-10">
       <h2>Employee Applications</h2>
