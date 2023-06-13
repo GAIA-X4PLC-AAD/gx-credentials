@@ -10,7 +10,8 @@ import type {
 } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
-import { setAddressRole } from "./database";
+import { setAddressRoleInDb } from "./database";
+import { ADDRESS_ROLES } from "@/constants/constants";
 
 export const credentialOutputDescriptor = {
   id: "Gaia-X Identity Credential",
@@ -85,7 +86,10 @@ export const issueCompanyCredential = async (
   };
   try {
     const credential = await issueCredential(rawCredential);
-    await setAddressRole(companyApplication.address, "companyApproved");
+    await setAddressRoleInDb(
+      companyApplication.address,
+      ADDRESS_ROLES.COMPANY_APPROVED,
+    );
     console.log(credential);
     return credential;
   } catch (error) {
@@ -123,7 +127,10 @@ export const issueEmployeeCredential = async (
   };
   try {
     const credential = await issueCredential(rawCredential);
-    await setAddressRole(employeeApplication.address, "employeeApproved");
+    await setAddressRoleInDb(
+      employeeApplication.address,
+      ADDRESS_ROLES.EMPLOYEE_APPROVED,
+    );
     console.log(credential);
     return credential;
   } catch (error) {

@@ -2,26 +2,27 @@ import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
-import { db } from "../../config/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import { issueEmployeeCredential } from "../../lib/credentials";
-import {
-  CompanyApplication,
-  EmployeeApplication,
-} from "@/types/CompanyApplication";
+import { EmployeeApplication } from "@/types/CompanyApplication";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 import {
-  getRegistrars,
-  writeTrustedIssuerLog,
-} from "@/lib/registryInteraction";
-import { getAddressRolesFromDb, getApplicationsFromDb } from "@/lib/database";
-import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
+  getAddressRolesFromDb,
+  getApplicationsFromDb,
+  updateApplicationStatusInDb,
+} from "@/lib/database";
+import {
+  ADDRESS_ROLES,
+  APPLICATION_STATUS,
+  COLLECTIONS,
+} from "@/constants/constants";
 
 export default function Issue(props: any) {
-  const handleSignout = useProtected();
   const { data: session } = useSession();
-  const router = useRouter();
+  const [applications, setApplications] = React.useState<EmployeeApplication[]>(
+    props.pendiong,
+  );
 
   function delay(milliseconds: number) {
     return new Promise((resolve) => {
@@ -29,7 +30,7 @@ export default function Issue(props: any) {
     });
   }
 
-  const handleEmmployeeIssuance = async (application: EmployeeApplication) => {
+  const handleEmployeeIssuance = async (application: EmployeeApplication) => {
     let credential = null;
     try {
       // Issue credential
@@ -40,7 +41,7 @@ export default function Issue(props: any) {
       return;
     }
 
-    await delay(2000);
+    // await delay(2000);
 
     // try {
     //   // Publish credential to issuer registry
@@ -57,13 +58,35 @@ export default function Issue(props: any) {
         role: "employee",
         applicationKey: application.address + "-" + application.timestamp,
       })
-      .then(function (response) {
-        router.reload();
+      .then(async function (response) {
+        const updatedApplications: any = await getApplicationsFromDb(
+          COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        );
+        setApplications(updatedApplications);
         console.log(response);
       })
       .catch(function (error) {
         console.log(error);
       });
+  };
+
+  const handleRejectEmployeeIssuance = async (
+    application: EmployeeApplication,
+  ) => {
+    try {
+      // Update database with credential issuance
+      await updateApplicationStatusInDb(
+        COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        application.address + "-" + application.timestamp,
+        APPLICATION_STATUS.REJECTED,
+      );
+      const updatedApplications: any = await getApplicationsFromDb(
+        COLLECTIONS.EMPLOYEE_APPLICATIONS,
+      );
+      setApplications(updatedApplications);
+    } catch (error) {
+      console.log("Error updating application status: ", error);
+    }
   };
 
   return (
@@ -92,7 +115,7 @@ export default function Issue(props: any) {
                   </tr>
                 </thead>
                 <tbody>
-                  {props.pendingEmployeeApplications
+                  {applications
                     .filter(
                       (application: any) =>
                         session?.user?.pkh === application.companyId,
@@ -118,13 +141,19 @@ export default function Issue(props: any) {
                           <td className="whitespace-nowrap px-6 py-4">
                             <button
                               onClick={() =>
-                                handleEmmployeeIssuance(application)
+                                handleEmployeeIssuance(application)
                               }
                               className="mr-2"
                             >
                               Accept
                             </button>
-                            <button>Reject</button>
+                            <button
+                              onClick={() =>
+                                handleRejectEmployeeIssuance(application)
+                              }
+                            >
+                              Reject
+                            </button>
                           </td>
                         ) : application.status === "approved" ? (
                           <td>
@@ -154,9 +183,7 @@ export default function Issue(props: any) {
 export async function getServerSideProps(context: NextPageContext) {
   try {
     const session = await getSession(context);
-    // If the user is not a company that has been approved by the registrars, redirect to unauthorised page
-    const addressRole: any = await getAddressRolesFromDb(session?.user?.pkh);
-    if (!session || !addressRole) {
+    if (!session) {
       return {
         redirect: {
           destination: "/",
@@ -165,8 +192,11 @@ export async function getServerSideProps(context: NextPageContext) {
       };
     }
 
+    // If the user is not a company that has been approved by the registrars, redirect to unauthorised page
+    const addressRole: any = await getAddressRolesFromDb(session?.user?.pkh);
+
     // Logging in first time
-    if (addressRole.length === 0) {
+    if (!addressRole) {
       return {
         redirect: {
           destination: "/apply",
@@ -176,14 +206,17 @@ export async function getServerSideProps(context: NextPageContext) {
     }
 
     console.log("addressRole: ", addressRole);
-    if (addressRole[0].role === ADDRESS_ROLES.COMPANY_APPLIED) {
+    const role = Array.isArray(addressRole)
+      ? addressRole[0].role
+      : addressRole.role;
+    if (role === ADDRESS_ROLES.COMPANY_APPLIED) {
       return {
         redirect: {
           destination: "/common/pending",
           permanent: false,
         },
       };
-    } else if (addressRole[0].role === ADDRESS_ROLES.COMPANY_REJECTED) {
+    } else if (role === ADDRESS_ROLES.COMPANY_REJECTED) {
       return {
         redirect: {
           destination: "/common/rejected",

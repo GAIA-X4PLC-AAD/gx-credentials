@@ -1,21 +1,23 @@
 import React from "react";
-import { getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../../hooks/useProtected";
-import { db } from "../../config/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import { issueCompanyCredential } from "../../lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
-import { useRouter } from "next/router";
 import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import { getApplicationsFromDb } from "@/lib/database";
+import {
+  getApplicationsFromDb,
+  updateApplicationStatusInDb,
+} from "@/lib/database";
+import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
 export default function Issue(props: any) {
-  const router = useRouter();
+  const [applications, setApplications] = React.useState<CompanyApplication[]>(
+    props.pendingCompanyApplications,
+  );
 
   function delay(milliseconds: number) {
     return new Promise((resolve) => {
@@ -38,13 +40,13 @@ export default function Issue(props: any) {
 
     await delay(2000);
 
-    try {
-      // Publish credential to issuer registry
-      await writeTrustedIssuerLog(application.address);
-    } catch (error) {
-      console.log("Error publishing credential to issuer registry: ", error);
-      return;
-    }
+    // try {
+    //   // Publish credential to issuer registry
+    //   await writeTrustedIssuerLog(application.address);
+    // } catch (error) {
+    //   console.log("Error publishing credential to issuer registry: ", error);
+    //   return;
+    // }
 
     // Update database with credential issuance
     axios
@@ -53,8 +55,11 @@ export default function Issue(props: any) {
         role: "company",
         applicationKey: application.address + "-" + application.timestamp,
       })
-      .then(function (response) {
-        router.reload();
+      .then(async function (response) {
+        const updatedApplications: any = await getApplicationsFromDb(
+          COLLECTIONS.COMPANY_APPLICATIONS,
+        );
+        setApplications(updatedApplications);
         console.log(response);
       })
       .catch(function (error) {
@@ -65,8 +70,23 @@ export default function Issue(props: any) {
   const handleRejectCompanyIssuance = async (
     application: CompanyApplication,
   ) => {
-    // Update database with credential issuance
-    // axios
+    try {
+      // Update database with credential issuance
+      await updateApplicationStatusInDb(
+        COLLECTIONS.COMPANY_APPLICATIONS,
+        application.address + "-" + application.timestamp,
+        APPLICATION_STATUS.REJECTED,
+      );
+      const updatedApplications: any = await getApplicationsFromDb(
+        COLLECTIONS.COMPANY_APPLICATIONS,
+      );
+      setApplications(updatedApplications);
+    } catch (error) {
+      console.log(
+        "Could not update application Reject status in database",
+        error,
+      );
+    }
   };
 
   return (
@@ -95,7 +115,7 @@ export default function Issue(props: any) {
                   </tr>
                 </thead>
                 <tbody>
-                  {props.pendingCompanyApplications.map((application: any) => (
+                  {applications.map((application: any) => (
                     <tr
                       className="border-b border-neutral-500"
                       key={application.address}
@@ -122,7 +142,13 @@ export default function Issue(props: any) {
                           >
                             Accept
                           </button>
-                          <button>Reject</button>
+                          <button
+                            onClick={() =>
+                              handleRejectCompanyIssuance(application)
+                            }
+                          >
+                            Reject
+                          </button>
                         </td>
                       ) : application.status === "approved" ? (
                         <td>
@@ -153,7 +179,7 @@ export async function getServerSideProps(context: NextPageContext) {
   try {
     const session = await getSession(context);
     const registrars = await getRegistrars();
-    if (!session || !session) {
+    if (!session || !registrars) {
       return {
         redirect: {
           destination: "/",
@@ -174,7 +200,7 @@ export async function getServerSideProps(context: NextPageContext) {
     return {
       props: {
         pendingCompanyApplications: await getApplicationsFromDb(
-          "CompanyApplications",
+          COLLECTIONS.COMPANY_APPLICATIONS,
         ),
       },
     };

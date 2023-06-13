@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
 import { getTrustedIssuersFromDb } from "@/lib/database";
 import { useRouter } from "next/router";
 
 export default function ApplyAsEmployee() {
-  const handleSignout = useProtected();
   const { data: session } = useSession();
 
   const [name, setName] = useState<string>("");
   const [employeeId, setEmployeeId] = useState<string>("");
   const [companyId, setCompanyId] = useState<string>("");
   const [companies, setCompanies] = useState(new Map());
-  const [submitted, setSubmitted] = useState<boolean>(false);
   const [companyName, setCompanyName] = useState<string>("");
   const router = useRouter();
 
@@ -37,7 +34,6 @@ export default function ApplyAsEmployee() {
         companyName: companyName,
       })
       .then(function (response) {
-        setSubmitted(true);
         console.log(response);
       })
       .then(() => {

@@ -1,18 +1,12 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
-import { db } from "../../config/firebase";
-import { doc, setDoc, updateDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   addCredentialInDb,
   setAddressRoleInDb,
   updateApplicationStatusInDb,
 } from "@/lib/database";
-import {
-  ADDRESS_ROLES,
-  APPLICATION_STATUS,
-  COLLECTIONS,
-} from "@/constants/constants";
+import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
 
 export default async function handler(
   req: NextApiRequest,

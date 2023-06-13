@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../hooks/useProtected";
 import { getCredentialsFromDb } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
-import { getCredentialStatus } from "@/lib/registryInteraction";
 import { COLLECTIONS } from "@/constants/constants";
 
 export default function Takeout(props: any) {
@@ -53,7 +51,7 @@ export default function Takeout(props: any) {
                       className="border-b border-neutral-500"
                       key={credential.id}
                     >
-                      <td className="whitespace-nowrap  px-6 py-4 font-medium">
+                      <td className="whitespace-nowrap px-6 py-4 font-medium">
                         {
                           credential.credentialSubject[
                             "gx:legalRegistrationNumber"

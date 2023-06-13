@@ -19,19 +19,24 @@ import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
 export const getTrustedIssuersFromDb = async () => {
-  const q = query(collection(db, COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS));
-  const querySnapshot = await getDocs(q);
+  try {
+    const q = query(collection(db, COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS));
+    const querySnapshot = await getDocs(q);
 
-  const resultMap = new Map();
+    const resultMap = new Map();
 
-  querySnapshot.docs.forEach((doc) => {
-    const data = doc.data();
-    const legalName = data.credential.credentialSubject["gx:legalName"];
-    const address = data.address;
-    resultMap.set(legalName, address);
-  });
+    querySnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const legalName = data.credential.credentialSubject["gx:legalName"];
+      const address = data.address;
+      resultMap.set(legalName, address);
+    });
 
-  return resultMap;
+    return resultMap;
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
 };
 
 // Add a new application to the database
@@ -61,18 +66,28 @@ export const getApplicationsFromDb = async (
   coll: string,
   companyId?: string,
 ) => {
-  const q = companyId
-    ? query(collection(db, coll), where("companyId", "==", companyId))
-    : query(collection(db, coll));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => doc.data());
+  try {
+    const q = companyId
+      ? query(collection(db, coll), where("companyId", "==", companyId))
+      : query(collection(db, coll));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => doc.data());
+  } catch (error: any) {
+    console.log("Error getting documents: ", error);
+    throw new Error(error);
+  }
 };
 
 // Return the verified credentials from the database based on the collection name
 export const getCredentialsFromDb = async (coll: string, address: string) => {
-  const q = query(collection(db, coll), where("address", "==", address));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => doc.data());
+  try {
+    const q = query(collection(db, coll), where("address", "==", address));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => doc.data());
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
 };
 
 // Function to add or update an address-role document in Firestore
@@ -127,14 +142,16 @@ export async function getAddressRolesFromDb(address?: string) {
 export const updateApplicationStatusInDb = async (
   collection: string,
   key: string,
+  status = APPLICATION_STATUS.APPROVED,
 ) => {
   try {
     await updateDoc(doc(db, collection, key), {
-      status: APPLICATION_STATUS.APPROVED,
+      status: status,
     });
     console.log("Document successfully written!");
   } catch (error) {
-    throw error;
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
   }
 };
 
@@ -150,6 +167,7 @@ export const addCredentialInDb = async (
     await setDoc(doc(db, collection, credential.id), dbObj);
     console.log("Document successfully written!");
   } catch (error) {
-    throw error;
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
   }
 };

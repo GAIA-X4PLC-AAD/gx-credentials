@@ -1,28 +1,28 @@
 import React from "react";
-import { getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import Link from "next/link";
-import { useProtected } from "../hooks/useProtected";
 import { getRegistrars } from "../lib/registryInteraction";
-import { getCredentialsFromDb } from "../lib/database";
-import { COLLECTIONS } from "@/constants/constants";
+import { getAddressRolesFromDb } from "../lib/database";
+import { ADDRESS_ROLES } from "@/constants/constants";
 
 export default function Apply() {
-  const handleSignout = useProtected();
-  const { data: session } = useSession();
-
   return (
-    <main className="ml-20 mt-10">
-      <p>
-        You are still unknown to our system. Do you wish to apply for a specific
-        credential?
-      </p>
-      <button>
-        <Link href="/apply/applyAsCompany">Apply as Company</Link>
-      </button>
-      <button>
-        <Link href="/apply/applyAsEmployee">Apply as Employee</Link>
-      </button>
+    <main className="h-screen flex flex-col align-center">
+      <div className="flex justify-center">
+        <p>
+          You are still unknown to our system. Do you wish to apply for a
+          specific credential?
+        </p>
+      </div>
+      <div className="flex justify-center">
+        <button className="m-2">
+          <Link href="/apply/applyAsCompany">Apply as Company</Link>
+        </button>
+        <button className="m-2">
+          <Link href="/apply/applyAsEmployee">Apply as Employee</Link>
+        </button>
+      </div>
     </main>
   );
 }
@@ -42,24 +42,49 @@ export async function getServerSideProps(context: NextPageContext) {
   if (registrars.includes(session.user.pkh)) {
     return {
       redirect: {
-        destination: "/issueCompany",
+        destination: "/issue/issueCompany",
         permanent: false,
       },
     };
   }
 
   // TODO should first redirect to issuance page for companies with optional link to cred takeout
-  const userIssuerCredentials = await getCredentialsFromDb(
-    session.user.pkh,
-    COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
-  );
-  if (userIssuerCredentials.length > 0) {
-    return {
-      redirect: {
-        destination: "/takeout",
-        permanent: false,
-      },
-    };
+  const addressRole: any = await getAddressRolesFromDb(session.user.pkh);
+  if (addressRole) {
+    const role = Array.isArray(addressRole)
+      ? addressRole[0].role
+      : addressRole.role;
+    if (
+      role === ADDRESS_ROLES.COMPANY_APPROVED ||
+      role === ADDRESS_ROLES.EMPLOYEE_APPROVED
+    ) {
+      return {
+        redirect: {
+          destination: "/takeout",
+          permanent: false,
+        },
+      };
+    } else if (
+      role === ADDRESS_ROLES.COMPANY_APPLIED ||
+      role === ADDRESS_ROLES.EMPLOYEE_APPLIED
+    ) {
+      return {
+        redirect: {
+          destination: "/common/pending",
+          permanent: false,
+        },
+      };
+    } else if (
+      role === ADDRESS_ROLES.COMPANY_REJECTED ||
+      role === ADDRESS_ROLES.EMPLOYEE_REJECTED
+    ) {
+      return {
+        redirect: {
+          destination: "/common/rejected",
+          permanent: false,
+        },
+      };
+    }
   }
 
   return {

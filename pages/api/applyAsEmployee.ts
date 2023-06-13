@@ -1,12 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
-import { db } from "../../config/firebase";
-import { doc, setDoc } from "firebase/firestore/lite";
 import type { NextApiRequest, NextApiResponse } from "next";
-import type {
-  CompanyApplication,
-  EmployeeApplication,
-} from "../../types/CompanyApplication";
+import type { EmployeeApplication } from "../../types/CompanyApplication";
 import { setAddressRoleInDb, writeApplicationToDb } from "@/lib/database";
 import { ADDRESS_ROLES, APPLICATION_STATUS } from "@/constants/constants";
 
