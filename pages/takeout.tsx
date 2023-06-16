@@ -31,6 +31,8 @@ export default function Takeout(props: any) {
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
     props.pendingEmployeeApplications,
   );
+  const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
+  console.log(props.coll);
 
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
@@ -161,13 +163,11 @@ export default function Takeout(props: any) {
             style={{ display: "flex", justifyItems: "center", width: "50%" }}
           >
             <Tab value="Takeout">Takeout</Tab>
-            {props.coll !== COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS && (
-              <Tab value="Issue">Issue</Tab>
-            )}
+            {showIssuerTab && <Tab value="Issue">Issue</Tab>}
           </TabsHeader>
           <TabsBody>
             <TabPanel value="Takeout">{takeoutCredential}</TabPanel>
-            {props.coll !== COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS && (
+            {showIssuerTab && (
               <TabPanel value="Issue">
                 <IssueEmployeeCredentialsTable
                   props={{
@@ -223,6 +223,7 @@ export async function getServerSideProps(context: NextPageContext) {
         COLLECTIONS.EMPLOYEE_APPLICATIONS,
         session.user!.pkh,
       ),
+      coll,
       apiHost: process.env.GLOBAL_SERVER_URL,
     },
   };
