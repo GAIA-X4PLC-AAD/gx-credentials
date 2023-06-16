@@ -1,6 +1,6 @@
 import { TezosToolkit } from "@taquito/taquito";
 
-const rpcUrl = process.env.TEZOS_RPC_URL as string;
+const rpcUrl = process.env.NEXT_PUBLIC_TEZOS_RPC_URL as string;
 
 const tezos: TezosToolkit = new TezosToolkit(rpcUrl);
 

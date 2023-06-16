@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { CompanyApplication } from "../../types/CompanyApplication";
+import type { EmployeeApplication } from "../../types/CompanyApplication";
 import { setAddressRoleInDb, writeApplicationToDb } from "@/lib/database";
 import { ADDRESS_ROLES, APPLICATION_STATUS } from "@/constants/constants";
 
@@ -14,17 +14,18 @@ export default async function handler(
   if (session) {
     // Signed in
     try {
-      const ca: CompanyApplication = {
+      const ea: EmployeeApplication = {
         name: req.body.name,
-        gx_id: req.body.gx_id,
-        description: req.body.description,
+        employeeId: req.body.employeeId,
+        companyId: req.body.companyId,
+        companyName: req.body.companyName,
         address: session.user!.pkh,
         timestamp: new Date().getTime().toString(),
         status: APPLICATION_STATUS.PENDING,
       };
       if (
-        (await writeApplicationToDb(ca)) &&
-        (await setAddressRoleInDb(ca.address, ADDRESS_ROLES.COMPANY_APPLIED))
+        (await writeApplicationToDb(ea)) &&
+        (await setAddressRoleInDb(ea.address, ADDRESS_ROLES.EMPLOYEE_APPLIED))
       )
         res.status(200);
       else res.status(500);

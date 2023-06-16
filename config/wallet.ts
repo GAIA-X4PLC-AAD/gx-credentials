@@ -1,5 +1,7 @@
 import { DAppClient, NetworkType } from "@airgap/beacon-sdk";
 
+const rpcUrl = process.env.NEXT_PUBLIC_TEZOS_RPC_URL as string;
+
 const globalForWallet = global as unknown as {
   dAppClient: DAppClient | undefined;
 };
@@ -19,3 +21,12 @@ export const dAppClient =
       }));
 
 globalForWallet.dAppClient = dAppClient;
+
+export function requestRequiredPermissions() {
+  return dAppClient!.requestPermissions({
+    network: {
+      type: NetworkType.GHOSTNET,
+      rpcUrl: rpcUrl,
+    },
+  });
+}
