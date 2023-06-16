@@ -14,7 +14,7 @@ import {
 } from "@/lib/database";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
-export default function Issue(props: any) {
+export default function IssueCompany(props: any) {
   const [applications, setApplications] = React.useState<CompanyApplication[]>(
     props.pendingCompanyApplications,
   );
@@ -191,7 +191,7 @@ export async function getServerSideProps(context: NextPageContext) {
     if (!registrars.includes(session.user?.pkh)) {
       return {
         redirect: {
-          destination: "/unauthorised",
+          destination: "/common/unauthorised",
           permanent: false,
         },
       };

@@ -61,6 +61,7 @@ export async function getServerSideProps(context: NextPageContext) {
       return {
         redirect: {
           destination: "/takeout",
+          role: role,
           permanent: false,
         },
       };
