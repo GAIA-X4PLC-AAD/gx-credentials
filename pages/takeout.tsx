@@ -1,10 +1,19 @@
 import React, { useEffect } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { getAddressRolesFromDb, getCredentialsFromDb } from "../lib/database";
+import {
+  getAddressRolesFromDb,
+  getCredentialsFromDb,
+  getApplicationsFromDb,
+  updateApplicationStatusInDb,
+} from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
-import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
+import {
+  ADDRESS_ROLES,
+  APPLICATION_STATUS,
+  COLLECTIONS,
+} from "@/constants/constants";
 import {
   Tab,
   TabPanel,
@@ -12,9 +21,19 @@ import {
   TabsBody,
   TabsHeader,
 } from "@material-tailwind/react";
-import IssueEmployee from "../components/issueEmployee";
+import IssueEmployeeCredentialsTable from "../components/IssueEmployeeCredentialsTable";
+import { EmployeeApplication } from "@/types/CompanyApplication";
+import { issueEmployeeCredential } from "../lib/credentials";
+import axios from "axios";
 
 export default function Takeout(props: any) {
+  const { data: session } = useSession();
+  const [applications, setApplications] = React.useState<EmployeeApplication[]>(
+    props.pendingEmployeeApplications,
+  );
+  const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
+  console.log(props.coll);
+
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
@@ -33,6 +52,56 @@ export default function Takeout(props: any) {
   };
   const whiteShadow = {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
+  };
+
+  const handleEmployeeIssuance = async (application: EmployeeApplication) => {
+    let credential = null;
+    try {
+      // Issue credential
+      credential = await issueEmployeeCredential(application);
+      console.log("credential: ", credential);
+    } catch (error) {
+      console.log("Error issuing credential: ", error);
+      return;
+    }
+
+    // Update database with credential issuance
+    axios
+      .post("/api/publishCredential", {
+        credential: credential,
+        role: "employee",
+        applicationKey: application.address + "-" + application.timestamp,
+      })
+      .then(async function (response) {
+        const updatedApplications: any = await getApplicationsFromDb(
+          COLLECTIONS.EMPLOYEE_APPLICATIONS,
+          session?.user?.pkh,
+        );
+        setApplications(updatedApplications);
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const handleRejectEmployeeIssuance = async (
+    application: EmployeeApplication,
+  ) => {
+    try {
+      // Update database with credential issuance
+      await updateApplicationStatusInDb(
+        COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        application.address + "-" + application.timestamp,
+        APPLICATION_STATUS.REJECTED,
+      );
+      const updatedApplications: any = await getApplicationsFromDb(
+        COLLECTIONS.EMPLOYEE_APPLICATIONS,
+      );
+      setApplications(updatedApplications);
+    } catch (error) {
+      console.log("Error updating application status: ", error);
+    }
   };
 
   const takeoutCredential = (
@@ -94,15 +163,19 @@ export default function Takeout(props: any) {
             style={{ display: "flex", justifyItems: "center", width: "50%" }}
           >
             <Tab value="Takeout">Takeout</Tab>
-            {props.coll !== COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS && (
-              <Tab value="Issue">Issue</Tab>
-            )}
+            {showIssuerTab && <Tab value="Issue">Issue</Tab>}
           </TabsHeader>
           <TabsBody>
             <TabPanel value="Takeout">{takeoutCredential}</TabPanel>
-            {props.coll === COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS && (
+            {showIssuerTab && (
               <TabPanel value="Issue">
-                <IssueEmployee />
+                <IssueEmployeeCredentialsTable
+                  props={{
+                    applications: applications,
+                    handleEmployeeIssuance: handleEmployeeIssuance,
+                    handleRejectEmployeeIssuance: handleRejectEmployeeIssuance,
+                  }}
+                />
               </TabPanel>
             )}
           </TabsBody>
@@ -148,6 +221,11 @@ export async function getServerSideProps(context: NextPageContext) {
       userCredentials: (
         await getCredentialsFromDb(coll, session.user!.pkh)
       ).map((wrapper) => wrapper.credential),
+      pendingEmployeeApplications: await getApplicationsFromDb(
+        COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        session.user!.pkh,
+      ),
+      coll,
       apiHost: process.env.GLOBAL_SERVER_URL,
     },
   };
