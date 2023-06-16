@@ -124,8 +124,6 @@ export async function getServerSideProps(context: NextPageContext) {
   }
 
   const addressRole: any = await getAddressRolesFromDb(session.user!.pkh);
-  console.log("DSS: ", addressRole);
-
   const role = addressRole
     ? Array.isArray(addressRole)
       ? addressRole[0].role

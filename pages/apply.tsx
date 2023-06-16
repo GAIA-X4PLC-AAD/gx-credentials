@@ -51,9 +51,11 @@ export async function getServerSideProps(context: NextPageContext) {
   // TODO should first redirect to issuance page for companies with optional link to cred takeout
   const addressRole: any = await getAddressRolesFromDb(session.user.pkh);
   if (addressRole) {
-    const role = Array.isArray(addressRole)
-      ? addressRole[0].role
-      : addressRole.role;
+    const role = addressRole
+      ? Array.isArray(addressRole)
+        ? addressRole[0].role
+        : addressRole.role
+      : null;
     if (
       role === ADDRESS_ROLES.COMPANY_APPROVED ||
       role === ADDRESS_ROLES.EMPLOYEE_APPROVED
