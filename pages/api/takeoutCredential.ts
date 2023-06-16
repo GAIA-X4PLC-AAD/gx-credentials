@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { credentialOutputDescriptor } from "../../lib/credentials";
 import { getCredentialsFromDb } from "../../lib/database";
 import multer from "multer";
-import { verifyPresentationUtil } from "@/lib/verifyPresentation";
+import { verifyIdentificationPresentation } from "@/lib/verifyPresentation";
 import { COLLECTIONS } from "@/constants/constants";
 
 // Multer is a middleware for handling multipart/form-data, which is primarily used for uploading files.
@@ -85,7 +85,7 @@ export default async function handler(
           console.log("Presentation: ", presentation);
 
           // Verify the presentation and the status of the credential
-          if (await verifyPresentationUtil(presentation)) {
+          if (await verifyIdentificationPresentation(presentation)) {
             console.log("Presentation verified");
           } else {
             console.log("Presentation invalid");
@@ -100,12 +100,19 @@ export default async function handler(
               "associatedAddress"
             ];
 
+          console.log("Confirmed user access with address "+address);
+
           // Get the credentials from the database
           const credentials = await getCredentialsFromDb(
             COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
             address,
           );
-          res.status(200).json(credentials[0].credential);
+
+          if (credentials.length === 0) {
+            res.status(500);
+          }else{
+            res.status(200).json(credentials[0].credential);
+          }
           resolve();
         });
       });
