@@ -63,7 +63,7 @@ export default function Home() {
         <div className="w-full flex align-center justify-center">
           <button
             id="login-button"
-            className="text-lg w-2/4 hover:bg-gray-100 font-semibold py-2 px-2 border border-gray-500 hover:border-transparent rounded transform transition-all duration-500 ease-in-out translate-y-full"
+            className="text-lg w-2/4 hover:bg-gray-100 font-semibold py-2 px-2 border border-gray-500 hover:border-transparent rounded"
             onClick={handleLogin}
           >
             Login

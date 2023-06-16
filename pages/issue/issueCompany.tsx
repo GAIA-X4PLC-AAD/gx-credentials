@@ -40,13 +40,13 @@ export default function IssueCompany(props: any) {
 
     await delay(2000);
 
-    // try {
-    //   // Publish credential to issuer registry
-    //   await writeTrustedIssuerLog(application.address);
-    // } catch (error) {
-    //   console.log("Error publishing credential to issuer registry: ", error);
-    //   return;
-    // }
+    try {
+      // Publish credential to issuer registry
+      await writeTrustedIssuerLog(application.address);
+    } catch (error) {
+      console.log("Error publishing credential to issuer registry: ", error);
+      return;
+    }
 
     // Update database with credential issuance
     axios

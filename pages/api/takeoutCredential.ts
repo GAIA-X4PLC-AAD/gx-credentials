@@ -102,8 +102,8 @@ export default async function handler(
 
           // Get the credentials from the database
           const credentials = await getCredentialsFromDb(
-            address,
             COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+            address,
           );
           res.status(200).json(credentials[0].credential);
           resolve();
