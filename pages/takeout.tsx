@@ -124,9 +124,13 @@ export async function getServerSideProps(context: NextPageContext) {
   }
 
   const addressRole: any = await getAddressRolesFromDb(session.user!.pkh);
-  const role = Array.isArray(addressRole)
-    ? addressRole[0].role
-    : addressRole.role;
+  console.log("DSS: ", addressRole);
+
+  const role = addressRole
+    ? Array.isArray(addressRole)
+      ? addressRole[0].role
+      : addressRole.role
+    : null;
   let coll = "";
   if (role === ADDRESS_ROLES.COMPANY_APPROVED) {
     coll = COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
@@ -135,7 +139,7 @@ export async function getServerSideProps(context: NextPageContext) {
   } else {
     return {
       redirect: {
-        destination: "/common/unauthorized",
+        destination: "/common/unauthorised",
         permanent: false,
       },
     };
