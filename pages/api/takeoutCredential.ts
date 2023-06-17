@@ -46,7 +46,7 @@ export default async function handler(
           issuer: "did:pkh:tz:",
         },
         credential_manifest: {
-          output_descriptors: [credentialOutputDescriptor],
+          output_descriptors: [credentialOutputDescriptor], // TODO make a descriptor just for the preview?
           presentation_definition: {
             input_descriptors: [
               {

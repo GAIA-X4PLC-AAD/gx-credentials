@@ -50,6 +50,7 @@ export default function Takeout(props: any) {
         "Get your GX Credential! #" + props.apiHost + "/api/takeoutCredential",
     });
   };
+
   const whiteShadow = {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
   };

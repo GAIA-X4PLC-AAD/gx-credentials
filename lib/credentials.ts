@@ -14,7 +14,7 @@ import { setAddressRoleInDb } from "./database";
 import { ADDRESS_ROLES } from "@/constants/constants";
 
 export const credentialOutputDescriptor = {
-  id: "Gaia-X Identity Credential",
+  id: "Gaia-X Participant Credential",
   schema: "Gaia-X Credentials",
   display: {
     title: {
@@ -25,7 +25,7 @@ export const credentialOutputDescriptor = {
       fallback: "GX Participant",
     },
     subtitle: {
-      path: ["$.credentialSubject.gx:legalName"],
+      path: ["$.credentialSubject['gx:legalName']"],
       schema: {
         type: "string",
       },
