@@ -41,7 +41,7 @@ export default function IssueCompany(props: any) {
     await delay(2000);
 
     try {
-      // Publish credential to issuer registry
+      // write credential issuance to issuer registry
       await writeTrustedIssuerLog(application.address);
     } catch (error) {
       console.log("Error publishing credential to issuer registry: ", error);

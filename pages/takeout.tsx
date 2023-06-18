@@ -25,6 +25,7 @@ import IssueEmployeeCredentialsTable from "../components/IssueEmployeeCredential
 import { EmployeeApplication } from "@/types/CompanyApplication";
 import { issueEmployeeCredential } from "../lib/credentials";
 import axios from "axios";
+import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
   const { data: session } = useSession();
@@ -50,9 +51,16 @@ export default function Takeout(props: any) {
         "Get your GX Credential! #" + props.apiHost + "/api/takeoutCredential",
     });
   };
+
   const whiteShadow = {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
   };
+
+  function delay(milliseconds: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
+  }
 
   const handleEmployeeIssuance = async (application: EmployeeApplication) => {
     let credential = null;
@@ -62,6 +70,16 @@ export default function Takeout(props: any) {
       console.log("credential: ", credential);
     } catch (error) {
       console.log("Error issuing credential: ", error);
+      return;
+    }
+
+    await delay(2000);
+
+    try {
+      // write credential issuance to issuer registry
+      await writeTrustedIssuerLog(application.address);
+    } catch (error) {
+      console.log("Error publishing credential to issuer registry: ", error);
       return;
     }
 

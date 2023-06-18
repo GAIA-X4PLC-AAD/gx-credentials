@@ -15,7 +15,7 @@ function Header() {
   return session && router.pathname !== "/" ? (
     <div className="flex items-center justify-end md:m-2">
       <h3 className="md:m-4">
-        Hi !! <b className="text-blue-500">{session.user.pkh}</b>
+        Hello <b className="text-blue-500">{session.user.pkh}</b> !
       </h3>
       <button onClick={handleSignout} className="md:m-4 m-2">
         Logout
