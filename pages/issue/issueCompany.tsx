@@ -56,9 +56,13 @@ export default function IssueCompany(props: any) {
         applicationKey: application.address + "-" + application.timestamp,
       })
       .then(async function (response) {
-        const updatedApplications: any = await getApplicationsFromDb(
-          COLLECTIONS.COMPANY_APPLICATIONS,
-        );
+        application.status = APPLICATION_STATUS.APPROVED;
+        const updatedApplications = applications.map((app) => {
+          if (app.address === application.address) {
+            return application;
+          }
+          return app;
+        });
         setApplications(updatedApplications);
         console.log(response);
       })

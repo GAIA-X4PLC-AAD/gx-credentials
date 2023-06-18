@@ -1,5 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { credentialOutputDescriptor } from "../../lib/credentials";
+import { getCredentialsFromDb } from "../../lib/database";
+import multer from "multer";
+import { verifyIdentificationPresentation } from "@/lib/verifyPresentation";
+import { COLLECTIONS } from "@/constants/constants";
+
+// Multer is a middleware for handling multipart/form-data, which is primarily used for uploading files.
+const upload = multer();
+
+// This array will contain the middleware functions for each form field
+let uploadMiddleware = upload.fields([
+  { name: "subject_id", maxCount: 1 },
+  { name: "presentation", maxCount: 1 },
+]);
 
 // TODO change this endpoint to already request a specific credential urn in the URL
 export default async function handler(
@@ -57,50 +70,58 @@ export default async function handler(
       });
     } else if (method === "POST") {
       console.log("API POST");
-      return new Promise(async (resolve, reject) => {
-        uploadMiddleware(req, res, async (err: Error | null) => {
-          if (err) {
-            // An error occurred when uploading
-            console.log(err);
-            reject(err);
-            return;
-          }
+      uploadMiddleware(req, res, async (err: Error | null) => {
+        if (err) {
+          // An error occurred when uploading
+          console.log(err);
+          res.status(500).end();
+          return;
+        }
 
-          // Parse the JSON string into a JavaScript object
-          const presentation = JSON.parse(req.body.presentation);
-          console.log("Presentation: ", presentation);
+        // Parse the JSON string into a JavaScript object
+        const presentation = JSON.parse(req.body.presentation);
+        console.log("Presentation: ", presentation);
 
-          // Verify the presentation and the status of the credential
-          if (await verifyIdentificationPresentation(presentation)) {
-            console.log("Presentation verified");
-          } else {
-            console.log("Presentation invalid");
-            res.status(500);
-            res.end();
-            return;
-          }
+        // Verify the presentation and the status of the credential
+        if (await verifyIdentificationPresentation(presentation)) {
+          console.log("Presentation verified");
+        } else {
+          console.log("Presentation invalid");
+          res.status(500).end();
+          return;
+        }
 
-          // Get the address of the user
-          const address =
-            presentation["verifiableCredential"]["credentialSubject"][
-              "associatedAddress"
-            ];
+        // Get the address of the user
+        const address =
+          presentation["verifiableCredential"]["credentialSubject"][
+            "associatedAddress"
+          ];
 
-          console.log("Confirmed user access with address " + address);
+        console.log("Confirmed user access with address " + address);
 
-          // Get the credentials from the database
-          const credentials = await getCredentialsFromDb(
-            COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+        // Get the credentials from the database
+        let credentials = await getCredentialsFromDb(
+          COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+          address,
+        );
+
+        if (credentials.length === 0) {
+          // TODO not ideal
+          // Get the credentials from the database's other collection
+          console.log("No Credential found so far. Trying employee collection");
+          credentials = await getCredentialsFromDb(
+            COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS,
             address,
           );
+          console.log(credentials);
+        }
 
-          if (credentials.length === 0) {
-            res.status(500);
-          } else {
-            res.status(200).json(credentials[0].credential);
-          }
-          resolve();
-        });
+        if (credentials.length === 0) {
+          console.log("No Credential found");
+          res.status(500).end();
+        } else {
+          res.status(200).json(credentials[0].credential);
+        }
       });
     } else {
       res.status(500).end();

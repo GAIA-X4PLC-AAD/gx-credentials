@@ -73,10 +73,13 @@ export default function Takeout(props: any) {
         applicationKey: application.address + "-" + application.timestamp,
       })
       .then(async function (response) {
-        const updatedApplications: any = await getApplicationsFromDb(
-          COLLECTIONS.EMPLOYEE_APPLICATIONS,
-          session?.user?.pkh,
-        );
+        application.status = APPLICATION_STATUS.APPROVED;
+        const updatedApplications = applications.map((app) => {
+          if (app.address === application.address) {
+            return application;
+          }
+          return app;
+        });
         setApplications(updatedApplications);
         console.log(response);
       })
@@ -95,9 +98,13 @@ export default function Takeout(props: any) {
         application.address + "-" + application.timestamp,
         APPLICATION_STATUS.REJECTED,
       );
-      const updatedApplications: any = await getApplicationsFromDb(
-        COLLECTIONS.EMPLOYEE_APPLICATIONS,
-      );
+      application.status = APPLICATION_STATUS.REJECTED;
+      const updatedApplications = applications.map((app) => {
+        if (app.address === application.address) {
+          return application;
+        }
+        return app;
+      });
       setApplications(updatedApplications);
     } catch (error) {
       console.log("Error updating application status: ", error);
