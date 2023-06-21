@@ -7,7 +7,7 @@ export function useProtected() {
 
   const handleSignout = async () => {
     await signOut({ callbackUrl: "/" });
-    await dAppClient.clearActiveAccount();
+    await dAppClient!.clearActiveAccount();
   };
 
   return handleSignout;

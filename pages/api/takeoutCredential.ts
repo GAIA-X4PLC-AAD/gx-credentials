@@ -70,6 +70,7 @@ export default async function handler(
       });
     } else if (method === "POST") {
       console.log("API POST");
+      // @ts-ignore
       uploadMiddleware(req, res, async (err: Error | null) => {
         if (err) {
           // An error occurred when uploading
