@@ -1,6 +1,8 @@
 import { signIn } from "next-auth/react";
-import { requestRequiredPermissions } from "../config/wallet";
+import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect } from "react";
+import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
+import { payloadBytesFromString } from "../lib/payload";
 
 export default function Home() {
   useEffect(() => {
@@ -27,8 +29,44 @@ export default function Home() {
   const handleLogin = async () => {
     try {
       const callbackUrl = "/apply";
-      const permissions = await requestRequiredPermissions();
-      signIn("credentials", { pkh: permissions.address, callbackUrl });
+      const activeAccount = await dAppClient?.getActiveAccount();
+      let activeAddress;
+      if (activeAccount) {
+        console.log("Already connected:", activeAccount.address);
+        activeAddress = activeAccount.address;
+      } else {
+        const permissions = await requestRequiredPermissions();
+        console.log("New connection:", permissions.address);
+        activeAddress = permissions.address;
+      }
+
+      // refer to https://tezostaquito.io/docs/signing/#generating-a-signature-with-beacon-sdk
+      const dappUrl = "gx-credentials.example.com";
+      const ISO8601formatedTimestamp = new Date().toISOString();
+      const input = "GX Credentials Login";
+      const formattedInput: string = [
+        "Tezos Signed Message:",
+        dappUrl,
+        ISO8601formatedTimestamp,
+        input,
+      ].join(" ");
+
+      const payloadBytes = payloadBytesFromString(formattedInput);
+
+      const payload: RequestSignPayloadInput = {
+        signingType: SigningType.MICHELINE,
+        payload: payloadBytes,
+        sourceAddress: activeAddress,
+      };
+      const response = await dAppClient!.requestSignPayload(payload);
+
+      signIn("credentials", {
+        pkh: activeAddress,
+        pk: activeAccount?.publicKey,
+        formattedInput,
+        signature: response.signature,
+        callbackUrl,
+      });
     } catch (error) {
       window.alert(error);
     }

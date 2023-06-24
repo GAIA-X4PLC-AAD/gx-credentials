@@ -4,7 +4,9 @@ import PropTypes from "prop-types";
 function pending() {
   return (
     <div>
-      <b>Thank you for submitting your request. Your request is under review.</b>
+      <b>
+        Thank you for submitting your request. Your request is under review.
+      </b>
     </div>
   );
 }

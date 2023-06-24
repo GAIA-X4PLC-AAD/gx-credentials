@@ -1,6 +1,7 @@
 import NextAuth, { AuthOptions } from "next-auth";
-import { validateAddress } from "@taquito/utils";
+import { getPkhfromPk, validateAddress, verifySignature } from "@taquito/utils";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { payloadBytesFromString } from "../../../lib/payload";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -12,11 +13,65 @@ export const authOptions: AuthOptions = {
           type: "text",
           placeholder: "0x0",
         },
+        pk: {
+          label: "Public Key",
+          type: "text",
+          placeholder: "0x0",
+        },
+        formattedInput: {
+          label: "Formatted Login Challenge String",
+          type: "text",
+          placeholder: "challenge",
+        },
+        signature: {
+          label: "Signature of the Challenge",
+          type: "text",
+          placeholder: "0x0",
+        },
       },
       async authorize(credentials) {
+        console.log("AUTHORIZING");
+        console.log(credentials);
         if (validateAddress(credentials?.pkh!) != 3) {
           return null;
         }
+
+        // @ts-ignore
+        const isVerified = verifySignature(
+          payloadBytesFromString(credentials?.formattedInput!),
+          credentials?.pk!,
+          credentials?.signature!,
+        );
+
+        if (!isVerified) {
+          console.log("Invalid signature");
+          return null;
+        }
+
+        if (getPkhfromPk(credentials?.pk!) !== credentials?.pkh) {
+          return null;
+        }
+
+        const dappUrl = "gx-credentials.example.com";
+        const input = "GX Credentials Login";
+        const inputSplit = credentials!
+          .formattedInput!.substring(22)
+          .split(" ");
+
+        console.log(inputSplit);
+        if (
+          dappUrl !== inputSplit[0] ||
+          input !== [inputSplit[2], inputSplit[3], inputSplit[4]].join(" ")
+        ) {
+          return null;
+        }
+
+        var timeError =
+          (new Date().getTime() - new Date(inputSplit[1]).getTime()) / 1000;
+        if (timeError < 0 || timeError > 60) {
+          return null;
+        }
+
         return {
           id: credentials?.pkh as string, // not sure why this is required
           pkh: credentials?.pkh as string,
