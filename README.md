@@ -88,6 +88,10 @@ Additionally, signing a credential will always tell the user it failed on the wa
 
 While downloading a raw credential file is supported, downloading via Beacon Protocol into [Altme Wallet](https://github.com/TalaoDAO/AltMe) is preferred. The download process still needs improvement to be more convenient for the user because the user needs to authenticate with the credential API endpoint separately. This creates friction as the user is struggling to choose the correct key for this credential. It also means that GX Credentials must show the wallet a generic placeholder preview to avoid leaking data to unauthenticated users.
 
+### Verifiable Credential Revocation
+
+While revocation is currently supported, revoking company credentials does not explicitly flag all corresponding employee credentials as revoked. However, this might be desired behavior for the future.
+
 ### User Roles
 
 To dynamically route users through the web app's pages, they are automatically assigned a role according to their actions. For simplicity's sake, this system assumes that one user, i.e., one key, only has one role. This also currently limits a company or an employee to exactly one credential application.
