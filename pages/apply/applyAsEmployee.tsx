@@ -5,7 +5,7 @@ import axios from "axios";
 import { getTrustedIssuersFromDb } from "@/lib/database";
 import { useRouter } from "next/router";
 
-export default function ApplyAsEmployee() {
+export default function ApplyAsEmployee(props: any) {
   const { data: session } = useSession();
 
   const [name, setName] = useState<string>("");
@@ -16,13 +16,7 @@ export default function ApplyAsEmployee() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const issuers = await getTrustedIssuersFromDb();
-
-      setCompanies(issuers);
-    };
-
-    fetchData();
+    setCompanies(props.issuers);
   }, []);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
@@ -170,7 +164,10 @@ export async function getServerSideProps(context: NextPageContext) {
       },
     };
   }
+  const issuers = await getTrustedIssuersFromDb();
   return {
-    props: {},
+    props: {
+      issuers,
+    },
   };
 }

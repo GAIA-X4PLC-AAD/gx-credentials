@@ -54,6 +54,7 @@ export async function getServerSideProps(context: NextPageContext) {
     const role = Array.isArray(addressRole)
       ? addressRole[0].role
       : addressRole.role;
+
     if (
       role === ADDRESS_ROLES.COMPANY_APPROVED ||
       role === ADDRESS_ROLES.EMPLOYEE_APPROVED

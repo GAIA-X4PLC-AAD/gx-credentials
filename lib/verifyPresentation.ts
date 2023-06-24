@@ -17,9 +17,11 @@ export const verifyIdentificationPresentation = async (VP: any) => {
     if (VP?.type?.includes(VP_TYPE)) {
       // Check the data type of the VerifiableCredential field
       if (VP?.verifiableCredential) {
-        const VC = VP.verifiableCredential.type?.includes(VC_TYPE) && VP.verifiableCredential.type?.includes(VC_TYPE2)
-          ? VP.verifiableCredential
-          : null;
+        const VC =
+          VP.verifiableCredential.type?.includes(VC_TYPE) &&
+          VP.verifiableCredential.type?.includes(VC_TYPE2)
+            ? VP.verifiableCredential
+            : null;
         if (VC) {
           status = await verifyPresentationHelper(VC, VP);
         } else {
@@ -34,7 +36,8 @@ export const verifyIdentificationPresentation = async (VP: any) => {
         console.error(errorMessage);
       }
     } else {
-      const errorMessage = "Unable to confirm that this is a Verifiable Presentation.";
+      const errorMessage =
+        "Unable to confirm that this is a Verifiable Presentation.";
       console.error(errorMessage);
     }
     return status;
@@ -48,31 +51,31 @@ const verifyPresentationHelper = async (VC: any, VP: any): Promise<boolean> => {
   // TezosAssociatedAddress VCs are signed with the Tezos key, but the VP is signed with a wallet did:key
   // we need to check that the wallet did:key matches the key confirmed with the Tezos key signature
   if (VP?.holder && VP?.holder === VC?.credentialSubject?.id) {
-      // Verify the signature on the VC
-      const verifyOptionsString = "{}";
-      const verifyResult = JSON.parse(
-        await verifyCredential(JSON.stringify(VC), verifyOptionsString),
+    // Verify the signature on the VC
+    const verifyOptionsString = "{}";
+    const verifyResult = JSON.parse(
+      await verifyCredential(JSON.stringify(VC), verifyOptionsString),
+    );
+    // If credential verification is successful, verify the presentation
+    if (verifyResult?.errors?.length === 0) {
+      const res = JSON.parse(
+        await verifyPresentation(JSON.stringify(VP), verifyOptionsString),
       );
-      // If credential verification is successful, verify the presentation
-      if (verifyResult?.errors?.length === 0) {
-        const res = JSON.parse(
-          await verifyPresentation(JSON.stringify(VP), verifyOptionsString),
-        );
-        // If verification is successful
-        if (res.errors.length === 0) {
-          return true;
-        } else {
-          const errorMessage = `Unable to verify presentation: ${res.errors.join(
-            ", ",
-          )}`;
-          console.error(errorMessage);
-        }
+      // If verification is successful
+      if (res.errors.length === 0) {
+        return true;
       } else {
-        const errorMessage = `Unable to verify credential: ${verifyResult.errors.join(
+        const errorMessage = `Unable to verify presentation: ${res.errors.join(
           ", ",
         )}`;
         console.error(errorMessage);
       }
+    } else {
+      const errorMessage = `Unable to verify credential: ${verifyResult.errors.join(
+        ", ",
+      )}`;
+      console.error(errorMessage);
+    }
   } else {
     const errorMessage = "The credential subject does not match the VP holder.";
     console.error(errorMessage);
