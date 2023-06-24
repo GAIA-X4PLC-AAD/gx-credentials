@@ -11,13 +11,13 @@ export default function ApplyAsEmployee(props: any) {
   const [name, setName] = useState<string>("");
   const [employeeId, setEmployeeId] = useState<string>("");
   const [companyId, setCompanyId] = useState<string>("");
-  const [companies, setCompanies] = useState(new Map());
+  const [companies, setCompanies] = useState([]);
   const [companyName, setCompanyName] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
     setCompanies(props.issuers);
-  }, []);
+  }, [props.issuers]);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault(); // avoid default behaviour
@@ -95,18 +95,25 @@ export default function ApplyAsEmployee(props: any) {
             value={companyName}
             onChange={(e) => {
               console.log(e.target.value);
-
               setCompanyName(e.target.value);
-              setCompanyId(companies.get(e.target.value));
+
+              for (let i = 0; i < Array.from(companies).length; i++) {
+                const company = companies[i];
+                console.log(company);
+                if (company[0] == e.target.value) {
+                  setCompanyId(company[1]);
+                  break;
+                }
+              }
             }}
             required
           >
             <option value="" disabled>
               Select a company
             </option>
-            {Array.from(companies.keys()).map((key) => (
-              <option key={key} value={key}>
-                {key}
+            {companies.map((company) => (
+              <option key={company[1]} value={company[0]}>
+                {company[0]}
               </option>
             ))}
           </select>
@@ -165,9 +172,10 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
   const issuers = await getTrustedIssuersFromDb();
+  const issuerList = Array.from(issuers.entries());
   return {
     props: {
-      issuers,
+      issuers: issuerList,
     },
   };
 }

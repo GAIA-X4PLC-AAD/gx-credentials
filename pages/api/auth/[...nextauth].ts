@@ -58,7 +58,6 @@ export const authOptions: AuthOptions = {
           .formattedInput!.substring(22)
           .split(" ");
 
-        console.log(inputSplit);
         if (
           dappUrl !== inputSplit[0] ||
           input !== [inputSplit[2], inputSplit[3], inputSplit[4]].join(" ")

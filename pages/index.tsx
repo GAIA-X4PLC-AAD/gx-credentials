@@ -31,13 +31,16 @@ export default function Home() {
       const callbackUrl = "/apply";
       const activeAccount = await dAppClient?.getActiveAccount();
       let activeAddress;
+      let activePk;
       if (activeAccount) {
         console.log("Already connected:", activeAccount.address);
         activeAddress = activeAccount.address;
+        activePk = activeAccount.publicKey;
       } else {
         const permissions = await requestRequiredPermissions();
         console.log("New connection:", permissions.address);
         activeAddress = permissions.address;
+        activePk = permissions.publicKey;
       }
 
       // refer to https://tezostaquito.io/docs/signing/#generating-a-signature-with-beacon-sdk
@@ -62,7 +65,7 @@ export default function Home() {
 
       signIn("credentials", {
         pkh: activeAddress,
-        pk: activeAccount?.publicKey,
+        pk: activePk,
         formattedInput,
         signature: response.signature,
         callbackUrl,
