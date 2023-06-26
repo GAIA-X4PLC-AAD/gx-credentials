@@ -1,31 +1,5 @@
-NAME
-GX-Credentials
+# GX Credentials
 
-## Description
+**Disclaimer: This repository is in active development and not production software.**
 
-### Introduction
-...
-
-### Goal
-...
-
-### Content
-...
-
-## Installation & Execution
-
-### Windows
-...
-
-### Linux
-...
-
-
-## Usage
-...
-
-## Quality Measures
-...
-
-## Legal
-...
+The current state of the software can be found in the `development` branch.
