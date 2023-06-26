@@ -1,10 +1,10 @@
 # Contributing Guidelines
 
-...
+The general contribution rules of open source apply to this project in addition to the compliance rules of the [GaiaX 4 PLC-AAD](https://www.gaia-x4plcaad.info/) research project.
 
 # Licensing
 
-...
+This work is licensed under [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html).
 
 
 # Developer Certification of Origin (DCO)
