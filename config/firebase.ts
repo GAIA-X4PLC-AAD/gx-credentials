@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore/lite";

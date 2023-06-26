@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /** @type {import('tailwindcss').Config} */
 const withMT = require("@material-tailwind/react/utils/withMT");
 module.exports = withMT({

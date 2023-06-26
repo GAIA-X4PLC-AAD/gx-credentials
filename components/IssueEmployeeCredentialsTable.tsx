@@ -1,6 +1,9 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { EmployeeApplication } from "@/types/CompanyApplication";
 import React from "react";
-import { issueEmployeeCredential } from "../lib/credentials";
 
 const IssueEmployeeCredentialsTable = (props: any) => {
   const applications = props?.props.applications as EmployeeApplication[];

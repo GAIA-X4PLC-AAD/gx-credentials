@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
 type credential_status = ["Active"] | ["Revoked"];
 
 type credential_log_entry = {issuer: address, issuance_time: timestamp, status: credential_status};
@@ -45,7 +49,7 @@ const revoke_issuance = (hash: string, store : storage) : return_ => {
     return match(Map.find_opt(hash, store.log), {
         Some: (entry:credential_log_entry) => {
             if (Tezos.get_sender() != entry.issuer) { return failwith("Access denied."); }
-            else { 
+            else {
                 const e : credential_log_entry = {...entry, status: Revoked()};
                 return [list([]), {...store, log: Map.update(hash, Some(e), store.log)}];
             };

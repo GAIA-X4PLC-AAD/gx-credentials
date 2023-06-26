@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
 export const ADDRESS_ROLES = {
   COMPANY_APPLIED: "companyApplied",
   COMPANY_APPROVED: "companyApproved",
