@@ -1,0 +1,67 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+type credential_status = ["Active"] | ["Revoked"];
+
+type credential_log_entry = {issuer: address, issuance_time: timestamp, status: credential_status};
+
+type parameter =
+| ["Add_Registrar", address]
+| ["Remove_Registrar", address]
+| ["Log_Issuance", string]
+| ["Revoke_Issuance", string];
+
+type storage = {
+    owner: address,
+    registrars: set<address>,
+    log: map<string, credential_log_entry> // mapping credential hashes to their status
+};
+
+// storage init
+/*
+{owner:"tz1YeiPapCiHfpwVcEUjMaSC3TDh9iMzkAKr" as address,registrars: Set.empty,log: Map.empty}
+*/
+
+type return_ = [list<operation>, storage];
+
+const add_registrar = (acc : address, store : storage) : return_ => {
+    if (Tezos.get_sender() != store.owner) { return failwith("Access denied."); }
+    else { return [list([]), {...store, registrars: Set.add(acc, store.registrars)}]; };
+}
+
+const remove_registrar = (acc : address, store : storage) : return_ => {
+    if (Tezos.get_sender() != store.owner) { return failwith("Access denied."); }
+    else { return [list([]), {...store, registrars: Set.remove(acc, store.registrars)}]; };
+}
+
+// no access control could lead to spam at worst
+const log_issuance = (hash: string, store : storage) : return_ => {
+    const entry : credential_log_entry = {
+        issuer: Tezos.get_sender(),
+        issuance_time: Tezos.get_now(),
+        status: Active()
+    };
+    return [list([]), {...store, log: Map.add(hash, entry, store.log)}];
+}
+
+const revoke_issuance = (hash: string, store : storage) : return_ => {
+    return match(Map.find_opt(hash, store.log), {
+        Some: (entry:credential_log_entry) => {
+            if (Tezos.get_sender() != entry.issuer) { return failwith("Access denied."); }
+            else {
+                const e : credential_log_entry = {...entry, status: Revoked()};
+                return [list([]), {...store, log: Map.update(hash, Some(e), store.log)}];
+            };
+        },
+        None: () => failwith("No issuance found.")
+    });
+}
+
+const main = (action: parameter, store: storage): return_ =>
+  match(action, {
+    Add_Registrar: a => add_registrar(a, store),
+    Remove_Registrar: a => remove_registrar(a, store),
+    Log_Issuance: h => log_issuance(h, store),
+    Revoke_Issuance: h => revoke_issuance(h, store)
+  });

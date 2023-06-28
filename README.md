@@ -1,107 +1,162 @@
-# Use Cases
+# GX Credentials
 
-A company admin applies to a Company Credential in the first use case (UC1). This credential is then reviewed and issued by the ASCS admin. Companies require this credential to become a trusted issuer (recorded on the smart contract). In the second use case, a company employee applies for an Employee Credential. This credential's reviewer and issuer is the respective company admin (not ASCS).
- 
-For both types of credentials, a record is placed on the smart contract to indicate the status (active or revoked). While a company credential only has a DID and status, an employee credential also has an issuer DID. When a company issues an employee credential, the company DID is automatically (i.e., DID taken from the caller address) assigned to the issuer DID field (this way, we prevent a company from issuing an employee credential with another company’s DID as the issuer DID.). A similar check is also done for credential revoking.
- 
-An employee credential can only be placed on the contract by the companies in the trusted issuers list (remember that a company gets into the list when ASCS issues them a company credential). This is required to prevent any random account from adding employee credentials to the contract. Moreover, a company credential can only be added to the contract by the ASCS admin account or any other allowed callers.
- 
-## UC1
- 
-1. Company admin applies for a credential
-- *Admin connects Temple wallet*
-- *Applies to the relevant credential*
-2. ASCS admin monitors applications
-- *Admin connects Temple wallet*
-3. ASCS admin accepts/rejects an application
-- *Signs the credential to generate a proof*
-- *Issues a transaction to update the contract (add trusted issuer, add company credential)*
-- *The contract storage gets updated (companyCreds, trusted_issuers)*
-4. Company admin downloads the issued credential JSON file
- 
-## UC2
- 
-1. Company employee applies for a credential
-- *BMW employee connects Temple wallet*
-- *Applies to the relevant credential*
-2. Company admin monitors/accepts/rejects employee applications
-- *BMW admin connects Temple wallet*
-- *Signs the credential to generate a proof*
-- *Issues a transaction to update the contract (add employee credential)*
-- *The contract storage gets updated (employeeCreds)*
-3. Company employee downloads the issued credential JSON file
- 
-## Some notes
- 
-- We use Tezos address (public key hash) as the default DID
-- We use Firebase to store the full credentials for now. Users can download their credentials and use them freely. Remember that having a copy a credential doesn’t mean that any can present it. Only the holder of keys associated with the credential’s DID can generate a valid signature. Nonetheless, we believe employee credentials should not be stored like this in the future due to GDPR issues.
-- The issued credentials are verified by our verifier backend in the EDC-Interface. This component checks whether a presented credential has a trusted issuer and its status is not revoked.
-- Smart Contract Deployed Instance [Better Call Dev](https://better-call.dev/ghostnet/KT1AgNNsgQRigNTmLcQrhGPZafvdmvnLXXAZ/storage)
+**Disclaimer: This repository is in active development and not production software.**
 
-# Generate Verifiable Credentials
+This application explores an approach for issuing Verifiable Credentials to companies and their employees in a Gaia-X ecosystem. Employees could then use these credentials to authenticate with different services in the ecosystem.
 
-## Build and Running instructions
+The operator of this web application hosts it as a trust anchor to enable identity management among a dataspace or consortium. The operator only directly certifies company identities. This application supports companies in employee credential issuance, but that could be done entirely inside each company with custom software.
 
-### Replace the Firebase.js file:
-Create a Firebase project 'gaiax-ssi' and get the configuration file from `project settings -> general -> add App`
+## Architecture Components
 
-Create a .env file with the following fields:
+| Component               | Generic Role       | Explanation                                                                                                    |
+| ----------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Next.js App             | Frontend & Backend | Website provides a user interface with a backend for session management and authenticated database operations. |
+| Firestore               | Database           | Stores applications for credentials and the credentials themselves.                                            |
+| Registry Smart Contract | Smart Contract     | Securely administrates issuer keys for the trust anchor. Logs credential issuance and enables revocation.      |
+
+## User Stories
+
+### Stakeholders
+
+| Role                    | Explanation                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Operator & Trust Anchor | Operates this web application and functions as a trusted entity within an ecosystem.                               |
+| Company                 | Companies apply to be certified by the trust anchor. If accepted, they receive a company credential.               |
+| Employee                | Employees work at certified companies and can receive employee credentials from their company through the web app. |
+
+### A Company Obtains a Company Credential
+
+**Company** starts by applying for consortium membership:
+
+1. **Company** sets up a wallet app and generates a DID
+2. **Company** navigates to the website and uses their smartphone wallet app to log in
+3. **Company** fills in a company application form on the website
+4. **Company** logs out
+
+**Trust Anchor** issues a company credential:
+
+1. **Trust Anchor** has a wallet and key that is registered in the smart contract
+2. **Trust Anchor** navigates to the website and uses a wallet to log in
+3. **Trust Anchor** reviews list of new company applications and sees **Company**'s application
+4. **Trust Anchor** contacts **Company** out of band to confirm suitability for membership, identity, and intent
+5. **Trust Anchor** clicks the corresponding button on the website to approve credential issuance for the application
+6. **Trust Anchor** reviews new signing request for the company credential on his wallet and confirms
+7. **Trust Anchor** reviews new transaction request to log the company credential issuance to the blockchain and confirms
+8. **Trust Anchor** sees confirmation of issuance on the website and logs out
+
+**Company** returns to receive credential:
+
+1. **Company** navigates to the website and uses their wallet to log in
+2. **Company** sees their credential was issued and clicks to take out the credential via Beacon protocol
+3. **Company** accepts the new signing request on the wallet to initiate the exchange
+4. **Company** is shown a generic preview of the company credential on their wallet and accepts to continue
+5. **Company** is prompted by the wallet to choose their Account Ownership Credential (native to Altme wallet) to authenticate with
+6. **Company** sees the company credential in the wallet
+7. **Company** logs out
+
+### An Employee Obtains an Employee Credential
+
+This use case parallels the previous one. Now, an **Employee** applies through the website. The **Company** issues him a credential, which he can download.
+
+## Limitations, Warnings, and Considerations
+
+This software is experimental and in active development. It is currently not suited to any form of production use.
+
+### Database
+
+For ease of development and coordination within development teams, this project currently uses a Firebase Cloud Firestore. In the default configuration, this cloud database is fully public to anyone possessing the URL. Thus, this web app's application and credential data would be publicly accessible.
+
+Employee credentials could be deleted from the database after the employee has received them. However, that is different from the current behavior of the web app.
+
+Company credentials must be accessible to be used as a trusted issuer list by future credential verifier software. This should probably happen through an unauthenticated API endpoint in the Next.js app. It still needs to be implemented.
+
+### Data Fields
+
+The data fields used for application forms and subsequent credential creation are just placeholder data. It needs to be finalized at a later point.
+
+### Verifiable Credential Issuance
+
+We use [didkit](https://github.com/spruceid/didkit) for credential issuance and verification. Almost all other libraries facilitating the issuance of credentials assume that the issuer's private key can be directly loaded by the issuing software. That philosophy is incompatible with GX Credentials. No key material should leave a user's wallet device.
+
+There still seems to be a security(?) issue with didkit resolving external VC contexts. It leads to issuance processes for credentials with external contexts failing. Currently, GX Credentials issues simplified Gaia-X Participant credentials where the context is commented out.
+
+It should also be noted that GX Credentials currently has no error recovery. This primarily affects the two-step issuance process. If a credential is successfully signed but logging the issuance on the smart contract fails, the system cannot automatically recover from this state.
+
+Additionally, signing a credential will always tell the user it failed on the wallet app, even though it succeeded. The web app will show it correctly.
+
+### Verifiable Credential Download
+
+While downloading a raw credential file is supported, downloading via Beacon Protocol into [Altme Wallet](https://github.com/TalaoDAO/AltMe) is preferred. The download process still needs improvement to be more convenient for the user because the user needs to authenticate with the credential API endpoint separately. This creates friction as the user is struggling to choose the correct key for this credential. It also means that GX Credentials must show the wallet a generic placeholder preview to avoid leaking data to unauthenticated users.
+
+### Verifiable Credential Revocation
+
+While revocation is currently supported, revoking company credentials does not explicitly flag all corresponding employee credentials as revoked. However, this might be desired behavior for the future.
+
+### User Roles
+
+To dynamically route users through the web app's pages, they are automatically assigned a role according to their actions. For simplicity's sake, this system assumes that one user, i.e., one key, only has one role. This also currently limits a company or an employee to exactly one credential application.
+
+## Development Setup
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+### Prerequisites
+
+Install a tunneling tool like [ngrok](https://ngrok.com). You will need it to easily use a smartphone wallet with the application or to demo the application to someone outside your local network.
+
+Install a wallet software that supports the Beacon protocol. For the best experience, we currently recomment using [Altme](https://altme.io). Be aware that you can choose a wallet that is not SSI compatible. Then you are excluded from any functionality using Verifiable Credentials.
+
+A Firebase Firestore is used to provide traditional database storage. It needs the following (initially empty) collections:
+
+- AddressRoles
+- CompanyApplications
+- EmployeeApplications
+- TrustedIssuerCredentials
+- TrustedEmployeeCredentials
+
+This project uses the Tezos blockchain to provide secure timestamped consensus on valid issuers and certificate status. The registry smart contract in the `contracts` folder needs to be deployed on your preferred testnet. For quick delpoyment, you could use the online IDE [here](https://ide.ligolang.org/local).
+
+We recommend using [VS Code](https://code.visualstudio.com) with [DevContainers](https://code.visualstudio.com/docs/devcontainers/containers). This project comes with configuration that ensures your Node.js environment container is setup properly. This requires [Docker](https://www.docker.com) to be installed and running. If opening the project does not immediately launch the container, execute the command "Reopen in Container".
+
+An environment file `.env` of the following form is required:
 
 ```
-ISSUER_PRIVATE_KEY=
-ISSUER_PUBLIC_KEY=
+NEXTAUTH_SECRET=somereallysecretsecret
+JWT_SECRET=itshouldbealsoverysecret
+NEXTAUTH_URL=http://localhost:3000
+
+FIREBASE_API_KEY=yourAPIkey
+FIREBASE_MESSAGING_SENDER_ID=yourSenderID
+FIREBASE_APP_ID=yourAppID
+
+NEXT_PUBLIC_TEZOS_RPC_URL=linkToPreferredNode
+NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT=deployedContract
+
+GLOBAL_SERVER_URL=yourTunnelURL (ngrok url)
+
+NEXT_PUBLIC_MY_NAMESPACE=yourNamespaceForUUIDs (eg - 1b671a64-40d5-491e-99b0-da01ff1f3341)
 ```
 
-Install Dependencies:
-`npm install`
+Initialize dependencies by executing:
 
-List of dependencies:
-```
- "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.8",
-    "@tsconfig/svelte": "^3.0.0",
-    "autoprefixer": "^10.4.13",
-    "svelte": "^3.50.1",
-    "svelte-check": "^2.9.1",
-    "svelte-preprocess": "^4.10.7",
-    "tailwindcss": "^3.2.4",
-    "tslib": "^2.4.0",
-    "typescript": "^4.8.4",
-    "vite": "^3.1.4"
-  },
-  "dependencies": {
-    "@airgap/beacon-sdk": "^3.3.2",
-    "@spruceid/didkit-wasm": "^0.2.1",
-    "@spruceid/didkit-wasm-node": "^0.2.1",
-    "@taquito/beacon-wallet": "^15.1.0",
-    "@taquito/signer": "^15.1.0",
-    "@taquito/taquito": "^15.1.0",
-    "@taquito/tzip16": "^15.1.0",
-    "@taquito/utils": "^15.1.0",
-    "buffer": "^6.0.3",
-    "events": "^3.3.0",
-    "firebase": "^9.17.1",
-    "svelte-navigator": "^3.2.2",
-    "uuid": "^9.0.0",
-    "vite-compatible-readable-stream": "^3.6.1",
-    "vite-plugin-wasm": "^3.1.1"
-  }
+```bash
+npm install
 ```
 
-Start the application:
-`npm run dev`
+### Starting the Development Server
 
-Usage:
-- Connect Tezos by clicking on "Connect Wallet" on homescreen.
-- apply for Coonpany/Employee Credentials
-- Go to route '/admin' to see the list of applications. You can Approve/Reject.
-- After approving, the subject can download the VC after logging in.
+First, run the tunnel to get a globally accessible URL for the development server:
 
-## Firebase Tables
-- **Admins**: List of tezos addresses with admin rights.
-- **CompanyCredentials**: Stores the application for a company credentials and updates the status when it is approved/rejected.
-- **CompanyVC**: Stores the Verifiable Credential after it is approved by the admin.
-- **EmployeeCredentials**: Stores the application for a employee credentials and updates the status when it is approved/rejected.
-- **EmployeeVC**: Stores the Verifiable Credential for an employee after it is approved by the company.
+```bash
+ngrok http 3000
+```
 
+In the environment file `.env` make sure that the `GLOBAL_SERVER_URL` corresponds to your current tunnel URL.
 
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
