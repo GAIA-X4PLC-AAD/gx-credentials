@@ -16,9 +16,11 @@ export default function ApplyAsCompany() {
   const [name, setName] = useState<string>("");
   const [gx_id, setGX_ID] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault(); // avoid default behaviour
+    setIsLoading(true); // Set loading state to true
 
     axios
       .post("/api/applyAsCompany", {
@@ -34,6 +36,9 @@ export default function ApplyAsCompany() {
       })
       .catch(function (error) {
         console.log(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -117,18 +122,23 @@ export default function ApplyAsCompany() {
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4"></div>
         <div className="md:w-3/4">
-          <button>Apply for Company Registration</button>
+          <button disabled={isLoading}>Apply for Company Registration</button>
         </div>
       </div>
     </form>
   );
 
   return (
-    <div className="flex justify-center min-h-screen">
+    <div className="relative flex justify-center min-h-screen">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
       <main className="md:w-2/4 mt-10">
         <h1>Register Your Company</h1>
         <p className="mb-4">
-          Registering your company here will allo w you to issue employee
+          Registering your company here will allow you to issue employee
           credentials to your employees that are trusted by all other members of
           this consortium. For convenience, issuers can optionally use this web
           application to handle the process of issuing employee credentials.

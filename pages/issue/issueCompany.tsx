@@ -2,7 +2,7 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from "react";
+import React, { useState } from "react";
 import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import { issueCompanyCredential } from "../../lib/credentials";
@@ -22,6 +22,7 @@ export default function IssueCompany(props: any) {
   const [applications, setApplications] = React.useState<CompanyApplication[]>(
     props.pendingCompanyApplications,
   );
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   function delay(milliseconds: number) {
     return new Promise((resolve) => {
@@ -32,12 +33,14 @@ export default function IssueCompany(props: any) {
   const handleAcceptCompanyIssuance = async (
     application: CompanyApplication,
   ) => {
+    setIsProcessing(true); // Set processing state to true
     let credential = null;
     try {
       // Issue credential
       credential = await issueCompanyCredential(application);
       console.log("credential: ", credential);
     } catch (error) {
+      setIsProcessing(false);
       console.log("Error issuing credential: ", error);
       return;
     }
@@ -48,6 +51,7 @@ export default function IssueCompany(props: any) {
       // write credential issuance to issuer registry
       await writeTrustedIssuerLog(application.address);
     } catch (error) {
+      setIsProcessing(false);
       console.log("Error publishing credential to issuer registry: ", error);
       return;
     }
@@ -72,12 +76,19 @@ export default function IssueCompany(props: any) {
       })
       .catch(function (error) {
         console.log(error);
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      })
+      .finally(() => {
+        setIsProcessing(false);
       });
   };
 
   const handleRejectCompanyIssuance = async (
     application: CompanyApplication,
   ) => {
+    setIsProcessing(true); // Set processing state to true
     try {
       // Update database with credential issuance
       await updateApplicationStatusInDb(
@@ -89,7 +100,9 @@ export default function IssueCompany(props: any) {
         COLLECTIONS.COMPANY_APPLICATIONS,
       );
       setApplications(updatedApplications);
+      setIsProcessing(false);
     } catch (error) {
+      setIsProcessing(false);
       console.log(
         "Could not update application Reject status in database",
         error,
@@ -148,12 +161,14 @@ export default function IssueCompany(props: any) {
                   {application.status === "pending" ? (
                     <td className="whitespace-nowrap px-6 py-4">
                       <button
+                        disabled={isProcessing}
                         onClick={() => handleAcceptCompanyIssuance(application)}
                         className="mr-2"
                       >
                         Accept
                       </button>
                       <button
+                        disabled={isProcessing}
                         onClick={() => handleRejectCompanyIssuance(application)}
                       >
                         Reject
@@ -178,6 +193,11 @@ export default function IssueCompany(props: any) {
           </table>
         </div>
       </div>
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
     </main>
   );
 }
