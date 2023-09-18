@@ -17,6 +17,7 @@ export default function ApplyAsEmployee(props: any) {
   const [companyId, setCompanyId] = useState<string>("");
   const [companies, setCompanies] = useState([]);
   const [companyName, setCompanyName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -40,6 +41,9 @@ export default function ApplyAsEmployee(props: any) {
       })
       .catch(function (error) {
         console.log(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -145,7 +149,7 @@ export default function ApplyAsEmployee(props: any) {
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4"></div>
         <div className="md:w-3/4">
-          <button>Apply for Employee Registration</button>
+          <button disabled={isLoading}>Apply for Employee Registration</button>
         </div>
       </div>
     </form>
@@ -153,6 +157,11 @@ export default function ApplyAsEmployee(props: any) {
 
   return (
     <div className="flex justify-center min-h-screen">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
       <main className="md:w-2/4 mt-10">
         <h1>Register as an Employee</h1>
         <p className="mb-4">
