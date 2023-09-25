@@ -6,33 +6,24 @@ import {
   CompanyApplication,
   EmployeeApplication,
 } from "@/types/CompanyApplication";
-import { db } from "../config/firebase";
-import {
-  DocumentSnapshot,
-  QuerySnapshot,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from "firebase/firestore/lite";
+import { getDb } from "@/config/mongo";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
+
+const db = getDb();
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
 export const getTrustedIssuersFromDb = async () => {
   try {
-    const q = query(collection(db, COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS));
-    const querySnapshot = await getDocs(q);
+    const collection = db.collection(COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS);
+
+    // The find method returns a cursor, but for this case, we'll convert it to an array
+    const docs = await collection.find().toArray();
 
     const resultMap = new Map();
 
-    querySnapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      const legalName = data.credential.credentialSubject["gx:legalName"];
-      const address = data.address;
+    docs.forEach((doc: any) => {
+      const legalName = doc.credential.credentialSubject["gx:legalName"];
+      const address = doc.address;
       resultMap.set(legalName, address);
     });
 
@@ -47,22 +38,20 @@ export const getTrustedIssuersFromDb = async () => {
 export const writeApplicationToDb = async (
   application: CompanyApplication | EmployeeApplication,
 ) => {
-  let collection = (application as EmployeeApplication).employeeId
+  let collectionName = (application as EmployeeApplication).employeeId
     ? COLLECTIONS.EMPLOYEE_APPLICATIONS
     : COLLECTIONS.COMPANY_APPLICATIONS;
 
-  return setDoc(
-    doc(db, collection, application.address + "-" + application.timestamp),
-    { ...application },
-  )
-    .then(() => {
-      console.log("Document successfully written!");
-      return true;
-    })
-    .catch((error) => {
-      console.error("Error adding document: ", error);
-      return false;
-    });
+  const collection = db.collection(collectionName);
+
+  try {
+    await collection.insertOne(application);
+    console.log("Document successfully written!");
+    return true;
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    return false;
+  }
 };
 
 // Return pending applications from the database based on the collection name
@@ -71,43 +60,47 @@ export const getApplicationsFromDb = async (
   companyId?: string,
 ) => {
   try {
-    const q = companyId
-      ? query(collection(db, coll), where("companyId", "==", companyId))
-      : query(collection(db, coll));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => doc.data());
-  } catch (error: any) {
-    console.log("Error getting documents: ", error);
-    throw new Error(error);
-  }
-};
+    const collection = db.collection(coll);
+    const filter = companyId ? { companyId: companyId } : {};
 
-// Return the verified credentials from the database based on the collection name
-export const getCredentialsFromDb = async (coll: string, address: string) => {
-  try {
-    const q = query(collection(db, coll), where("address", "==", address));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => doc.data());
+    const docs = await collection.find(filter).toArray();
+
+    return docs;
   } catch (error) {
     console.log("Error getting documents: ", error);
     throw new Error(String(error));
   }
 };
 
-// Function to add or update an address-role document in Firestore
+// Return the verified credentials from the database based on the collection name
+export const getCredentialsFromDb = async (coll: string, address: string) => {
+  try {
+    const collection = db.collection(coll);
+    const filter = { address: address };
+
+    const docs = await collection.find(filter).toArray();
+
+    return docs;
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
+};
+
+// Function to add or update an address-role document in MongoDB
 export async function setAddressRoleInDb(address: string, role: string) {
   try {
-    // Get a reference to the document with the given address
-    const docRef = doc(db, COLLECTIONS.ADDRESS_ROLES, address);
-    const docSnap: DocumentSnapshot = await getDoc(docRef);
+    const collection = db.collection(COLLECTIONS.ADDRESS_ROLES);
+    const filter = { address: address };
 
-    // If the document exists, update it. If it does not exist, create it.
-    if (docSnap.exists()) {
+    const document = await collection.findOne(filter);
+
+    if (document) {
       // Update the document
-      await updateDoc(docRef, { role: role });
+      await collection.updateOne(filter, { $set: { role: role } });
     } else {
       // Create the document
-      await setDoc(docRef, { address: address, role: role });
+      await collection.insertOne({ address: address, role: role });
     }
   } catch (error) {
     console.log("Error setting AddressRole document: ", error);
@@ -118,24 +111,16 @@ export async function setAddressRoleInDb(address: string, role: string) {
 
 export async function getAddressRolesFromDb(address?: string) {
   try {
-    // If an address is provided, get the document with the given address
-    // If no address is provided, get all documents in the collection
+    const collection = db.collection(COLLECTIONS.ADDRESS_ROLES);
+
     if (address) {
-      const docRef = doc(db, COLLECTIONS.ADDRESS_ROLES, address);
-      const docSnap: DocumentSnapshot = await getDoc(docRef);
+      const filter = { address: address };
+      const document = await collection.findOne(filter);
 
-      // If the document exists, return its data. Otherwise, return null.
-      if (docSnap.exists()) {
-        return docSnap.data();
-      } else {
-        return null;
-      }
+      return document ? document : null;
     } else {
-      const collectionRef = collection(db, COLLECTIONS.ADDRESS_ROLES);
-      const querySnapshot: QuerySnapshot = await getDocs(collectionRef);
-
-      // Return all documents in the collection. If there are no documents, return an empty array.
-      return querySnapshot.docs.map((doc) => doc.data());
+      const docs = await collection.find().toArray();
+      return docs;
     }
   } catch (error) {
     console.log("Error getting AddressRole document: ", error);
@@ -143,24 +128,27 @@ export async function getAddressRolesFromDb(address?: string) {
   }
 }
 
+// Function to update the application status in MongoDB
 export const updateApplicationStatusInDb = async (
-  collection: string,
+  collectionName: string,
   key: string,
   status = APPLICATION_STATUS.APPROVED,
 ) => {
   try {
-    await updateDoc(doc(db, collection, key), {
-      status: status,
-    });
-    console.log("Document successfully written!");
+    const collection = db.collection(collectionName);
+    const filter = { _id: key };
+
+    await collection.updateOne(filter, { $set: { status: status } });
+    console.log("Document successfully updated!");
   } catch (error) {
-    console.log("Error getting documents: ", error);
+    console.log("Error updating document: ", error);
     throw new Error(String(error));
   }
 };
 
+// Function to add credential in MongoDB
 export const addCredentialInDb = async (
-  collection: string,
+  collectionName: string,
   credential: any,
 ) => {
   const dbObj = {
@@ -168,25 +156,31 @@ export const addCredentialInDb = async (
     credential: credential,
   };
   try {
-    await setDoc(doc(db, collection, credential.id), dbObj);
-    console.log("Document successfully written!");
+    const collection = db.collection(collectionName);
+
+    await collection.insertOne(dbObj);
+    console.log("Document successfully added!");
   } catch (error) {
-    console.log("Error getting documents: ", error);
+    console.log("Error adding document: ", error);
     throw new Error(String(error));
   }
 };
 
+// Function to revoke credential in MongoDB
 export const revokeCredentialInDb = async (
-  collection: string,
+  collectionName: string,
   credentialId: string,
 ) => {
   try {
-    await updateDoc(doc(db, collection, credentialId), {
-      status: APPLICATION_STATUS.REVOKED,
+    const collection = db.collection(collectionName);
+    const filter = { _id: credentialId }; // Assuming the credentialId is the '_id' in MongoDB
+
+    await collection.updateOne(filter, {
+      $set: { status: APPLICATION_STATUS.REVOKED },
     });
-    console.log("Document successfully written!");
+    console.log("Document successfully updated!");
   } catch (error) {
-    console.log("Error getting documents: ", error);
+    console.log("Error updating document: ", error);
     throw new Error(String(error));
   }
 };

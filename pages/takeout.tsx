@@ -249,7 +249,7 @@ export async function getServerSideProps(context: NextPageContext) {
     props: {
       userCredentials: (
         await getCredentialsFromDb(coll, session.user!.pkh)
-      ).map((wrapper) => wrapper.credential),
+      ).map((wrapper: any) => wrapper.credential),
       pendingEmployeeApplications: await getApplicationsFromDb(
         COLLECTIONS.EMPLOYEE_APPLICATIONS,
         session.user!.pkh,
