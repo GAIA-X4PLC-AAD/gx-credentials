@@ -7,8 +7,9 @@ import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
+import { connect } from "@/config/mongo";
 
-export default function Home() {
+export default function Home(props: any) {
   useEffect(() => {
     const animateElements = () => {
       const gxElement = document.getElementById("gx-text");
@@ -29,6 +30,11 @@ export default function Home() {
       animateElements();
     }, 500);
   }, []);
+
+  if (props.error) {
+    console.log("Error connecting to database: ", props.error);
+    return <h3>Error connecting to database</h3>;
+  }
 
   const handleLogin = async () => {
     try {
@@ -122,4 +128,13 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+export async function getServerSideProps(context: any) {
+  try {
+    await connect();
+    return { props: {} };
+  } catch (error: any) {
+    return { props: { error: error.message } };
+  }
 }
