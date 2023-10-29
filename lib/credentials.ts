@@ -14,7 +14,7 @@ import type {
 } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
-import { setAddressRoleInDb } from "./database_old";
+import { setAddressRoleInDb } from "./database";
 import { ADDRESS_ROLES } from "@/constants/constants";
 
 export const credentialOutputDescriptor = {

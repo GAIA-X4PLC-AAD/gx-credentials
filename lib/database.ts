@@ -8,6 +8,7 @@ import {
 } from "@/types/CompanyApplication";
 import { getDb } from "@/config/mongo";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
+import { ObjectId } from "mongodb";
 
 const db = getDb();
 
@@ -136,8 +137,7 @@ export const updateApplicationStatusInDb = async (
 ) => {
   try {
     const collection = db.collection(collectionName);
-    const filter = { _id: key };
-
+    const filter = { _id: new ObjectId(key) };
     await collection.updateOne(filter, { $set: { status: status } });
     console.log("Document successfully updated!");
   } catch (error) {
@@ -173,7 +173,7 @@ export const revokeCredentialInDb = async (
 ) => {
   try {
     const collection = db.collection(collectionName);
-    const filter = { _id: credentialId }; // Assuming the credentialId is the '_id' in MongoDB
+    const filter = { _id: new ObjectId(credentialId) };
 
     await collection.updateOne(filter, {
       $set: { status: APPLICATION_STATUS.REVOKED },
