@@ -2,8 +2,8 @@ import { MongoClient, Db } from "mongodb";
 
 const uri: string = process.env.MONGODB_URI as string;
 const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true,
 });
 
 let db: Db | null = null;
