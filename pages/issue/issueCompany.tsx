@@ -12,11 +12,8 @@ import {
   getRegistrars,
   writeTrustedIssuerLog,
 } from "@/lib/registryInteraction";
-import {
-  getApplicationsFromDb,
-  updateApplicationStatusInDb,
-} from "@/lib/database";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
+import { getApplicationsFromDb } from "@/lib/database";
 
 export default function IssueCompany(props: any) {
   const [applications, setApplications] = React.useState<CompanyApplication[]>(
@@ -36,9 +33,8 @@ export default function IssueCompany(props: any) {
     setIsProcessing(true); // Set processing state to true
     let credential = null;
     try {
-      // Issue credential
+      // Generate the credential using the didkit-wasm library
       credential = await issueCompanyCredential(application);
-      console.log("credential: ", credential);
     } catch (error) {
       setIsProcessing(false);
       console.log("Error issuing credential: ", error);
@@ -61,7 +57,6 @@ export default function IssueCompany(props: any) {
       .post("/api/publishCredential", {
         credential: credential,
         role: "company",
-        applicationKey: application.address + "-" + application.timestamp,
       })
       .then(async function (response) {
         application.status = APPLICATION_STATUS.APPROVED;
@@ -79,9 +74,6 @@ export default function IssueCompany(props: any) {
       })
       .finally(() => {
         setIsProcessing(false);
-      })
-      .finally(() => {
-        setIsProcessing(false);
       });
   };
 
@@ -89,24 +81,32 @@ export default function IssueCompany(props: any) {
     application: CompanyApplication,
   ) => {
     setIsProcessing(true); // Set processing state to true
+
     try {
-      // Update database with credential issuance
-      await updateApplicationStatusInDb(
-        COLLECTIONS.COMPANY_APPLICATIONS,
-        application.address + "-" + application.timestamp,
-        APPLICATION_STATUS.REJECTED,
-      );
-      const updatedApplications: any = await getApplicationsFromDb(
-        COLLECTIONS.COMPANY_APPLICATIONS,
-      );
-      setApplications(updatedApplications);
-      setIsProcessing(false);
+      // Call the API to update the application status in the database
+      const response = await axios.post("/api/updateApplicationStatusInDb", {
+        collection: COLLECTIONS.COMPANY_APPLICATIONS,
+        address: application.address,
+        status: APPLICATION_STATUS.REJECTED,
+      });
+
+      // If the update was successful, update the state
+      if (response.status === 200) {
+        const updatedApplications = applications.map((app) => {
+          if (app.address === application.address) {
+            return { ...app, status: APPLICATION_STATUS.REJECTED };
+          }
+          return app;
+        });
+        setApplications(updatedApplications);
+      }
     } catch (error) {
-      setIsProcessing(false);
-      console.log(
+      console.error(
         "Could not update application Reject status in database",
         error,
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -203,6 +203,7 @@ export default function IssueCompany(props: any) {
 }
 
 export async function getServerSideProps(context: NextPageContext) {
+  // const { getApplicationsFromDb } = require("../../lib/database");
   try {
     const session = await getSession(context);
     const registrars = await getRegistrars();
