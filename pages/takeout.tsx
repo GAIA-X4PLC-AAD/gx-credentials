@@ -2,14 +2,13 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import {
   getAddressRolesFromDb,
   getCredentialsFromDb,
   getApplicationsFromDb,
-  updateApplicationStatusInDb,
 } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
@@ -32,13 +31,12 @@ import axios from "axios";
 import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
-  const { data: session } = useSession();
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
     props.pendingEmployeeApplications,
   );
-  const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
-  console.log(props.coll);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
+  const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
@@ -49,7 +47,7 @@ export default function Takeout(props: any) {
   };
 
   const transferCredentialToWallet = async () => {
-    const signature = await dAppClient!.requestSignPayload({
+    await dAppClient!.requestSignPayload({
       signingType: SigningType.RAW,
       payload:
         "Get your GX Credential! #" + props.apiHost + "/api/takeoutCredential",
@@ -67,6 +65,7 @@ export default function Takeout(props: any) {
   }
 
   const handleEmployeeIssuance = async (application: EmployeeApplication) => {
+    setIsProcessing(true); // Set processing state to true
     let credential = null;
     try {
       // Issue credential
@@ -74,6 +73,7 @@ export default function Takeout(props: any) {
       console.log("credential: ", credential);
     } catch (error) {
       console.log("Error issuing credential: ", error);
+      setIsProcessing(false);
       return;
     }
 
@@ -84,6 +84,7 @@ export default function Takeout(props: any) {
       await writeTrustedIssuerLog(application.address);
     } catch (error) {
       console.log("Error publishing credential to issuer registry: ", error);
+      setIsProcessing(false);
       return;
     }
 
@@ -92,7 +93,6 @@ export default function Takeout(props: any) {
       .post("/api/publishCredential", {
         credential: credential,
         role: "employee",
-        applicationKey: application.address + "-" + application.timestamp,
       })
       .then(async function (response) {
         application.status = APPLICATION_STATUS.APPROVED;
@@ -107,29 +107,37 @@ export default function Takeout(props: any) {
       })
       .catch(function (error) {
         console.log(error);
+      })
+      .finally(() => {
+        setIsProcessing(false);
       });
   };
 
   const handleRejectEmployeeIssuance = async (
     application: EmployeeApplication,
   ) => {
+    setIsProcessing(false);
     try {
-      // Update database with credential issuance
-      await updateApplicationStatusInDb(
-        COLLECTIONS.EMPLOYEE_APPLICATIONS,
-        application.address + "-" + application.timestamp,
-        APPLICATION_STATUS.REJECTED,
-      );
-      application.status = APPLICATION_STATUS.REJECTED;
-      const updatedApplications = applications.map((app) => {
-        if (app.address === application.address) {
-          return application;
-        }
-        return app;
+      // Call the API to update the application status in the database
+      const response = await axios.post("/api/updateApplicationStatusInDb", {
+        collection: COLLECTIONS.EMPLOYEE_APPLICATIONS,
+        address: application.address,
+        status: APPLICATION_STATUS.REJECTED,
       });
-      setApplications(updatedApplications);
+      if (response.status === 200) {
+        application.status = APPLICATION_STATUS.REJECTED;
+        const updatedApplications = applications.map((app) => {
+          if (app.address === application.address) {
+            return application;
+          }
+          return app;
+        });
+        setApplications(updatedApplications);
+      }
     } catch (error) {
       console.log("Error updating application status: ", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -210,6 +218,11 @@ export default function Takeout(props: any) {
           </TabsBody>
         </Tabs>
       </div>
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
     </main>
   );
 }

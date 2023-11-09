@@ -7,10 +7,21 @@ import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
-import { connect } from "@/config/mongo";
+import { connectToDatabase } from "@/config/mongo";
+// import { connect } from "@/config/mongo";
 
 export default function Home(props: any) {
   useEffect(() => {
+    const initialize = async () => {
+      // If dAppClient exists and clearActiveAccount is available, await it
+      if (dAppClient) {
+        await dAppClient.clearActiveAccount();
+      }
+    };
+
+    // Call the async function
+    initialize();
+
     const animateElements = () => {
       const gxElement = document.getElementById("gx-text");
       const buttonElement = document.getElementById("login-button");
@@ -128,13 +139,4 @@ export default function Home(props: any) {
       </div>
     </main>
   );
-}
-
-export async function getServerSideProps(context: any) {
-  try {
-    await connect();
-    return { props: {} };
-  } catch (error: any) {
-    return { props: { error: error.message } };
-  }
 }

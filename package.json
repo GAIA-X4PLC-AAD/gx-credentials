@@ -31,15 +31,15 @@
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.1",
     "typescript": "5.0.4",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "mongodb": "6.1.0"
   },
   "devDependencies": {
     "@types/multer": "^1.4.7",
     "@types/uuid": "^9.0.1",
     "@wasm-tool/wasm-pack-plugin": "^1.7.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^2.8.8",
-    "mongodb": "6.1.0"
+    "prettier": "^2.8.8"
   },
   "browser": {
     "fs": false,

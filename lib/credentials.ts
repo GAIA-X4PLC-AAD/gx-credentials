@@ -90,10 +90,6 @@ export const issueCompanyCredential = async (
   };
   try {
     const credential = await issueCredential(rawCredential);
-    await setAddressRoleInDb(
-      companyApplication.address,
-      ADDRESS_ROLES.COMPANY_APPROVED,
-    );
     console.log(credential);
     return credential;
   } catch (error) {
@@ -131,10 +127,6 @@ export const issueEmployeeCredential = async (
   };
   try {
     const credential = await issueCredential(rawCredential);
-    await setAddressRoleInDb(
-      employeeApplication.address,
-      ADDRESS_ROLES.EMPLOYEE_APPROVED,
-    );
     console.log(credential);
     return credential;
   } catch (error) {

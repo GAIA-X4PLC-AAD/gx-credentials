@@ -2,6 +2,7 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -12,6 +13,8 @@ import {
 } from "@/lib/database";
 import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
 
+// This is the publishCredential API route that is called by the frontend to publish a credential to the database.
+// It generates the credential from the application data , writes it to database, and updates the application status.
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>,
@@ -30,9 +33,7 @@ export default async function handler(
       )
         res.status(500);
       // update application for that credential on db
-      if (
-        !(await updateApplicationStatus(req.body.applicationKey, req.body.role))
-      )
+      if (!(await updateApplicationStatus(req.body.credential, req.body.role)))
         res.status(500);
       res.status(200);
     } catch (e) {
@@ -45,6 +46,7 @@ export default async function handler(
   res.end();
 }
 
+// Helper function to write credential to db and update Address Role status
 const writeTrustedIssuerCredential = async (credential: any, role: string) => {
   try {
     let collection = "",
@@ -72,7 +74,8 @@ const writeTrustedIssuerCredential = async (credential: any, role: string) => {
   }
 };
 
-const updateApplicationStatus = async (key: string, role: string) => {
+// Helper function to update application status
+const updateApplicationStatus = async (credential: any, role: string) => {
   let collection = "";
   switch (role) {
     case "company":
@@ -84,7 +87,10 @@ const updateApplicationStatus = async (key: string, role: string) => {
   }
   if (!role) return false;
   try {
-    await updateApplicationStatusInDb(collection, key);
+    await updateApplicationStatusInDb(
+      collection,
+      credential.credentialSubject.id.split(":").pop(),
+    );
     return true;
   } catch (error) {
     console.error("Error updating application status: ", error);

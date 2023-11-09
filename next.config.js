@@ -18,6 +18,16 @@ const nextConfig = {
       aggregateTimeout: 500,
     };
 
+    // Fallback for 'fs/promises' and other Node.js modules
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        "fs/promises": false,
+        // ... add any other Node.js modules you want to stub out for the browser here
+      };
+    }
+
     if (!dev && isServer) {
       config.output.webassemblyModuleFilename = "chunks/[id].wasm";
       config.plugins.push(new WasmChunksFixPlugin());

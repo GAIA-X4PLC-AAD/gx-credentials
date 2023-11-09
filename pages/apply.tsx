@@ -7,7 +7,7 @@ import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import Link from "next/link";
 import { getRegistrars } from "../lib/registryInteraction";
-import { getAddressRolesFromDb } from "../lib/database";
+import { getAddressRolesFromDb } from "@/lib/database";
 import { ADDRESS_ROLES } from "@/constants/constants";
 
 export default function Apply() {
@@ -34,6 +34,7 @@ export default function Apply() {
 export async function getServerSideProps(context: NextPageContext) {
   const session = await getSession(context);
   if (!session) {
+    console.log("No session found.");
     return {
       redirect: {
         destination: "/",
