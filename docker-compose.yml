@@ -1,6 +1,13 @@
 version: '3'
 
 services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
   web:
     build: .
     ports:
@@ -8,17 +15,7 @@ services:
     depends_on:
       - mongo
     environment:
-      - MONGODB_URI=${MONGODB_URI}
-
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - GLOBAL_SERVER_URL=${GLOBAL_SERVER_URL}
 
 volumes:
   mongo-data:
