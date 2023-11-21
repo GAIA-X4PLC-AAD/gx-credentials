@@ -20,12 +20,12 @@ export default function Apply() {
         </p>
       </div>
       <div className="flex justify-center">
-        <button className="m-2">
-          <Link href="/apply/applyAsCompany">Apply as Company</Link>
-        </button>
-        <button className="m-2">
-          <Link href="/apply/applyAsEmployee">Apply as Employee</Link>
-        </button>
+        <Link href="/apply/applyAsCompany">
+          <button className="m-2">Apply as Company</button>
+        </Link>
+        <Link href="/apply/applyAsEmployee">
+          <button className="m-2">Apply as Employee</button>
+        </Link>
       </div>
     </main>
   );

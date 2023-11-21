@@ -36,7 +36,7 @@ export default function ApplyAsEmployee(props: any) {
         console.log(response);
       })
       .then(() => {
-        router.push("/common/pending");
+        router.replace("/common/pending");
       })
       .catch(function (error) {
         console.log(error);

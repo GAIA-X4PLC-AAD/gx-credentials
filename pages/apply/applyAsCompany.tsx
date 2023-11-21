@@ -30,7 +30,7 @@ export default function ApplyAsCompany() {
         console.log(response);
       })
       .then(() => {
-        router.push("/common/pending");
+        router.replace("/common/pending");
       })
       .catch(function (error) {
         console.log(error);
