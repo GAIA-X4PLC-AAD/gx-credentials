@@ -106,14 +106,6 @@ Install a tunneling tool like [ngrok](https://ngrok.com). You will need it to ea
 
 Install a wallet software that supports the Beacon protocol. For the best experience, we currently recomment using [Altme](https://altme.io). Be aware that you can choose a wallet that is not SSI compatible. Then you are excluded from any functionality using Verifiable Credentials.
 
-A Firebase Firestore is used to provide traditional database storage. It needs the following (initially empty) collections:
-
-- AddressRoles
-- CompanyApplications
-- EmployeeApplications
-- TrustedIssuerCredentials
-- TrustedEmployeeCredentials
-
 This project uses the Tezos blockchain to provide secure timestamped consensus on valid issuers and certificate status. The registry smart contract in the `contracts` folder needs to be deployed on your preferred testnet. For quick delpoyment, you could use the online IDE [here](https://ide.ligolang.org/local).
 
 We recommend using [VS Code](https://code.visualstudio.com) with [DevContainers](https://code.visualstudio.com/docs/devcontainers/containers). This project comes with configuration that ensures your Node.js environment container is setup properly. This requires [Docker](https://www.docker.com) to be installed and running. If opening the project does not immediately launch the container, execute the command "Reopen in Container".
@@ -124,39 +116,32 @@ An environment file `.env` of the following form is required:
 NEXTAUTH_SECRET=somereallysecretsecret
 JWT_SECRET=itshouldbealsoverysecret
 NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_MY_NAMESPACE=yourNamespaceForUUIDs (eg - 1b671a64-40d5-491e-99b0-da01ff1f3341)
 
-FIREBASE_API_KEY=yourAPIkey
-FIREBASE_MESSAGING_SENDER_ID=yourSenderID
-FIREBASE_APP_ID=yourAppID
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=password123
+MONGO_INITDB_DATABASE=gx-credentials
 
 NEXT_PUBLIC_TEZOS_RPC_URL=linkToPreferredNode
 NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT=deployedContract
 
 GLOBAL_SERVER_URL=yourTunnelURL (ngrok url)
+MONGODB_URI=mongodb://admin:password123@mongo:27017?retryWrites=true&w=majority
 
-NEXT_PUBLIC_MY_NAMESPACE=yourNamespaceForUUIDs (eg - 1b671a64-40d5-491e-99b0-da01ff1f3341)
-```
-
-Initialize dependencies by executing:
-
-```bash
-npm install
 ```
 
 ### Starting the Development Server
 
-First, run the tunnel to get a globally accessible URL for the development server:
+First, run the tunnel to get a globally accessible URL for the development server (this url is valid for 60 mins):
 
 ```bash
 ngrok http 3000
 ```
 
-In the environment file `.env` make sure that the `GLOBAL_SERVER_URL` corresponds to your current tunnel URL.
-
-Run the development server:
+Then, run the docker-compose file to start the development server:
 
 ```bash
-npm run dev
+GLOBAL_SERVER_URL="ngrok url" docker-compose up --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
