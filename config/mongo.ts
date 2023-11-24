@@ -11,37 +11,50 @@ let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
 export async function connectToDatabase() {
-  // check the cached.
-  if (cachedClient && cachedDb) {
-    // load from cache
+  try {
+    // check the cached.
+    if (cachedClient && cachedDb) {
+      // load from cache
+      return {
+        client: cachedClient,
+        db: cachedDb,
+      };
+    }
+
+    // set the connection options
+    const opts: MongoClientOptions = {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    };
+
+    // Connect to cluster
+    let client = new MongoClient(process.env.MONGODB_URI as string, opts);
+    await client.connect();
+    let db = client.db(process.env.MONGO_INITDB_DATABASE);
+
+    // Send a ping to confirm a successful connection
+    await client
+      .db(process.env.MONGO_INITDB_ROOT_USERNAME)
+      .command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!",
+    );
+
+    // set cache
+    cachedClient = client;
+    cachedDb = db;
+
     return {
       client: cachedClient,
       db: cachedDb,
     };
+  } catch (error) {
+    console.error("Failed to connect to MongoDB", error);
+    throw error; // or handle error as needed
   }
-
-  // set the connection options
-  const opts: MongoClientOptions = {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
-  };
-
-  // Connect to cluster
-  let client = new MongoClient(process.env.MONGODB_URI as string, opts);
-  await client.connect();
-  let db = client.db(process.env.MONGO_INITDB_DATABASE);
-
-  // set cache
-  cachedClient = client;
-  cachedDb = db;
-
-  return {
-    client: cachedClient,
-    db: cachedDb,
-  };
 }
 
 const uri = process.env.MONGODB_URI;

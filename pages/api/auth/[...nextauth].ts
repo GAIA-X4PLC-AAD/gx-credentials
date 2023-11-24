@@ -84,7 +84,7 @@ export const authOptions: AuthOptions = {
   ],
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 day
+    maxAge: 60 * 60, // 1 hour
   },
   jwt: {
     secret: process.env.JWT_SECRET,

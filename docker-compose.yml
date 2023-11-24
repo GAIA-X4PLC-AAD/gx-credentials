@@ -7,9 +7,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     depends_on:
@@ -19,3 +25,4 @@ services:
 
 volumes:
   mongo-data:
+  # nodemodules:
