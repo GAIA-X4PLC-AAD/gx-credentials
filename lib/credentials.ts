@@ -172,6 +172,7 @@ const issueCredential = async (rawCredential: any) => {
     );
   } catch (error) {
     console.log("Error generating credential. ", error);
+    throw error;
   }
 
   const verifyOptionsString = "{}";

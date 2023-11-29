@@ -145,3 +145,23 @@ GLOBAL_SERVER_URL="ngrok url" docker-compose up --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Local development with hot reloading in Docker container
+
+If you want to develop locally with hot reloading, you can uncomment the below lines in the docker-compose.yml file:
+
+```bash
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+```
+
+Then run the following command (Assuming you have already built the image using `docker-compose build`):
+
+`docker-compose watch`

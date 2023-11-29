@@ -7,8 +7,6 @@ import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
-import { connectToDatabase } from "@/config/mongo";
-// import { connect } from "@/config/mongo";
 
 export default function Home(props: any) {
   useEffect(() => {

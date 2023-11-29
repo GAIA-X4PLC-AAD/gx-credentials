@@ -22,12 +22,13 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
+  background-image: linear-gradient(to bottom right, #B900FF -5%, #000094 85%, #46DAFF 110%);
+  /* background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
-    rgb(var(--background-start-rgb));
+    rgb(var(--background-start-rgb)); */
 }
 
 h1 {
