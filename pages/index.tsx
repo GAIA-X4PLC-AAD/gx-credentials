@@ -4,11 +4,15 @@
  */
 import { signIn } from "next-auth/react";
 import { requestRequiredPermissions, dAppClient } from "../config/wallet";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
+import { Box, Button, Icon, Stack, Typography } from "@mui/material";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
 export default function Home(props: any) {
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const initialize = async () => {
       // If dAppClient exists and clearActiveAccount is available, await it
@@ -19,25 +23,6 @@ export default function Home(props: any) {
 
     // Call the async function
     initialize();
-
-    const animateElements = () => {
-      const gxElement = document.getElementById("gx-text");
-      const buttonElement = document.getElementById("login-button");
-
-      if (gxElement) {
-        gxElement.classList.remove("-translate-y-52");
-        gxElement.classList.add("translate-y-0");
-      }
-
-      if (buttonElement) {
-        buttonElement.classList.remove("translate-y-52");
-        buttonElement.classList.add("-translate-y-0");
-      }
-    };
-
-    setTimeout(() => {
-      animateElements();
-    }, 500);
   }, []);
 
   if (props.error) {
@@ -47,6 +32,7 @@ export default function Home(props: any) {
 
   const handleLogin = async () => {
     try {
+      setLoading(true); // Start loading
       const callbackUrl = "/apply";
       const activeAccount = await dAppClient?.getActiveAccount();
       let activeAddress;
@@ -89,52 +75,127 @@ export default function Home(props: any) {
         signature: response.signature,
         callbackUrl,
       });
+      setLoading(false); // Stop loading after the process is complete
     } catch (error) {
       window.alert(error);
+      setLoading(false); // Stop loading after the process is complete
+    } finally {
+      setLoading(false); // Stop loading after the process is complete
     }
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p>This is experimental software. Use with caution!</p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "80%",
+      }}
+    >
+      {/* <Stack direction="row" justifyContent="space-around" alignItems="center"> */}
+      <Box
+        sx={{
+          width: "80%",
+          display: "flex",
+          flexDirection: { md: "row", xs: "column" },
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontSize: 15,
+            color: "white",
+          }}
+        >
+          This is experimental software. Use with caution!
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontSize: 15,
+            color: "white",
+            "&:hover a": {
+              // Target the <a> tag on hover of the Typography component
+              textDecoration: "underline",
+              textDecorationColor: "white",
+              boxShadow: "0px 2px white",
+            },
+            border: "1px solid white",
+            padding: "8px", // Add some padding inside the box
+            borderRadius: "4px", // Optional: if you want rounded corners
+            ":hover": {
+              cursor: "pointer",
+            },
+          }}
+        >
           <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
             href="https://wwwmatthes.in.tum.de/pages/t5ma0jrv6q7k/sebis-Public-Website-Home"
             target="_blank"
             rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "none" }}
           >
             By sebis @ TUM
           </a>
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
-      {/* <div className="flex flex-col place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]"> */}
-      <div className="flex flex-col place-items-center overflow-hidden">
-        <div>
-          <h1
-            id="gx-text"
-            className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 transition duration-500 ease-in-out transform -translate-y-full"
-          >
-            GX Credentials
-          </h1>
-        </div>
-        <div className="w-full flex align-center justify-center">
-          <button
-            id="login-button"
-            className="text-lg w-2/4 hover:bg-gray-100 font-semibold py-2 px-2 border border-gray-500 hover:border-transparent rounded"
+      <Box
+        sx={{
+          marginTop: "100px",
+        }}
+      >
+        {/* typography for the below text */}
+        <Typography
+          variant="h2"
+          sx={{
+            marginTop: "30px",
+            color: "white",
+            fontWeight: 700, // Bold font for better visibility
+            textShadow: "4px 4px 6px rgba(0, 0, 0, 0.5)", // Text shadow for better contrast
+            // Additional styling options
+            letterSpacing: "0.1rem", // Adjust letter spacing for aesthetic preference
+          }}
+        >
+          GX-Credentials
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Button
             onClick={handleLogin}
+            variant="contained"
+            startIcon={<AccountBalanceWalletIcon />}
+            size="large"
+            sx={{
+              marginTop: 5,
+              width: { xs: "60%", md: "50%" }, // Set the width as desired, e.g., 50% for half of the parent container's width
+              background: "linear-gradient(45deg, #0f9b0f 30%, #006400 90%)", // Example of a green metallic gradient
+              ":hover": {
+                background: "linear-gradient(45deg, #088808 30%, #004d00 90%)", // Slightly different gradient for hover state
+                transform: "scale(1.05)", // Add a slight scale on hover
+              },
+              color: "white", // Set text color to white for better visibility
+              padding: "8px", // Add some padding inside the box
+              boxShadow: "3px 3px 5px rgba(0, 0, 0, 0.5)", // Add a white shadow to the box
+            }}
+            disabled={loading}
           >
-            Login
-          </button>
-        </div>
-      </div>
+            <Typography
+              variant="caption"
+              sx={{ fontSize: 18, textTransform: "none" }}
+            >
+              {loading ? "Connecting..." : "Connect Wallet"}
+            </Typography>
+          </Button>
+        </Box>
+      </Box>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
+      <div>
         {/*TODO add some more informative content here later on*/}
         &nbsp;
       </div>
-    </main>
+    </Box>
   );
 }

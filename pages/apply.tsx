@@ -19,11 +19,11 @@ export default function Apply() {
           specific credential?
         </p>
       </div>
-      <div className="flex justify-center">
-        <button className="m-2">
+      <div>
+        <button>
           <Link href="/apply/applyAsCompany">Apply as Company</Link>
         </button>
-        <button className="m-2">
+        <button>
           <Link href="/apply/applyAsEmployee">Apply as Employee</Link>
         </button>
       </div>

@@ -9,7 +9,8 @@ import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useProtected } from "@/hooks/useProtected";
-import { ThemeProvider } from "@material-tailwind/react";
+import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
+import { Box } from "@mui/material";
 
 function Header() {
   const handleSignout = useProtected();
@@ -30,9 +31,11 @@ function Header() {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <SessionProvider session={pageProps.session}>
-      <Header />
-      <Component {...pageProps} />
-    </SessionProvider>
+    <ThemeRegistry>
+      <SessionProvider session={pageProps.session}>
+        <Header />
+        <Component {...pageProps} />
+      </SessionProvider>
+    </ThemeRegistry>
   );
 }
