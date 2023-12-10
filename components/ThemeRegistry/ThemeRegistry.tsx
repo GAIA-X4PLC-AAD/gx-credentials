@@ -20,7 +20,7 @@ export default function ThemeRegistry({
             width: "100vw", // Sets the width to full viewport width
             overflow: "auto", // Adds scrolling if content overflows
             backgroundImage: (theme) => theme.palette.background.default,
-            display: "flex",
+            // display: "flex",
             paddingX: 5,
           }}
         >

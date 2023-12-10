@@ -5,14 +5,22 @@
 import { signIn } from "next-auth/react";
 import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect, useState } from "react";
-import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
+import {
+  AnalyticsInterface,
+  BeaconEvent,
+  NetworkType,
+  P2PPairingRequest,
+  PostMessagePairingRequest,
+  RequestSignPayloadInput,
+  SigningType,
+  WalletConnectPairingRequest,
+  defaultEventCallbacks,
+} from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
 import { Box, Button, Icon, Stack, Typography } from "@mui/material";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
 export default function Home(props: any) {
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     const initialize = async () => {
       // If dAppClient exists and clearActiveAccount is available, await it
@@ -32,11 +40,13 @@ export default function Home(props: any) {
 
   const handleLogin = async () => {
     try {
-      setLoading(true); // Start loading
+      const handlePermissionRequestError = (error: any) => {
+        console.log("Signing request error:", error);
+      };
+
       const callbackUrl = "/apply";
+      let activeAddress, activePk;
       const activeAccount = await dAppClient?.getActiveAccount();
-      let activeAddress;
-      let activePk;
       if (activeAccount) {
         console.log("Already connected:", activeAccount.address);
         activeAddress = activeAccount.address;
@@ -75,12 +85,8 @@ export default function Home(props: any) {
         signature: response.signature,
         callbackUrl,
       });
-      setLoading(false); // Stop loading after the process is complete
     } catch (error) {
       window.alert(error);
-      setLoading(false); // Stop loading after the process is complete
-    } finally {
-      setLoading(false); // Stop loading after the process is complete
     }
   };
 
@@ -180,13 +186,12 @@ export default function Home(props: any) {
               padding: "8px", // Add some padding inside the box
               boxShadow: "3px 3px 5px rgba(0, 0, 0, 0.5)", // Add a white shadow to the box
             }}
-            disabled={loading}
           >
             <Typography
               variant="caption"
               sx={{ fontSize: 18, textTransform: "none" }}
             >
-              {loading ? "Connecting..." : "Connect Wallet"}
+              {"Connect Wallet"}
             </Typography>
           </Button>
         </Box>

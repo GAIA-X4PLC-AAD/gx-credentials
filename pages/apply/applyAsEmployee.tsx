@@ -8,6 +8,15 @@ import { NextPageContext } from "next";
 import axios from "axios";
 import { getTrustedIssuersFromDb } from "@/lib/database";
 import { useRouter } from "next/router";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  TextField,
+  Select,
+  MenuItem,
+  Button,
+} from "@mui/material";
 
 export default function ApplyAsEmployee(props: any) {
   const { data: session } = useSession();
@@ -47,113 +56,123 @@ export default function ApplyAsEmployee(props: any) {
       });
   };
 
-  const form = (
-    <form className="w-full max-w-xl" onSubmit={handleSubmit}>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-full-name"
-          >
+  const form = () => {
+    return (
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          width: "100%",
+          color: "primary.main",
+          borderRadius: "6px",
+          boxShadow: "20",
+          paddingX: { xs: "20px", md: "50px" },
+          paddingY: "30px",
+        }}
+      >
+        {/* Full Name Field */}
+        <FormControl fullWidth margin="normal">
+          <FormLabel htmlFor="inline-full-name" sx={{ color: "primary.main" }}>
             Full Name
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+          </FormLabel>
+          <TextField
+            required
             id="inline-full-name"
             type="text"
+            variant="outlined"
             onChange={(e) => setName(e.target.value)}
-            required
+            sx={{ mt: 1, input: { color: "primary.main" } }}
           />
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold  md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
-          >
+        </FormControl>
+
+        {/* Employee ID Field */}
+        <FormControl fullWidth margin="normal">
+          <FormLabel htmlFor="inline-gx-id" sx={{ color: "primary.main" }}>
             Employee ID
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+          </FormLabel>
+          <TextField
+            required
             id="inline-gx-id"
             type="text"
+            variant="outlined"
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
-            required
+            sx={{ mt: 1, input: { color: "primary.main" } }}
           />
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-description"
+        </FormControl>
+
+        {/* Company Name Field */}
+        <FormControl fullWidth margin="normal">
+          <FormLabel
+            htmlFor="inline-company-name"
+            sx={{ color: "primary.main" }}
           >
-            CompanyName
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <select
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            Company Name
+          </FormLabel>
+          <Select
+            required
+            id="inline-company-name"
             value={companyName}
             onChange={(e) => {
-              console.log(e.target.value);
               setCompanyName(e.target.value);
-
-              for (let i = 0; i < Array.from(companies).length; i++) {
-                const company = companies[i];
-                console.log(company);
-                if (company[0] == e.target.value) {
-                  setCompanyId(company[1]);
-                  break;
-                }
+              const selectedCompany = companies.find(
+                (company) => company[0] === e.target.value,
+              );
+              if (selectedCompany) {
+                setCompanyId(selectedCompany[1]);
               }
             }}
-            required
+            sx={{ mt: 1, input: { color: "primary.main" } }}
+            displayEmpty
           >
-            <option value="" disabled>
+            <MenuItem value="" disabled>
               Select a company
-            </option>
+            </MenuItem>
             {companies.map((company) => (
-              <option key={company[1]} value={company[0]}>
+              <MenuItem key={company[1]} value={company[0]}>
                 {company[0]}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
-          >
+          </Select>
+        </FormControl>
+
+        {/* Address Field */}
+        <FormControl fullWidth margin="normal">
+          <FormLabel htmlFor="inline-address" sx={{ color: "primary.main" }}>
             Address
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
+          </FormLabel>
+          <TextField
+            required
+            id="inline-address"
             type="text"
             value={session?.user?.pkh}
-            readOnly
+            InputProps={{ readOnly: true }}
+            variant="outlined"
+            sx={{ mt: 1, input: { color: "primary.main" } }}
           />
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4"></div>
-        <div className="md:w-3/4">
-          <button disabled={isLoading}>Apply for Employee Registration</button>
-        </div>
-      </div>
-    </form>
-  );
+        </FormControl>
+
+        {/* Submit Button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 2,
+          }}
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={isLoading}
+            color="success"
+            sx={{ boxShadow: "20" }}
+          >
+            Apply for Employee Registration
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
 
   return (
     <div className="flex justify-center min-h-screen">
@@ -167,7 +186,7 @@ export default function ApplyAsEmployee(props: any) {
         <p className="mb-4">
           Register as an Employee for one of the registered companies.
         </p>
-        {form}
+        {form()}
       </main>
     </div>
   );

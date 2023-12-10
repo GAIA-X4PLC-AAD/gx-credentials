@@ -8,6 +8,18 @@ import { NextPageContext } from "next";
 import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
 import { useRouter } from "next/router";
+import {
+  FormControl,
+  TextField,
+  TextareaAutosize,
+  Button,
+  Box,
+  FormLabel,
+  Typography,
+  CircularProgress,
+  Modal,
+} from "@mui/material";
+import { Container } from "postcss";
 
 export default function ApplyAsCompany() {
   const { data: session } = useSession();
@@ -42,110 +54,145 @@ export default function ApplyAsCompany() {
       });
   };
 
-  const form = (
-    <form className="w-full max-w-xl" onSubmit={handleSubmit}>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-full-name"
-          >
-            Full Name
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-full-name"
-            type="text"
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-      </div>
+  const form = () => {
+    return (
+      <>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            width: "100%",
+            color: "primary.main",
+            borderRadius: "6px",
+            boxShadow: "20",
+            paddingX: { xs: "20px", md: "50px" }, // Add padding for spacing
+            paddingY: "30px",
+          }}
+        >
+          <FormControl fullWidth margin="normal">
+            <FormLabel
+              htmlFor="inline-full-name"
+              sx={{ color: "primary.main" }}
+            >
+              Full Name
+            </FormLabel>
+            <TextField
+              required
+              id="inline-full-name"
+              type="text"
+              variant="outlined"
+              onChange={(e) => setName(e.target.value)}
+              sx={{
+                mt: 1,
+                input: { color: "primary.main" },
+              }}
+            />
+          </FormControl>
 
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
-          >
-            GX ID
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
-            type="text"
-            onChange={(e) => setGX_ID(e.target.value)}
-          />
-        </div>
-      </div>
+          <FormControl fullWidth margin="normal">
+            <FormLabel htmlFor="inline-gx-id" sx={{ color: "primary.main" }}>
+              GX ID
+            </FormLabel>
+            <TextField
+              required
+              id="inline-gx-id"
+              type="text"
+              variant="outlined"
+              onChange={(e) => setGX_ID(e.target.value)}
+              sx={{ mt: 1, input: { color: "primary.main" } }}
+            />
+          </FormControl>
 
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-description"
-          >
-            Description
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <textarea
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-description"
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-      </div>
+          <FormControl fullWidth margin="normal">
+            <FormLabel
+              htmlFor="inline-description"
+              sx={{ color: "primary.main" }}
+            >
+              Description
+            </FormLabel>
+            <TextField
+              required
+              id="inline-description"
+              type="text"
+              variant="outlined"
+              onChange={(e) => setDescription(e.target.value)}
+              sx={{ mt: 1, input: { color: "primary.main" } }}
+            />
+          </FormControl>
 
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
+          <FormControl fullWidth margin="normal">
+            <FormLabel htmlFor="inline-address" sx={{ color: "primary.main" }}>
+              Address
+            </FormLabel>
+            <TextField
+              required
+              id="inline-address"
+              type="text"
+              value={session?.user?.pkh}
+              InputProps={{ readOnly: true }}
+              variant="outlined"
+              sx={{ mt: 1, input: { color: "primary.main" } }}
+            />
+          </FormControl>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: 2,
+            }}
           >
-            Address
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
-            type="text"
-            value={session?.user?.pkh}
-            readOnly
-          />
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4"></div>
-        <div className="md:w-3/4">
-          <button disabled={isLoading}>Apply for Company Registration</button>
-        </div>
-      </div>
-    </form>
-  );
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+              color="success"
+              sx={{ boxShadow: "20" }}
+            >
+              Apply for Company Registration
+            </Button>
+          </Box>
+        </Box>
+      </>
+    );
+  };
 
   return (
-    <div className="relative flex justify-center min-h-screen">
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
-        </div>
-      )}
-      <main className="md:w-2/4 mt-10">
-        <h1>Register Your Company</h1>
-        <p className="mb-4">
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        mb: 10,
+        padding: "20px",
+      }}
+    >
+      <Modal
+        open={isLoading}
+        aria-labelledby="loading-modal-title"
+        aria-describedby="loading-modal-description"
+        closeAfterTransition
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box>
+          <CircularProgress />
+        </Box>
+      </Modal>
+      <Box maxWidth="md" sx={{ mt: 5, color: "primary.main" }}>
+        <Typography variant="h4" gutterBottom>
+          Register Your Company
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 4, color: "primary.main" }}>
           Registering your company here will allow you to issue employee
           credentials to your employees that are trusted by all other members of
           this consortium. For convenience, issuers can optionally use this web
           application to handle the process of issuing employee credentials.
-        </p>
-        <div>{form}</div>
-      </main>
-    </div>
+        </Typography>
+        {form()}
+      </Box>
+    </Box>
   );
 }
 
