@@ -16,6 +16,9 @@ import {
   Select,
   MenuItem,
   Button,
+  Modal,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 
 export default function ApplyAsEmployee(props: any) {
@@ -175,20 +178,39 @@ export default function ApplyAsEmployee(props: any) {
   };
 
   return (
-    <div className="flex justify-center min-h-screen">
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
-        </div>
-      )}
-      <main className="md:w-2/4 mt-10">
-        <h1>Register as an Employee</h1>
-        <p className="mb-4">
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        mb: 10,
+        padding: "20px",
+      }}
+    >
+      <Modal
+        open={isLoading}
+        aria-labelledby="loading-modal-title"
+        aria-describedby="loading-modal-description"
+        closeAfterTransition
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box>
+          <CircularProgress />
+        </Box>
+      </Modal>
+      <Box maxWidth="md" sx={{ mt: 5, color: "primary.main" }}>
+        <Typography variant="h4" gutterBottom>
+          Register as an Employee
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 4, color: "primary.main" }}>
           Register as an Employee for one of the registered companies.
-        </p>
+        </Typography>
         {form()}
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

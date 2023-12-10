@@ -67,66 +67,66 @@ export default function Apply() {
 
 export async function getServerSideProps(context: NextPageContext) {
   const session = await getSession(context);
-  // // if (!session) {
-  // //   console.log("No session found.");
-  // //   return {
-  // //     redirect: {
-  // //       destination: "/",
-  // //       permanent: false,
-  // //     },
-  // //   };
-  // // }
+  if (!session) {
+    console.log("No session found.");
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
-  // const registrars = await getRegistrars();
-  // if (registrars.includes(session.user.pkh)) {
-  //   return {
-  //     redirect: {
-  //       destination: "/issue/issueCompany",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
+  const registrars = await getRegistrars();
+  if (registrars.includes(session.user.pkh)) {
+    return {
+      redirect: {
+        destination: "/issue/issueCompany",
+        permanent: false,
+      },
+    };
+  }
 
-  // // TODO should first redirect to issuance page for companies with optional link to cred takeout
-  // const addressRole: any = await getAddressRolesFromDb(session.user.pkh);
-  // if (addressRole) {
-  //   const role = Array.isArray(addressRole)
-  //     ? addressRole[0].role
-  //     : addressRole.role;
+  // TODO should first redirect to issuance page for companies with optional link to cred takeout
+  const addressRole: any = await getAddressRolesFromDb(session.user.pkh);
+  if (addressRole) {
+    const role = Array.isArray(addressRole)
+      ? addressRole[0].role
+      : addressRole.role;
 
-  //   if (
-  //     role === ADDRESS_ROLES.COMPANY_APPROVED ||
-  //     role === ADDRESS_ROLES.EMPLOYEE_APPROVED
-  //   ) {
-  //     return {
-  //       redirect: {
-  //         destination: "/takeout",
-  //         role: role,
-  //         permanent: false,
-  //       },
-  //     };
-  //   } else if (
-  //     role === ADDRESS_ROLES.COMPANY_APPLIED ||
-  //     role === ADDRESS_ROLES.EMPLOYEE_APPLIED
-  //   ) {
-  //     return {
-  //       redirect: {
-  //         destination: "/common/pending",
-  //         permanent: false,
-  //       },
-  //     };
-  //   } else if (
-  //     role === ADDRESS_ROLES.COMPANY_REJECTED ||
-  //     role === ADDRESS_ROLES.EMPLOYEE_REJECTED
-  //   ) {
-  //     return {
-  //       redirect: {
-  //         destination: "/common/rejected",
-  //         permanent: false,
-  //       },
-  //     };
-  //   }
-  // }
+    if (
+      role === ADDRESS_ROLES.COMPANY_APPROVED ||
+      role === ADDRESS_ROLES.EMPLOYEE_APPROVED
+    ) {
+      return {
+        redirect: {
+          destination: "/takeout",
+          role: role,
+          permanent: false,
+        },
+      };
+    } else if (
+      role === ADDRESS_ROLES.COMPANY_APPLIED ||
+      role === ADDRESS_ROLES.EMPLOYEE_APPLIED
+    ) {
+      return {
+        redirect: {
+          destination: "/common/pending",
+          permanent: false,
+        },
+      };
+    } else if (
+      role === ADDRESS_ROLES.COMPANY_REJECTED ||
+      role === ADDRESS_ROLES.EMPLOYEE_REJECTED
+    ) {
+      return {
+        redirect: {
+          destination: "/common/rejected",
+          permanent: false,
+        },
+      };
+    }
+  }
 
   return {
     props: {},

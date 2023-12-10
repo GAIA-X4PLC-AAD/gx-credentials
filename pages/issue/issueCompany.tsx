@@ -14,6 +14,19 @@ import {
 } from "@/lib/registryInteraction";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 import { getApplicationsFromDb } from "@/lib/database";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  Button,
+  Modal,
+  CircularProgress,
+  TableContainer,
+} from "@mui/material";
 
 export default function IssueCompany(props: any) {
   const [applications, setApplications] = React.useState<CompanyApplication[]>(
@@ -110,100 +123,154 @@ export default function IssueCompany(props: any) {
     }
   };
 
-  const whiteShadow = {
-    boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
-  };
-
   return (
-    <main className="ml-20 mt-10">
-      <h2>Pending Company Applications</h2>
-      <div className="flex flex-col w-5/6">
-        <div
-          className="overflow-x-auto shadow rounded-lg border border-white"
-          style={whiteShadow}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        mb: 10,
+        mt: 5,
+        padding: "20px",
+      }}
+    >
+      <Box>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ color: "primary.main", fontWeight: "bold" }}
         >
-          <table className="min-w-full text-center text-sm font-light">
-            <thead className="border-b bg-gray-500 font-medium border-neutral-500 text-black">
-              <tr>
-                <th scope="col" className=" px-6 py-4">
-                  GX ID
-                </th>
-                <th scope="col" className=" px-6 py-4">
-                  Company Name
-                </th>
-                <th scope="col" className=" px-6 py-4">
-                  Public Key Hash
-                </th>
-                <th scope="col" className=" px-6 py-4">
-                  Description
-                </th>
-                <th scope="col" className=" px-6 py-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((application: any) => (
-                <tr
-                  className="border-b border-neutral-500"
-                  key={application.address}
+          Pending Company Applications
+        </Typography>
+        <Box
+          sx={{
+            width: "100%",
+            color: "primary.main",
+            borderRadius: "6px",
+            boxShadow: "20",
+            paddingX: { xs: "20px", md: "50px" }, // Add padding for spacing
+            paddingY: "30px",
+          }}
+        >
+          <Table sx={{ minWidth: 700 }}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "background.paper" }}>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
                 >
-                  <td className="whitespace-nowrap  px-6 py-4 font-medium">
-                    {application.gx_id}
-                  </td>
-                  <td className="whitespace-nowrap  px-6 py-4">
-                    {application.name}
-                  </td>
-                  <td className="whitespace-nowrap  px-6 py-4">
-                    {application.address}
-                  </td>
-                  <td className="whitespace-nowrap  px-6 py-4">
+                  GX ID
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                >
+                  Company Name
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                >
+                  Public Key Hash
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                >
+                  Description
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                ></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {applications.map((application) => (
+                <TableRow
+                  key={application.address}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell align="center">{application.gx_id}</TableCell>
+                  <TableCell align="center">{application.name}</TableCell>
+                  <TableCell align="center">{application.address}</TableCell>
+                  <TableCell align="center">
                     {application.description}
-                  </td>
-                  {application.status === "pending" ? (
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <button
-                        disabled={isProcessing}
-                        onClick={() => handleAcceptCompanyIssuance(application)}
-                        className="mr-2"
+                  </TableCell>
+                  <TableCell align="center">
+                    {application.status === "pending" ? (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={() =>
+                            handleAcceptCompanyIssuance(application)
+                          }
+                          disabled={isProcessing}
+                          sx={{ mr: 1 }}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() =>
+                            handleRejectCompanyIssuance(application)
+                          }
+                          disabled={isProcessing}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    ) : (
+                      <Typography
+                        sx={{
+                          bgcolor:
+                            application.status === "approved"
+                              ? "green.200"
+                              : "red.200",
+                          color:
+                            application.status === "approved"
+                              ? "green.800"
+                              : "red.700",
+                          borderRadius: 1,
+                          p: 1,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
-                        Accept
-                      </button>
-                      <button
-                        disabled={isProcessing}
-                        onClick={() => handleRejectCompanyIssuance(application)}
-                      >
-                        Reject
-                      </button>
-                    </td>
-                  ) : application.status === "approved" ? (
-                    <td>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">
-                        Approved
-                      </span>
-                    </td>
-                  ) : (
-                    <td>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  bg-red-200 text-red-700">
-                        Rejected
-                      </span>
-                    </td>
-                  )}
-                </tr>
+                        {application.status.charAt(0).toUpperCase() +
+                          application.status.slice(1)}
+                      </Typography>
+                    )}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {isProcessing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
-        </div>
-      )}
-    </main>
+            </TableBody>
+          </Table>
+        </Box>
+
+        {isProcessing && (
+          <Modal
+            open={isProcessing}
+            aria-labelledby="loading-modal-title"
+            aria-describedby="loading-modal-description"
+            closeAfterTransition
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress />
+          </Modal>
+        )}
+      </Box>
+    </Box>
   );
 }
 
 export async function getServerSideProps(context: NextPageContext) {
-  // const { getApplicationsFromDb } = require("../../lib/database");
   try {
     const session = await getSession(context);
     const registrars = await getRegistrars();
