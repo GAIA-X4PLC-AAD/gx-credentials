@@ -26,6 +26,8 @@ import {
   Modal,
   CircularProgress,
   TableContainer,
+  Container,
+  Chip,
 } from "@mui/material";
 
 export default function IssueCompany(props: any) {
@@ -126,146 +128,141 @@ export default function IssueCompany(props: any) {
   return (
     <Box
       sx={{
+        width: "100%",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
-        mb: 10,
-        mt: 5,
+        mb: 5,
         padding: "20px",
+        maxWidth: { xs: "100%", sm: "75%", md: "md", lg: "lg", xl: "xl" }, // Adjust maxWidth for different screen sizes
       }}
     >
-      <Box>
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{ color: "primary.main", fontWeight: "bold" }}
-        >
-          Pending Company Applications
-        </Typography>
-        <Box
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ color: "primary.main", fontWeight: "bold" }}
+      >
+        Pending Company Applications
+      </Typography>
+      <Box
+        sx={{
+          borderRadius: "6px",
+          boxShadow: 5,
+          overflow: "auto",
+          width: "100%",
+        }}
+      >
+        <Table
           sx={{
             width: "100%",
             color: "primary.main",
-            borderRadius: "6px",
-            boxShadow: "20",
-            paddingX: { xs: "20px", md: "50px" }, // Add padding for spacing
+            paddingX: { sm: "30px", md: "50px" }, // Adjust paddingX for different screen sizes
             paddingY: "30px",
           }}
         >
-          <Table sx={{ minWidth: 700 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "background.paper" }}>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
-                >
-                  GX ID
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
-                >
-                  Company Name
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
-                >
-                  Public Key Hash
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
-                >
-                  Description
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
-                ></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {applications.map((application) => (
-                <TableRow
-                  key={application.address}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell align="center">{application.gx_id}</TableCell>
-                  <TableCell align="center">{application.name}</TableCell>
-                  <TableCell align="center">{application.address}</TableCell>
-                  <TableCell align="center">
-                    {application.description}
-                  </TableCell>
-                  <TableCell align="center">
-                    {application.status === "pending" ? (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={() =>
-                            handleAcceptCompanyIssuance(application)
-                          }
-                          disabled={isProcessing}
-                          sx={{ mr: 1 }}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() =>
-                            handleRejectCompanyIssuance(application)
-                          }
-                          disabled={isProcessing}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    ) : (
-                      <Typography
-                        sx={{
-                          bgcolor:
-                            application.status === "approved"
-                              ? "green.200"
-                              : "red.200",
-                          color:
-                            application.status === "approved"
-                              ? "green.800"
-                              : "red.700",
-                          borderRadius: 1,
-                          p: 1,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
+          <TableHead>
+            <TableRow sx={{ bgcolor: "" }}>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              >
+                GX ID
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              >
+                Company Name
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              >
+                Public Key Hash
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              >
+                Description
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              ></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {applications.map((application) => (
+              <TableRow
+                key={application.address}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell align="center">{application.gx_id}</TableCell>
+                <TableCell align="center">{application.name}</TableCell>
+                <TableCell align="center">{application.address}</TableCell>
+                <TableCell align="center">{application.description}</TableCell>
+                <TableCell align="center">
+                  {application.status === "pending" ? (
+                    <>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={() => handleAcceptCompanyIssuance(application)}
+                        disabled={isProcessing}
+                        sx={{ mr: 1 }}
                       >
-                        {application.status.charAt(0).toUpperCase() +
-                          application.status.slice(1)}
-                      </Typography>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Box>
-
-        {isProcessing && (
-          <Modal
-            open={isProcessing}
-            aria-labelledby="loading-modal-title"
-            aria-describedby="loading-modal-description"
-            closeAfterTransition
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CircularProgress />
-          </Modal>
-        )}
+                        Accept
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleRejectCompanyIssuance(application)}
+                        disabled={isProcessing}
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  ) : (
+                    <Chip
+                      label={
+                        application.status.charAt(0).toUpperCase() +
+                        application.status.slice(1)
+                      }
+                      color={
+                        application.status === "approved" ? "success" : "error"
+                      }
+                      // sx={{
+                      //   borderRadius: 1,
+                      //   p: 1,
+                      //   display: "inline-flex",
+                      //   alignItems: "center",
+                      //   justifyContent: "center",
+                      // }}
+                    />
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Box>
+
+      {isProcessing && (
+        <Modal
+          open={isProcessing}
+          aria-labelledby="loading-modal-title"
+          aria-describedby="loading-modal-description"
+          closeAfterTransition
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Modal>
+      )}
     </Box>
   );
 }

@@ -114,7 +114,15 @@ export default function ApplyAsEmployee(props: any) {
           </FormLabel>
           <Select
             required
-            id="inline-company-name"
+            inputProps={{
+              MenuProps: {
+                MenuListProps: {
+                  sx: {
+                    backgroundColor: "white",
+                  },
+                },
+              },
+            }}
             value={companyName}
             onChange={(e) => {
               setCompanyName(e.target.value);
@@ -125,7 +133,7 @@ export default function ApplyAsEmployee(props: any) {
                 setCompanyId(selectedCompany[1]);
               }
             }}
-            sx={{ mt: 1, input: { color: "primary.main" } }}
+            sx={{ mt: 1, color: "primary.main" }}
             displayEmpty
           >
             <MenuItem value="" disabled>

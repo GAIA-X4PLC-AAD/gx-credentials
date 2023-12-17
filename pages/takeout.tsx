@@ -18,25 +18,42 @@ import {
   COLLECTIONS,
 } from "@/constants/constants";
 import {
-  Tab,
-  TabPanel,
   Tabs,
-  TabsBody,
-  TabsHeader,
-} from "@material-tailwind/react";
+  Tab,
+  Box,
+  CircularProgress,
+  Modal,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button,
+} from "@mui/material";
 import IssueEmployeeCredentialsTable from "../components/IssueEmployeeCredentialsTable";
 import { EmployeeApplication } from "@/types/CompanyApplication";
 import { issueEmployeeCredential } from "../lib/credentials";
 import axios from "axios";
 import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
+import DownloadIcon from "@mui/icons-material/Download";
+import WalletIcon from "@mui/icons-material/Wallet";
 
 export default function Takeout(props: any) {
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
     props.pendingEmployeeApplications,
   );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [tabValue, setTabValue] = useState("Takeout");
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    setTabValue(newValue);
+  };
+
+  // Show issuer's tab only if the user is a company
   const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
+
+  // Method to download credential as JSON file
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
@@ -46,6 +63,7 @@ export default function Takeout(props: any) {
     link.click();
   };
 
+  // Method to transfer credential to wallet
   const transferCredentialToWallet = async () => {
     await dAppClient!.requestSignPayload({
       signingType: SigningType.RAW,
@@ -54,16 +72,13 @@ export default function Takeout(props: any) {
     });
   };
 
-  const whiteShadow = {
-    boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
-  };
-
   function delay(milliseconds: number) {
     return new Promise((resolve) => {
       setTimeout(resolve, milliseconds);
     });
   }
 
+  // Method to handle accept issue employee credential click
   const handleEmployeeIssuance = async (application: EmployeeApplication) => {
     setIsProcessing(true); // Set processing state to true
     let credential = null;
@@ -113,6 +128,7 @@ export default function Takeout(props: any) {
       });
   };
 
+  // Method to handle reject employee issuance click
   const handleRejectEmployeeIssuance = async (
     application: EmployeeApplication,
   ) => {
@@ -142,88 +158,133 @@ export default function Takeout(props: any) {
   };
 
   const takeoutCredential = (
-    <div
-      className="overflow-x-auto shadow rounded-lg border border-white"
-      style={whiteShadow}
+    <Table
+      sx={{
+        width: "100%",
+        paddingX: { sm: "30px", md: "50px" }, // Adjust paddingX for different screen sizes
+        paddingY: "30px",
+      }}
     >
-      <table className="min-w-full text-center text-sm font-light">
-        <thead className="border-b bg-gray-500 font-medium border-neutral-500 text-black">
-          <tr>
-            <th scope="col" className=" px-6 py-4">
-              GX ID
-            </th>
-            <th scope="col" className=" px-6 py-4">
-              Company Name
-            </th>
-            <th scope="col" className=" px-6 py-4">
-              Public Key Hash
-            </th>
-            <th scope="col" className=" px-6 py-4"></th>
-          </tr>
-        </thead>
-        <tbody className="text-white">
-          {props.userCredentials.map((credential: any) => (
-            <tr className="border-b border-neutral-500" key={credential.id}>
-              <td className="whitespace-nowrap px-6 py-4 font-medium">
-                {
-                  credential.credentialSubject["gx:legalRegistrationNumber"][
-                    "gx:vatID"
-                  ]
-                }
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                {credential.credentialSubject["gx:legalName"]}
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                {credential.credentialSubject.id}
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                <button onClick={transferCredentialToWallet} className="mr-2">
-                  Beacon Wallet
-                </button>
-                <button onClick={() => downloadCredential(credential)}>
-                  Raw Download
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      <TableHead>
+        <TableRow>
+          <TableCell
+            align="center"
+            sx={{ fontWeight: "bold", color: "primary.main" }}
+          >
+            GX ID
+          </TableCell>
+          <TableCell
+            align="center"
+            sx={{ fontWeight: "bold", color: "primary.main" }}
+          >
+            Company Name
+          </TableCell>
+          <TableCell
+            align="center"
+            sx={{ fontWeight: "bold", color: "primary.main" }}
+          >
+            Public Key Hash
+          </TableCell>
+          <TableCell
+            align="center"
+            sx={{ fontWeight: "bold", color: "primary.main" }}
+          ></TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {props.userCredentials.map((credential: any) => (
+          <TableRow
+            key={credential.id}
+            sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+          >
+            <TableCell align="center" sx={{ color: "primary.main" }}>
+              {
+                credential.credentialSubject["gx:legalRegistrationNumber"][
+                  "gx:vatID"
+                ]
+              }
+            </TableCell>
+            <TableCell align="center" sx={{ color: "primary.main" }}>
+              {credential.credentialSubject["gx:legalName"]}
+            </TableCell>
+            <TableCell align="center" sx={{ color: "primary.main" }}>
+              {credential.credentialSubject.id}
+            </TableCell>
+            <TableCell align="center" sx={{ color: "primary.main" }}>
+              <Button
+                onClick={transferCredentialToWallet}
+                variant="contained"
+                startIcon={<WalletIcon />}
+              >
+                Beacon Wallet
+              </Button>
+              <Button
+                onClick={() => downloadCredential(credential)}
+                variant="contained"
+                sx={{
+                  m: 1,
+                }}
+                startIcon={<DownloadIcon />}
+              >
+                Raw Download
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 
   return (
-    <main className="ml-20 mt-10">
-      <div className="flex flex-col w-5/6">
-        <Tabs className="" value="Takeout">
-          <TabsHeader
-            style={{ display: "flex", justifyItems: "center", width: "50%" }}
-          >
-            <Tab value="Takeout">Takeout</Tab>
-            {showIssuerTab && <Tab value="Issue">Issue</Tab>}
-          </TabsHeader>
-          <TabsBody>
-            <TabPanel value="Takeout">{takeoutCredential}</TabPanel>
-            {showIssuerTab && (
-              <TabPanel value="Issue">
-                <IssueEmployeeCredentialsTable
-                  props={{
-                    applications: applications,
-                    handleEmployeeIssuance: handleEmployeeIssuance,
-                    handleRejectEmployeeIssuance: handleRejectEmployeeIssuance,
-                  }}
-                />
-              </TabPanel>
-            )}
-          </TabsBody>
+    <Box sx={{ mt: 2.5, width: "100%" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: { xs: "100%", md: "80%" }, // 100% on extra-small to medium screens, 80% on medium screens and above
+        }}
+      >
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          <Tab value="Takeout" label="Takeout" />
+          {showIssuerTab && <Tab value="Issue" label="Issue" />}
         </Tabs>
-      </div>
-      {isProcessing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
-        </div>
-      )}
-    </main>
+
+        <Box role="tabpanel" hidden={tabValue !== "Takeout"}>
+          {tabValue === "Takeout" && (
+            <Box
+              sx={{
+                overflow: "auto",
+                mt: 2,
+                borderRadius: "6px",
+                boxShadow: 5,
+                width: "100%",
+              }}
+            >
+              {takeoutCredential}
+            </Box>
+          )}
+        </Box>
+
+        <Box role="tabpanel" hidden={tabValue !== "Issue"}>
+          {tabValue === "Issue" && (
+            <IssueEmployeeCredentialsTable
+              props={{
+                applications: applications,
+                handleEmployeeIssuance: handleEmployeeIssuance,
+                handleRejectEmployeeIssuance: handleRejectEmployeeIssuance,
+              }}
+            />
+          )}
+        </Box>
+      </Box>
+
+      <Modal
+        open={isProcessing}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <CircularProgress />
+      </Modal>
+    </Box>
   );
 }
 
