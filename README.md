@@ -11,7 +11,7 @@ The operator of this web application hosts it as a trust anchor to enable identi
 | Component               | Generic Role       | Explanation                                                                                                    |
 | ----------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
 | Next.js App             | Frontend & Backend | Website provides a user interface with a backend for session management and authenticated database operations. |
-| Firestore               | Database           | Stores applications for credentials and the credentials themselves.                                            |
+| MongoDB                 | Database           | Stores applications for credentials and the credentials themselves.                                            |
 | Registry Smart Contract | Smart Contract     | Securely administrates issuer keys for the trust anchor. Logs credential issuance and enables revocation.      |
 
 ## User Stories
