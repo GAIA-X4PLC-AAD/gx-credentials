@@ -1,5 +1,19 @@
 import { createTheme } from "@mui/material/styles";
+declare module "@mui/material/styles" {
+  interface Palette {
+    myAwesomeColor: Palette["primary"];
+  }
+  interface PaletteOptions {
+    myAwesomeColor: PaletteOptions["primary"];
+  }
+}
 
+declare module "@mui/material/Button" {
+  interface ButtonPropsColorOverrides {
+    myAwesomeColor: true;
+  }
+}
+const { palette } = createTheme();
 const theme = createTheme({
   palette: {
     primary: {
@@ -10,6 +24,12 @@ const theme = createTheme({
         "linear-gradient(to bottom right, #B900FF -5%, #000094 85%, #46DAFF 110%)",
       paper:
         "radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(188,78,156,1) 39%, rgba(252,70,107,1) 95%)",
+    },
+    text: {
+      primary: "#ffffff", // white color for text
+    },
+    myAwesomeColor: {
+      main: "linear-gradient(to bottom right, #B900FF -5%, #000094 85%, #46DAFF 110%)", // Custom Color 2
     },
   },
   breakpoints: {

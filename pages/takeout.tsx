@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
+import Backdrop from "@mui/material/Backdrop";
 import { NextPageContext } from "next";
 import {
   getAddressRolesFromDb,
@@ -38,6 +39,7 @@ import axios from "axios";
 import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 import DownloadIcon from "@mui/icons-material/Download";
 import WalletIcon from "@mui/icons-material/Wallet";
+import { ComplianceModal } from "@/components/ComplianceModal";
 
 export default function Takeout(props: any) {
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
@@ -228,6 +230,7 @@ export default function Takeout(props: any) {
               >
                 Raw Download
               </Button>
+              <ComplianceModal credential={props.userCredentials} />
             </TableCell>
           </TableRow>
         ))}
@@ -241,7 +244,7 @@ export default function Takeout(props: any) {
         sx={{
           display: "flex",
           flexDirection: "column",
-          width: { xs: "100%", md: "80%" }, // 100% on extra-small to medium screens, 80% on medium screens and above
+          width: { xs: "100%", md: "90%" }, // 100% on extra-small to medium screens, 80% on medium screens and above
         }}
       >
         <Tabs value={tabValue} onChange={handleTabChange}>

@@ -12,6 +12,7 @@ import { useProtected } from "@/hooks/useProtected";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 import { Box, Button, Typography } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout"; // Importing an icon for the logout button
+import { red } from "@mui/material/colors";
 
 function Header() {
   const handleSignout = useProtected();
@@ -38,16 +39,19 @@ function Header() {
         sx={{
           mt: 1,
           width: { xs: "60%", md: "auto" },
-          background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+          background: red[500],
           ":hover": {
-            background: "linear-gradient(45deg, #FF4176 30%, #FF7350 90%)",
+            background: red[300],
             transform: "scale(1.05)",
           },
           color: "white",
           boxShadow: "3px 3px 5px rgba(0, 0, 0, 0.5)",
         }}
       >
-        <Typography variant="caption" sx={{ textTransform: "none" }}>
+        <Typography
+          variant="caption"
+          sx={{ textTransform: "none", fontWeight: "bold" }}
+        >
           Logout
         </Typography>
       </Button>
