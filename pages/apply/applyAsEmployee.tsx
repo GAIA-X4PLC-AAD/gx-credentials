@@ -20,6 +20,7 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
+import { grey } from "@mui/material/colors";
 
 export default function ApplyAsEmployee(props: any) {
   const { data: session } = useSession();
@@ -84,7 +85,14 @@ export default function ApplyAsEmployee(props: any) {
             type="text"
             variant="outlined"
             onChange={(e) => setName(e.target.value)}
-            sx={{ mt: 1, input: { color: "primary.main" } }}
+            sx={{
+              mt: 1,
+              input: {
+                color: "black",
+                backgroundColor: "white",
+                borderRadius: "10px",
+              },
+            }}
           />
         </FormControl>
 
@@ -100,7 +108,14 @@ export default function ApplyAsEmployee(props: any) {
             variant="outlined"
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
-            sx={{ mt: 1, input: { color: "primary.main" } }}
+            sx={{
+              mt: 1,
+              input: {
+                color: "black",
+                backgroundColor: "primary.main",
+                borderRadius: "10px",
+              },
+            }}
           />
         </FormControl>
 
@@ -118,7 +133,8 @@ export default function ApplyAsEmployee(props: any) {
               MenuProps: {
                 MenuListProps: {
                   sx: {
-                    backgroundColor: "white",
+                    backgroundColor: "primary.main",
+                    color: "black",
                   },
                 },
               },
@@ -133,7 +149,17 @@ export default function ApplyAsEmployee(props: any) {
                 setCompanyId(selectedCompany[1]);
               }
             }}
-            sx={{ mt: 1, color: "primary.main" }}
+            sx={{
+              mt: 1,
+              color: "black",
+              backgroundColor: "primary.main",
+              ".MuiSelect-select": {
+                backgroundColor: "primary.main",
+                color: "black",
+                borderRadius: "10px",
+              },
+              borderRadius: "10px",
+            }}
             displayEmpty
           >
             <MenuItem value="" disabled>
@@ -159,7 +185,14 @@ export default function ApplyAsEmployee(props: any) {
             value={session?.user?.pkh}
             InputProps={{ readOnly: true }}
             variant="outlined"
-            sx={{ mt: 1, input: { color: "primary.main" } }}
+            sx={{
+              mt: 1,
+              input: {
+                color: "black",
+                backgroundColor: "primary.main",
+                borderRadius: "10px",
+              },
+            }}
           />
         </FormControl>
 
