@@ -16,6 +16,7 @@
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.14.19",
     "@spruceid/didkit-wasm": "^0.2.1",
+    "@tanstack/react-query": "^5.17.19",
     "@taquito/taquito": "^16.1.2",
     "@taquito/utils": "^16.1.2",
     "@types/node": "18.15.13",

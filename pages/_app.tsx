@@ -13,6 +13,7 @@ import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 import { Box, Button, Typography } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout"; // Importing an icon for the logout button
 import { red } from "@mui/material/colors";
+import { ClearingHousesProvider } from "@/contexts/ClearingHousesContext";
 
 function Header() {
   const handleSignout = useProtected();
@@ -63,8 +64,10 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeRegistry>
       <SessionProvider session={pageProps.session}>
-        <Header />
-        <Component {...pageProps} />
+        <ClearingHousesProvider>
+          <Header />
+          <Component {...pageProps} />
+        </ClearingHousesProvider>
       </SessionProvider>
     </ThemeRegistry>
   );
