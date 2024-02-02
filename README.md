@@ -11,7 +11,7 @@ The operator of this web application hosts it as a trust anchor to enable identi
 | Component               | Generic Role       | Explanation                                                                                                    |
 | ----------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
 | Next.js App             | Frontend & Backend | Website provides a user interface with a backend for session management and authenticated database operations. |
-| Firestore               | Database           | Stores applications for credentials and the credentials themselves.                                            |
+| MongoDB                 | Database           | Stores applications for credentials and the credentials themselves.                                            |
 | Registry Smart Contract | Smart Contract     | Securely administrates issuer keys for the trust anchor. Logs credential issuance and enables revocation.      |
 
 ## User Stories
@@ -141,7 +141,7 @@ ngrok http 3000
 Then, run the docker-compose file to start the development server:
 
 ```bash
-GLOBAL_SERVER_URL="ngrok url" docker-compose up --build
+GLOBAL_SERVER_URL="ngrok url" docker compose up --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -162,6 +162,6 @@ If you want to develop locally with hot reloading, you can uncomment the below l
           path: package.json
 ```
 
-Then run the following command (Assuming you have already built the image using `docker-compose build`):
+Then run the following command (Assuming you have already built the image using `docker compose build`):
 
-`docker-compose watch`
+`docker compose watch`
