@@ -7,6 +7,13 @@ import { requestRequiredPermissions, dAppClient } from "../config/wallet";
 import { useEffect } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
+import {
+  JWKFromTezos,
+  keyToVerificationMethod,
+  verifyCredential,
+} from "@spruceid/didkit-wasm";
+import base64url from "base64url";
+import * as jose from "jose";
 
 export default function Home(props: any) {
   useEffect(() => {
@@ -66,12 +73,40 @@ export default function Home(props: any) {
       const dappUrl = "gx-credentials.example.com";
       const ISO8601formatedTimestamp = new Date().toISOString();
       const input = "GX Credentials Login";
-      const formattedInput: string = [
-        "Tezos Signed Message:",
-        dappUrl,
-        ISO8601formatedTimestamp,
-        input,
-      ].join(" ");
+
+      const jwtHeader = {
+        alg: "EdDSA",
+        typ: "JWT",
+        kid: "did:example:abfe13f712120431c276e12ecab#keys-1",
+      };
+
+      const jwtPayload = {
+        sub: "did:example:ebfeb1f712ebc6f1c276e12ec21",
+        jti: "http://example.edu/credentials/3732",
+        iss: "https://example.com/keys/foo.jwk",
+        nbf: 1541493724,
+        iat: 1541493724,
+        exp: 1573029723,
+        nonce: "660!6345FSer",
+        vc: {
+          "@context": [
+            "https://www.w3.org/2018/credentials/v1",
+            "https://www.w3.org/2018/credentials/examples/v1",
+          ],
+          type: ["VerifiableCredential", "UniversityDegreeCredential"],
+          credentialSubject: {
+            degree: {
+              type: "BachelorDegree",
+              name: "Bachelor of Science and Arts",
+            },
+          },
+        },
+      };
+
+      const formattedInput: string =
+        base64url(JSON.stringify(jwtHeader)) +
+        "." +
+        base64url(JSON.stringify(jwtPayload));
 
       const payloadBytes = payloadBytesFromString(formattedInput);
 
@@ -82,13 +117,27 @@ export default function Home(props: any) {
       };
       const response = await dAppClient!.requestSignPayload(payload);
 
-      signIn("credentials", {
-        pkh: activeAddress,
-        pk: activePk,
-        formattedInput,
-        signature: response.signature,
-        callbackUrl,
-      });
+      const jwtvc = formattedInput + "." + base64url(response.signature);
+      console.log(response);
+      console.log(jwtvc);
+
+      const alg = "EdDSA";
+      const jwk = JSON.parse(await JWKFromTezos(activePk));
+      jwk.alg = alg;
+      console.log(jwk);
+      const publicKey = await jose.importJWK(jwk, alg);
+      console.log(publicKey);
+      const verifyResult = await jose.jwtVerify(jwtvc, publicKey);
+
+      console.log(verifyResult);
+
+      // signIn("credentials", {
+      //   pkh: activeAddress,
+      //   pk: activePk,
+      //   formattedInput,
+      //   signature: response.signature,
+      //   callbackUrl,
+      // });
     } catch (error) {
       window.alert(error);
     }
