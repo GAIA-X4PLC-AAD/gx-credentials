@@ -7,15 +7,13 @@ import {
   JWKFromTezos,
   prepareIssueCredential,
   verifyCredential,
-} from "@spruceid/didkit-wasm";
+} from "@spruceid/didkit-wasm-node";
 import type {
   CompanyApplication,
   EmployeeApplication,
 } from "../types/CompanyApplication";
 import { dAppClient } from "../config/wallet";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
-import { setAddressRoleInDb } from "./database";
-import { ADDRESS_ROLES } from "@/constants/constants";
 
 export const credentialOutputDescriptor = {
   id: "Gaia-X Participant Credential",

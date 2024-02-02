@@ -1,0 +1,36 @@
+/*
+ * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+namespace GXCRegistry {
+    export type storage = { owner: address, registrars: set<address> };
+    type ret = [list<operation>, storage];
+    @entry
+    const add_registrar = (acc: address, store: storage): ret => {
+        if (Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, registrars: Set.add(acc, store.registrars) }
+            ];
+        };
+    }
+    @entry
+    const remove_registrar = (acc: address, store: storage): ret => {
+        if (Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, registrars: Set.remove(acc, store.registrars) }
+            ];
+        };
+    }
+}
+
+// storage init
+/*
+{owner:"tz1RvTJhbVPas1sCPDUQknNLXDdjWyF2hMXe" as address,registrars: Set.empty}
+*/
+// TODO add optimized status list back at later point (could also be secondary contract)

@@ -96,51 +96,6 @@ export const getCredentialsFromDb = async (coll: string, address: string) => {
   }
 };
 
-// Function to add or update an address-role document in MongoDB
-export async function setAddressRoleInDb(address: string, role: string) {
-  try {
-    const { db } = await connectToDatabase();
-    const collection = db.collection(COLLECTIONS.ADDRESS_ROLES);
-    const filter = { address: address };
-
-    const document = await collection.findOne(filter);
-
-    if (document) {
-      // Update the document
-      await collection.updateOne(filter, { $set: { role: role } });
-    } else {
-      // Create the document
-      await collection.insertOne({ address: address, role: role });
-    }
-  } catch (error) {
-    console.log("Error setting AddressRole document: ", error);
-    return false;
-  }
-  console.log("AddressRole document successfully set!");
-  return true;
-}
-
-export async function getAddressRolesFromDb(address?: string) {
-  try {
-    const { db } = await connectToDatabase();
-    const collection = db.collection(COLLECTIONS.ADDRESS_ROLES);
-
-    if (address) {
-      const filter = { address: address };
-      const document = await collection.findOne(filter);
-
-      return document ? document : null;
-    } else {
-      const docs = await collection.find().toArray();
-      return docs;
-    }
-  } catch (error) {
-    console.log("Error getting AddressRole document: ", error);
-    return null;
-  }
-}
-
-// Function to update the application status in MongoDB
 export const updateApplicationStatusInDb = async (
   collectionName: string, // Name of the MongoDB collection
   address: string, // Address to identify the document to update
@@ -166,8 +121,7 @@ export const updateApplicationStatusInDb = async (
   }
 };
 
-// Function to add credential in MongoDB
-export const addCredentialInDb = async (
+export const addCredentialToDb = async (
   collectionName: string,
   credential: any,
 ) => {
@@ -183,26 +137,6 @@ export const addCredentialInDb = async (
     console.log("Document successfully added!");
   } catch (error) {
     console.log("Error adding document: ", error);
-    throw new Error(String(error));
-  }
-};
-
-// Function to revoke credential in MongoDB
-export const revokeCredentialInDb = async (
-  collectionName: string,
-  credentialId: string,
-) => {
-  try {
-    const { db } = await connectToDatabase();
-    const collection = db.collection(collectionName);
-    const filter = { _id: new ObjectId(credentialId) };
-
-    await collection.updateOne(filter, {
-      $set: { status: APPLICATION_STATUS.REVOKED },
-    });
-    console.log("Document successfully updated!");
-  } catch (error) {
-    console.log("Error updating document: ", error);
     throw new Error(String(error));
   }
 };

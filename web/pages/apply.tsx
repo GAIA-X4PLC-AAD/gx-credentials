@@ -7,8 +7,12 @@ import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import Link from "next/link";
 import { getRegistrars } from "../lib/registryInteraction";
-import { getAddressRolesFromDb } from "@/lib/database";
-import { ADDRESS_ROLES } from "@/constants/constants";
+import {
+  getTrustedIssuersFromDb,
+  getCredentialsFromDb,
+  getApplicationsFromDb,
+} from "@/lib/database";
+import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
 export default function Apply() {
   return (
@@ -43,6 +47,7 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
+  // user is a registrar
   const registrars = await getRegistrars();
   if (registrars.includes(session.user.pkh)) {
     return {
@@ -53,48 +58,12 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  // TODO should first redirect to issuance page for companies with optional link to cred takeout
-  const addressRole: any = await getAddressRolesFromDb(session.user.pkh);
-  if (addressRole) {
-    const role = Array.isArray(addressRole)
-      ? addressRole[0].role
-      : addressRole.role;
-
-    if (
-      role === ADDRESS_ROLES.COMPANY_APPROVED ||
-      role === ADDRESS_ROLES.EMPLOYEE_APPROVED
-    ) {
-      return {
-        redirect: {
-          destination: "/takeout",
-          role: role,
-          permanent: false,
-        },
-      };
-    } else if (
-      role === ADDRESS_ROLES.COMPANY_APPLIED ||
-      role === ADDRESS_ROLES.EMPLOYEE_APPLIED
-    ) {
-      return {
-        redirect: {
-          destination: "/common/pending",
-          permanent: false,
-        },
-      };
-    } else if (
-      role === ADDRESS_ROLES.COMPANY_REJECTED ||
-      role === ADDRESS_ROLES.EMPLOYEE_REJECTED
-    ) {
-      return {
-        redirect: {
-          destination: "/common/rejected",
-          permanent: false,
-        },
-      };
-    }
-  }
-
+  // every other user should go to the takeout page
+  // we provide further options there
   return {
-    props: {},
+    redirect: {
+      destination: "/takeout",
+      permanent: false,
+    },
   };
 }

@@ -11,10 +11,12 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
-        "lacroixdavid1.vscode-format-context-menu"
+        "lacroixdavid1.vscode-format-context-menu",
+        "ligolang-publish.ligo-vscode"
       ]
     }
-  }
+  },
+  "postCreateCommand": "wget https://gitlab.com/ligolang/ligo/-/jobs/6056572676/artifacts/raw/ligo.deb && sudo apt install ./ligo.deb && rm ligo.deb"
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},

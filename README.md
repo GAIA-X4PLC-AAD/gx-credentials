@@ -127,7 +127,6 @@ NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT=deployedContract
 
 GLOBAL_SERVER_URL=yourTunnelURL (ngrok url)
 MONGODB_URI=mongodb://admin:password123@mongo:27017?retryWrites=true&w=majority
-
 ```
 
 ### Starting the Development Server

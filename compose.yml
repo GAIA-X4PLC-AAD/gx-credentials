@@ -14,7 +14,7 @@ services:
 
   web:
     build:
-      context: .
+      context: ./web
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -22,16 +22,6 @@ services:
       - mongo
     environment:
       - GLOBAL_SERVER_URL=${GLOBAL_SERVER_URL}
-    # Uncomment below when you want to develop locally with docker
-    develop:
-      watch:
-        - action: sync
-          path: ./
-          target: /app
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: package.json
 
 volumes:
   gxc-mongo-data:

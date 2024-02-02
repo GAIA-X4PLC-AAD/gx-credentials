@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import {
-  getAddressRolesFromDb,
   getCredentialsFromDb,
   getApplicationsFromDb,
 } from "../lib/database";
