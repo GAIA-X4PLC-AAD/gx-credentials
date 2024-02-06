@@ -5,20 +5,17 @@
 import React, { useState } from "react";
 import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { issueCompanyCredential } from "../../lib/credentials";
+import { issueCompanyCredential } from "@/lib/credentials";
 import { CompanyApplication } from "@/types/CompanyApplication";
 import axios from "axios";
-import {
-  getRegistrars,
-  writeTrustedIssuerLog,
-} from "@/lib/registryInteraction";
+import { getRegistrars } from "@/lib/registryInteraction";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 import { getApplicationsFromDb } from "@/lib/database";
 
 export default function IssueCompany(props: any) {
-  const [applications, setApplications] = React.useState<CompanyApplication[]>(
-    props.pendingCompanyApplications,
-  );
+   const [applications, setApplications] = React.useState<CompanyApplication[]>(
+     props.pendingCompanyApplications,
+   );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   function delay(milliseconds: number) {
@@ -43,14 +40,7 @@ export default function IssueCompany(props: any) {
 
     await delay(2000);
 
-    try {
-      // write credential issuance to issuer registry
-      await writeTrustedIssuerLog(application.address);
-    } catch (error) {
-      setIsProcessing(false);
-      console.log("Error publishing credential to issuer registry: ", error);
-      return;
-    }
+    // TODO status list write
 
     // Update database with credential issuance
     axios
@@ -203,7 +193,6 @@ export default function IssueCompany(props: any) {
 }
 
 export async function getServerSideProps(context: NextPageContext) {
-  // const { getApplicationsFromDb } = require("../../lib/database");
   try {
     const session = await getSession(context);
     const registrars = await getRegistrars();
@@ -227,9 +216,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
     return {
       props: {
-        pendingCompanyApplications: await getApplicationsFromDb(
-          COLLECTIONS.COMPANY_APPLICATIONS,
-        ),
+        pendingCompanyApplications: await getApplicationsFromDb(COLLECTIONS.COMPANY_APPLICATIONS),
       },
     };
   } catch (error) {

@@ -8,11 +8,7 @@ import { NextPageContext } from "next";
 import { getCredentialsFromDb, getApplicationsFromDb } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
-import {
-  ADDRESS_ROLES,
-  APPLICATION_STATUS,
-  COLLECTIONS,
-} from "@/constants/constants";
+import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 import {
   Tab,
   TabPanel,
@@ -24,7 +20,6 @@ import IssueEmployeeCredentialsTable from "../components/IssueEmployeeCredential
 import { EmployeeApplication } from "@/types/CompanyApplication";
 import { issueEmployeeCredential } from "../lib/credentials";
 import axios from "axios";
-import { writeTrustedIssuerLog } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
   const [applications, setApplications] = React.useState<EmployeeApplication[]>(
@@ -32,7 +27,7 @@ export default function Takeout(props: any) {
   );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  const showIssuerTab = props.coll == COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
+  const showIssuerTab = props.isIssuer;
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
@@ -75,14 +70,7 @@ export default function Takeout(props: any) {
 
     await delay(2000);
 
-    try {
-      // write credential issuance to issuer registry
-      await writeTrustedIssuerLog(application.address);
-    } catch (error) {
-      console.log("Error publishing credential to issuer registry: ", error);
-      setIsProcessing(false);
-      return;
-    }
+    // TODO status list write
 
     // Update database with credential issuance
     axios
@@ -234,36 +222,27 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const addressRole: any = await getAddressRolesFromDb(session.user!.pkh);
-  const role = addressRole
-    ? Array.isArray(addressRole)
-      ? addressRole[0].role
-      : addressRole.role
-    : null;
-  let coll = "";
-  if (role === ADDRESS_ROLES.COMPANY_APPROVED) {
-    coll = COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
-  } else if (role === ADDRESS_ROLES.EMPLOYEE_APPROVED) {
-    coll = COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS;
-  } else {
-    return {
-      redirect: {
-        destination: "/common/unauthorised",
-        permanent: false,
-      },
-    };
-  }
+  const dbCredentials1 = (
+    await getCredentialsFromDb(
+      COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+      session.user!.pkh,
+    )
+  ).map((wrapper: any) => wrapper.credential);
+  const dbCredentials2 = (
+    await getCredentialsFromDb(
+      COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS,
+      session.user!.pkh,
+    )
+  ).map((wrapper: any) => wrapper.credential);
 
   return {
     props: {
-      userCredentials: (
-        await getCredentialsFromDb(coll, session.user!.pkh)
-      ).map((wrapper: any) => wrapper.credential),
+      userCredentials: dbCredentials1.push(...dbCredentials2),
       pendingEmployeeApplications: await getApplicationsFromDb(
         COLLECTIONS.EMPLOYEE_APPLICATIONS,
         session.user!.pkh,
       ),
-      coll,
+      isIssuer: dbCredentials1.length > 0,
       apiHost: process.env.GLOBAL_SERVER_URL,
     },
   };

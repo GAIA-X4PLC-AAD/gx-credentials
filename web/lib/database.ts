@@ -7,7 +7,7 @@ import {
   EmployeeApplication,
 } from "@/types/CompanyApplication";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { connectToDatabase } from "@/config/mongo";
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
@@ -139,4 +139,23 @@ export const addCredentialToDb = async (
     console.log("Error adding document: ", error);
     throw new Error(String(error));
   }
+};
+
+export const userHasCredentialOrApplication = async (address: string) => {
+  // TODO return true if the user has a credential or application in the database
+  if (
+    (await getApplicationsFromDb(COLLECTIONS.COMPANY_APPLICATIONS)).filter(
+      (doc) =>
+        doc.address === address && doc.status != APPLICATION_STATUS.REJECTED,
+    ).length > 0
+  )
+    return true;
+  if (
+    (await getApplicationsFromDb(COLLECTIONS.EMPLOYEE_APPLICATIONS)).filter(
+      (doc) =>
+        doc.address === address && doc.status != APPLICATION_STATUS.REJECTED,
+    ).length > 0
+  )
+    return true;
+  return false;
 };

@@ -11,6 +11,7 @@ import {
   getTrustedIssuersFromDb,
   getCredentialsFromDb,
   getApplicationsFromDb,
+  userHasCredentialOrApplication
 } from "@/lib/database";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
@@ -52,18 +53,23 @@ export async function getServerSideProps(context: NextPageContext) {
   if (registrars.includes(session.user.pkh)) {
     return {
       redirect: {
-        destination: "/issue/issueCompany",
+        destination: "/issue",
         permanent: false,
       },
     };
   }
 
-  // every other user should go to the takeout page
-  // we provide further options there
-  return {
-    redirect: {
-      destination: "/takeout",
-      permanent: false,
-    },
-  };
+  // user has at least one credential or application
+  const isKnownUser = await userHasCredentialOrApplication(session.user.pkh);
+  if (registrars.includes(session.user.pkh)) {
+    return {
+      redirect: {
+        destination: "/takeout",
+        permanent: false,
+      },
+    };
+  }
+
+  // every other user should apply
+  return {};
 }

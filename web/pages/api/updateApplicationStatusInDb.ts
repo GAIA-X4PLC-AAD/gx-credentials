@@ -1,11 +1,7 @@
-import {
-  setAddressRoleInDb,
-  updateApplicationStatusInDb,
-} from "@/lib/database";
+import { updateApplicationStatusInDb } from "@/lib/database";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ADDRESS_ROLES } from "@/constants/constants";
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,7 +17,6 @@ export default async function handler(
       console.log("Status: ", status);
 
       await updateApplicationStatusInDb(collection, address, status);
-      await setAddressRoleInDb(address, ADDRESS_ROLES.EMPLOYEE_REJECTED);
 
       res.status(200).json({
         message: "Application status and Address role updated successfully",

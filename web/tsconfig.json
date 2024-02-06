@@ -19,6 +19,6 @@
     },
     "typeRoots": ["./types"]
   },
-  "include": ["next-env.d.ts", "types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "types/**/*.ts", "**/*.ts", "**/*.tsx", "jest.config.mjs", "jest-mongodb-config.js"],
   "exclude": ["node_modules"]
 }

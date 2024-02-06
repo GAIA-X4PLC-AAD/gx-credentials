@@ -3,20 +3,23 @@
 {
   "name": "GX Credentials",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-18",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   "customizations": {
     "vscode": {
       "extensions": [
+        "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "lacroixdavid1.vscode-format-context-menu",
         "ligolang-publish.ligo-vscode",
         "github.vscode-github-actions"
       ]
     }
-  }
+  },
+  "postCreateCommand": "curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh && sudo bash nodesource_setup.sh && sudo apt install -y nodejs && sudo npm install -g tslint-to-eslint-config typescript && sudo rm nodesource_setup.sh",
+  "runArgs": ["--network=host"]
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},

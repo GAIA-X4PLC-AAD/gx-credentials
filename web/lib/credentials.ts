@@ -7,7 +7,7 @@ import {
   JWKFromTezos,
   prepareIssueCredential,
   verifyCredential,
-} from "@spruceid/didkit-wasm-node";
+} from "@spruceid/didkit-wasm";
 import type {
   CompanyApplication,
   EmployeeApplication,

@@ -9,6 +9,7 @@ export interface CompanyApplication {
   address: string;
   timestamp: string;
   status: string;
+  _id?: string;
 }
 
 export interface EmployeeApplication {
@@ -19,4 +20,5 @@ export interface EmployeeApplication {
   address: string;
   timestamp: string;
   status: string;
+  _id?: string;
 }

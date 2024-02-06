@@ -6,12 +6,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  addCredentialInDb,
-  setAddressRoleInDb,
-  updateApplicationStatusInDb,
-} from "@/lib/database";
-import { ADDRESS_ROLES, COLLECTIONS } from "@/constants/constants";
+import { addCredentialToDb, updateApplicationStatusInDb } from "@/lib/database";
+import { COLLECTIONS } from "@/constants/constants";
 
 // This is the publishCredential API route that is called by the frontend to publish a credential to the database.
 // It generates the credential from the application data , writes it to database, and updates the application status.
@@ -49,24 +45,17 @@ export default async function handler(
 // Helper function to write credential to db and update Address Role status
 const writeTrustedIssuerCredential = async (credential: any, role: string) => {
   try {
-    let collection = "",
-      addressRoleStatus = "";
+    let collection = "";
     switch (role) {
       case "company":
         collection = COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
-        addressRoleStatus = ADDRESS_ROLES.COMPANY_APPROVED;
         break;
       case "employee":
         collection = COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS;
-        addressRoleStatus = ADDRESS_ROLES.EMPLOYEE_APPROVED;
         break;
     }
 
-    await addCredentialInDb(collection, credential);
-    await setAddressRoleInDb(
-      credential.credentialSubject.id.split(":").pop(),
-      addressRoleStatus,
-    );
+    await addCredentialToDb(collection, credential);
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
