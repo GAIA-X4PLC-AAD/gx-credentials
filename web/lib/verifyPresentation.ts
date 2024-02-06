@@ -2,7 +2,10 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
-import { verifyCredential, verifyPresentation } from "@spruceid/didkit-wasm-node";
+import {
+  verifyCredential,
+  verifyPresentation,
+} from "@spruceid/didkit-wasm-node";
 
 /**
  * Verify the given Verifiable Presentation object, which is expected to contain a credential of type "TezosAssociatedAddress" specifically. This is a specialized method and probably not safe for general use.

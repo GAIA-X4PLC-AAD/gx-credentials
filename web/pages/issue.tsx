@@ -13,9 +13,9 @@ import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 import { getApplicationsFromDb } from "@/lib/database";
 
 export default function IssueCompany(props: any) {
-   const [applications, setApplications] = React.useState<CompanyApplication[]>(
-     props.pendingCompanyApplications,
-   );
+  const [applications, setApplications] = React.useState<CompanyApplication[]>(
+    props.pendingCompanyApplications,
+  );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   function delay(milliseconds: number) {
@@ -216,7 +216,9 @@ export async function getServerSideProps(context: NextPageContext) {
 
     return {
       props: {
-        pendingCompanyApplications: await getApplicationsFromDb(COLLECTIONS.COMPANY_APPLICATIONS),
+        pendingCompanyApplications: await getApplicationsFromDb(
+          COLLECTIONS.COMPANY_APPLICATIONS,
+        ),
       },
     };
   } catch (error) {

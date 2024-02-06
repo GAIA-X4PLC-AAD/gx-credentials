@@ -11,7 +11,7 @@ import {
   getTrustedIssuersFromDb,
   getCredentialsFromDb,
   getApplicationsFromDb,
-  userHasCredentialOrApplication
+  userHasCredentialOrApplication,
 } from "@/lib/database";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 
