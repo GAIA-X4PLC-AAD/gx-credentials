@@ -5,10 +5,7 @@
 import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import {
-  getCredentialsFromDb,
-  getApplicationsFromDb,
-} from "../lib/database";
+import { getCredentialsFromDb, getApplicationsFromDb } from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
 import {
