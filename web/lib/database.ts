@@ -124,9 +124,8 @@ export const getWrappedEmployeeCredentialsFromDb = async (address?: string) => {
 
 export const getWrappedCredentialsFromDb = async (address: string) => {
   const companyCredentials = await getWrappedCompanyCredentialsFromDb(address);
-  const employeeCredentials = await getWrappedEmployeeCredentialsFromDb(
-    address,
-  );
+  const employeeCredentials =
+    await getWrappedEmployeeCredentialsFromDb(address);
   return [...companyCredentials, ...employeeCredentials].sort(
     (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
   );

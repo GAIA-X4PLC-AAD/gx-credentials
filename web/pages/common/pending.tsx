@@ -11,9 +11,7 @@ function pending() {
   return (
     <div className="ml-6">
       <div>
-        <b>
-          Thank you for submitting your request. It is under review.
-        </b>
+        <b>Thank you for submitting your request. It is under review.</b>
       </div>
       <button onClick={() => router.push("/takeout")} className="mt-2">
         Continue

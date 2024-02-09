@@ -11,23 +11,31 @@ import {
 } from "@/lib/database";
 import { COLLECTIONS, APPLICATION_STATUS } from "@/constants/constants";
 
-describe('writeApplicationToDb', () => {
-  it('should write a CompanyApplication to the database', async () => {
-    const application = { /* create a CompanyApplication object */ };
+describe("writeApplicationToDb", () => {
+  it("should write a CompanyApplication to the database", async () => {
+    const application = {
+      /* create a CompanyApplication object */
+    };
     const result = await writeApplicationToDb(application);
     expect(result).toBe(true);
   });
 
-  it('should write an EmployeeApplication to the database', async () => {
-    const application = { /* create an EmployeeApplication object */ };
+  it("should write an EmployeeApplication to the database", async () => {
+    const application = {
+      /* create an EmployeeApplication object */
+    };
     const result = await writeApplicationToDb(application);
     expect(result).toBe(true);
   });
 
-  it('should handle error when writing to the database', async () => {
-    const application = { /* create an application object */ };
-    const mockError = new Error('Database error');
-    jest.spyOn(connectToDatabase, 'connectToDatabase').mockRejectedValue(mockError);
+  it("should handle error when writing to the database", async () => {
+    const application = {
+      /* create an application object */
+    };
+    const mockError = new Error("Database error");
+    jest
+      .spyOn(connectToDatabase, "connectToDatabase")
+      .mockRejectedValue(mockError);
     const result = await writeApplicationToDb(application);
     expect(result).toBe(false);
   });
