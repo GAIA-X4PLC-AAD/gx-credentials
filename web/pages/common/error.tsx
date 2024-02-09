@@ -5,7 +5,7 @@
 import React from "react";
 
 function error() {
-  return <div>Error encountered.</div>;
+  return <div className="ml-6">Error encountered.</div>;
 }
 
 export default error;

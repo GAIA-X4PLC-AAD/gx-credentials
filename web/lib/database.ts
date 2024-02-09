@@ -7,8 +7,8 @@ import {
   EmployeeApplication,
 } from "@/types/CompanyApplication";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
-import { Collection, ObjectId } from "mongodb";
 import { connectToDatabase } from "@/config/mongo";
+import { ObjectId } from "mongodb";
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
 export const getTrustedIssuersFromDb = async () => {
@@ -22,7 +22,9 @@ export const getTrustedIssuersFromDb = async () => {
     const resultMap = new Map();
 
     docs.forEach((doc: any) => {
-      const legalName = doc.credential.credentialSubject["gx:legalName"];
+      const legalName = doc.credential.credentialSubject["gx:legalName"]
+        ? doc.credential.credentialSubject["gx:legalName"]
+        : "UNKNOWN NAME";
       const address = doc.address;
       resultMap.set(legalName, address);
     });
@@ -34,12 +36,11 @@ export const getTrustedIssuersFromDb = async () => {
   }
 };
 
-// Add a new application to the database
 export const writeApplicationToDb = async (
   application: CompanyApplication | EmployeeApplication,
 ) => {
   const { db } = await connectToDatabase();
-  let collectionName = (application as EmployeeApplication).employeeId
+  let collectionName = (application as EmployeeApplication).role
     ? COLLECTIONS.EMPLOYEE_APPLICATIONS
     : COLLECTIONS.COMPANY_APPLICATIONS;
 
@@ -57,38 +58,50 @@ export const writeApplicationToDb = async (
   }
 };
 
-export const getApplicationsFromDb = async (
-  coll: string,
-  companyId?: string,
+export const getCompanyApplicationsFromDb = async (
+  address?: string,
+  companyAddress?: string,
 ) => {
   try {
     const { db } = await connectToDatabase();
-    const collection = db.collection(coll);
-    const filter = companyId ? { companyId: companyId } : {};
-
-    // Retrieve documents and map _id to a string
+    const collection = db.collection(COLLECTIONS.COMPANY_APPLICATIONS);
+    let filter: any = companyAddress ? { companyAddress: companyAddress } : {};
+    filter = address ? { ...filter, address: address } : filter;
     const docs = await collection.find(filter).toArray();
-    const serializedDocs = docs.map((doc) => ({
-      ...doc,
-      _id: doc._id.toString(), // Convert ObjectId to string
-    }));
-
-    return serializedDocs;
+    return docs as unknown as Array<CompanyApplication>;
   } catch (error) {
     console.log("Error getting documents: ", error);
     throw new Error(String(error));
   }
 };
 
-// Return the verified credentials from the database based on the collection name
-export const getCredentialsFromDb = async (coll: string, address: string) => {
+export const getEmployeeApplicationsFromDb = async (address?: string) => {
   try {
     const { db } = await connectToDatabase();
-    const collection = db.collection(coll);
-    const filter = { address: address };
-
+    const collection = db.collection(COLLECTIONS.EMPLOYEE_APPLICATIONS);
+    let filter: any = address ? { address: address } : {};
     const docs = await collection.find(filter).toArray();
+    return docs as unknown as Array<EmployeeApplication>;
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
+};
 
+export const getApplicationsFromDb = async (address: string) => {
+  const companyApplications = await getCompanyApplicationsFromDb(address);
+  const employeeApplications = await getEmployeeApplicationsFromDb(address);
+  return [...companyApplications, ...employeeApplications].sort(
+    (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
+  );
+};
+
+export const getWrappedCompanyCredentialsFromDb = async (address?: string) => {
+  try {
+    const { db } = await connectToDatabase();
+    const collection = db.collection(COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS);
+    const filter = { address: address };
+    const docs = await collection.find(filter).toArray();
     return docs;
   } catch (error) {
     console.log("Error getting documents: ", error);
@@ -96,20 +109,40 @@ export const getCredentialsFromDb = async (coll: string, address: string) => {
   }
 };
 
+export const getWrappedEmployeeCredentialsFromDb = async (address?: string) => {
+  try {
+    const { db } = await connectToDatabase();
+    const collection = db.collection(COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS);
+    const filter = { address: address };
+    const docs = await collection.find(filter).toArray();
+    return docs;
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+    throw new Error(String(error));
+  }
+};
+
+export const getWrappedCredentialsFromDb = async (address: string) => {
+  const companyCredentials = await getWrappedCompanyCredentialsFromDb(address);
+  const employeeCredentials = await getWrappedEmployeeCredentialsFromDb(
+    address,
+  );
+  return [...companyCredentials, ...employeeCredentials].sort(
+    (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
+  );
+};
+
 export const updateApplicationStatusInDb = async (
   collectionName: string, // Name of the MongoDB collection
-  address: string, // Address to identify the document to update
+  id: string,
   status = APPLICATION_STATUS.APPROVED, // New status (default is "approved")
 ) => {
   try {
     const { db } = await connectToDatabase(); // Connect to the MongoDB
     const collection = db.collection(collectionName); // Get the specified collection
-    console.log("Address: ", address); // Log the provided address
-    console.log("Status: ", status); // Log the new status
-    console.log("Collection: ", collectionName); // Log the collection name
 
     // Create a filter to identify the document by the "address" field
-    const filter = { address: address };
+    const filter = { _id: new ObjectId(id) };
 
     // Use updateOne to update the document matching the filter
     await collection.updateOne(filter, { $set: { status: status } });
@@ -142,20 +175,7 @@ export const addCredentialToDb = async (
 };
 
 export const userHasCredentialOrApplication = async (address: string) => {
-  // TODO return true if the user has a credential or application in the database
-  if (
-    (await getApplicationsFromDb(COLLECTIONS.COMPANY_APPLICATIONS)).filter(
-      (doc) =>
-        doc.address === address && doc.status != APPLICATION_STATUS.REJECTED,
-    ).length > 0
-  )
-    return true;
-  if (
-    (await getApplicationsFromDb(COLLECTIONS.EMPLOYEE_APPLICATIONS)).filter(
-      (doc) =>
-        doc.address === address && doc.status != APPLICATION_STATUS.REJECTED,
-    ).length > 0
-  )
-    return true;
+  if ((await getApplicationsFromDb(address)).length > 0) return true;
+  if ((await getWrappedCredentialsFromDb(address)).length > 0) return true;
   return false;
 };

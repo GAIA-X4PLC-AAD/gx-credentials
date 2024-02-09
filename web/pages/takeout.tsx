@@ -5,7 +5,13 @@
 import React, { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { getCredentialsFromDb, getApplicationsFromDb } from "../lib/database";
+import {
+  getWrappedCredentialsFromDb,
+  getWrappedCompanyCredentialsFromDb,
+  getApplicationsFromDb,
+  getEmployeeApplicationsFromDb,
+  getCompanyApplicationsFromDb,
+} from "../lib/database";
 import { dAppClient } from "../config/wallet";
 import { SigningType } from "@airgap/beacon-sdk";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
@@ -16,18 +22,29 @@ import {
   TabsBody,
   TabsHeader,
 } from "@material-tailwind/react";
-import IssueEmployeeCredentialsTable from "../components/IssueEmployeeCredentialsTable";
-import { EmployeeApplication } from "@/types/CompanyApplication";
-import { issueEmployeeCredential } from "../lib/credentials";
+import ApplicationCard from "../components/ApplicationCard";
+import CredentialCard from "../components/CredentialCard";
+import {
+  CompanyApplication,
+  EmployeeApplication,
+} from "@/types/CompanyApplication";
+import {
+  issueCompanyCredential,
+  issueEmployeeCredential,
+} from "../lib/credentials";
 import axios from "axios";
+import { useRouter } from "next/router";
+import { getRegistrars } from "@/lib/registryInteraction";
 
 export default function Takeout(props: any) {
-  const [applications, setApplications] = React.useState<EmployeeApplication[]>(
-    props.pendingEmployeeApplications,
-  );
+  const router = useRouter();
+  const [applications, setApplications] = useState<
+    (EmployeeApplication | CompanyApplication)[]
+  >(props.pendingApplications);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  const showIssuerTab = props.isIssuer;
+  const showIssuerTab = props.isIssuer || props.isRegistrar;
+  const showCredentialsTab = !props.isRegistrar;
   const downloadCredential = (credential: any) => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
@@ -49,26 +66,26 @@ export default function Takeout(props: any) {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
   };
 
-  function delay(milliseconds: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, milliseconds);
-    });
-  }
-
-  const handleEmployeeIssuance = async (application: EmployeeApplication) => {
-    setIsProcessing(true); // Set processing state to true
+  const handleIssuance = async (
+    application: CompanyApplication | EmployeeApplication,
+  ) => {
+    setIsProcessing(true);
+    let isCompany = application.role ? false : true;
     let credential = null;
     try {
-      // Issue credential
-      credential = await issueEmployeeCredential(application);
-      console.log("credential: ", credential);
+      if (isCompany)
+        credential = await issueCompanyCredential(
+          application as CompanyApplication,
+        );
+      else
+        credential = await issueEmployeeCredential(
+          application as EmployeeApplication,
+        );
     } catch (error) {
-      console.log("Error issuing credential: ", error);
       setIsProcessing(false);
+      console.log("Error issuing credential: ", error);
       return;
     }
-
-    await delay(2000);
 
     // TODO status list write
 
@@ -76,7 +93,7 @@ export default function Takeout(props: any) {
     axios
       .post("/api/publishCredential", {
         credential: credential,
-        role: "employee",
+        application: application,
       })
       .then(async function (response) {
         application.status = APPLICATION_STATUS.APPROVED;
@@ -97,106 +114,167 @@ export default function Takeout(props: any) {
       });
   };
 
-  const handleRejectEmployeeIssuance = async (
-    application: EmployeeApplication,
+  const handleRejectApplication = async (
+    application: CompanyApplication | EmployeeApplication,
   ) => {
-    setIsProcessing(false);
+    setIsProcessing(true);
     try {
-      // Call the API to update the application status in the database
+      const collection = application.role
+        ? COLLECTIONS.EMPLOYEE_APPLICATIONS
+        : COLLECTIONS.COMPANY_APPLICATIONS;
       const response = await axios.post("/api/updateApplicationStatusInDb", {
-        collection: COLLECTIONS.EMPLOYEE_APPLICATIONS,
-        address: application.address,
+        collection: collection,
+        id: application._id,
         status: APPLICATION_STATUS.REJECTED,
       });
+
+      // If the update was successful, update the state
       if (response.status === 200) {
-        application.status = APPLICATION_STATUS.REJECTED;
         const updatedApplications = applications.map((app) => {
           if (app.address === application.address) {
-            return application;
+            return { ...app, status: APPLICATION_STATUS.REJECTED };
           }
           return app;
         });
         setApplications(updatedApplications);
       }
     } catch (error) {
-      console.log("Error updating application status: ", error);
+      console.error("Could not update application status", error);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const takeoutCredential = (
-    <div
-      className="overflow-x-auto shadow rounded-lg border border-white"
-      style={whiteShadow}
-    >
-      <table className="min-w-full text-center text-sm font-light">
-        <thead className="border-b bg-gray-500 font-medium border-neutral-500 text-black">
-          <tr>
-            <th scope="col" className=" px-6 py-4">
-              GX ID
-            </th>
-            <th scope="col" className=" px-6 py-4">
-              Company Name
-            </th>
-            <th scope="col" className=" px-6 py-4">
-              Public Key Hash
-            </th>
-            <th scope="col" className=" px-6 py-4"></th>
-          </tr>
-        </thead>
-        <tbody className="text-white">
-          {props.userCredentials.map((credential: any) => (
-            <tr className="border-b border-neutral-500" key={credential.id}>
-              <td className="whitespace-nowrap px-6 py-4 font-medium">
-                {
-                  credential.credentialSubject["gx:legalRegistrationNumber"][
-                    "gx:vatID"
-                  ]
-                }
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                {credential.credentialSubject["gx:legalName"]}
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                {credential.credentialSubject.id}
-              </td>
-              <td className="whitespace-nowrap  px-6 py-4">
-                <button onClick={transferCredentialToWallet} className="mr-2">
-                  Beacon Wallet
-                </button>
-                <button onClick={() => downloadCredential(credential)}>
-                  Raw Download
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
   return (
     <main className="ml-20 mt-10">
       <div className="flex flex-col w-5/6">
-        <Tabs className="" value="Takeout">
+        <Tabs className="" value={showCredentialsTab ? "Takeout" : "Issue"}>
           <TabsHeader
             style={{ display: "flex", justifyItems: "center", width: "50%" }}
           >
-            <Tab value="Takeout">Takeout</Tab>
-            {showIssuerTab && <Tab value="Issue">Issue</Tab>}
+            {showCredentialsTab && (
+              <Tab value="Takeout">Your Verifiable Credentials</Tab>
+            )}
+            {showIssuerTab && (
+              <Tab value="Issue">
+                {props.isRegistrar
+                  ? "Issue to Companies"
+                  : "Issue to Employees"}
+              </Tab>
+            )}
           </TabsHeader>
           <TabsBody>
-            <TabPanel value="Takeout">{takeoutCredential}</TabPanel>
+            <TabPanel value="Takeout">
+              {showCredentialsTab && (
+                <div>
+                  <div className="overflow-x-auto pb-4">
+                    <div className="grid-cols-1 sm:grid md:grid-cols-2 ">
+                      {props.userCredentials.map((credential: any) => (
+                        <CredentialCard wrappedCredential={credential}>
+                          <button
+                            onClick={transferCredentialToWallet}
+                            className="mr-2 drop-shadow-lg"
+                          >
+                            Beacon Wallet
+                          </button>
+                          <button
+                            className="mr-2 drop-shadow-lg"
+                            onClick={() => downloadCredential(credential)}
+                          >
+                            Raw Download
+                          </button>
+                        </CredentialCard>
+                      ))}
+                      {props.userApplications.map(
+                        (
+                          application: CompanyApplication | EmployeeApplication,
+                        ) => (
+                          <ApplicationCard application={application}>
+                            {application.status === "pending" ? (
+                              <div>
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-800">
+                                  Pending
+                                </span>
+                              </div>
+                            ) : application.status === "approved" ? (
+                              <div>
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">
+                                  Approved
+                                </span>
+                              </div>
+                            ) : (
+                              <div>
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  bg-red-200 text-red-700">
+                                  Rejected
+                                </span>
+                              </div>
+                            )}
+                          </ApplicationCard>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                  {!props.isEmployee && (
+                    <button
+                      onClick={() => router.push("/apply/applyAsCompany")}
+                      className="mt-4 mr-4"
+                    >
+                      Apply for new Company Credential
+                    </button>
+                  )}
+                  {!props.isIssuer && (
+                    <button
+                      onClick={() => router.push("/apply/applyAsEmployee")}
+                      className="mt-4 mr-4"
+                    >
+                      Apply for new Employee Credential
+                    </button>
+                  )}
+                </div>
+              )}
+            </TabPanel>
             {showIssuerTab && (
               <TabPanel value="Issue">
-                <IssueEmployeeCredentialsTable
-                  props={{
-                    applications: applications,
-                    handleEmployeeIssuance: handleEmployeeIssuance,
-                    handleRejectEmployeeIssuance: handleRejectEmployeeIssuance,
-                  }}
-                />
+                <div className="grid-cols-1 sm:grid md:grid-cols-2 ">
+                  {props.pendingApplications.map(
+                    (application: CompanyApplication | EmployeeApplication) => (
+                      <ApplicationCard application={application}>
+                        {application.status === "pending" ? (
+                          <div className="whitespace-nowrap">
+                            <button
+                              disabled={isProcessing}
+                              onClick={() => handleIssuance(application)}
+                              className="mr-2 drop-shadow-lg"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              className="drop-shadow-lg"
+                              disabled={isProcessing}
+                              onClick={() =>
+                                handleRejectApplication(application)
+                              }
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : application.status === "approved" ? (
+                          <div>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">
+                              Approved
+                            </span>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  bg-red-200 text-red-700">
+                              Rejected
+                            </span>
+                          </div>
+                        )}
+                      </ApplicationCard>
+                    ),
+                  )}
+                </div>
               </TabPanel>
             )}
           </TabsBody>
@@ -222,27 +300,60 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const dbCredentials1 = (
-    await getCredentialsFromDb(
-      COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
-      session.user!.pkh,
-    )
-  ).map((wrapper: any) => wrapper.credential);
-  const dbCredentials2 = (
-    await getCredentialsFromDb(
-      COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS,
-      session.user!.pkh,
-    )
-  ).map((wrapper: any) => wrapper.credential);
+  const registrars = await getRegistrars();
+  const isRegistrar = registrars.includes(session.user.pkh);
+
+  const userCredentials = (
+    await getWrappedCredentialsFromDb(session.user!.pkh)
+  ).map((cred) => ({
+    ...cred,
+    _id: cred._id.toString(),
+  }));
+  const companyUserCredentials = await getWrappedCompanyCredentialsFromDb(
+    session.user.pkh,
+  );
+
+  const isIssuer = companyUserCredentials.length > 0;
+  const isEmployee = userCredentials.length - companyUserCredentials.length > 0;
+
+  const pendingOrRejectedUserApplications = (
+    await getApplicationsFromDb(session.user.pkh)
+  )
+    .filter((appl) => appl.status != APPLICATION_STATUS.APPROVED)
+    .map((app) => ({
+      ...app,
+      _id: app._id.toString(),
+    }));
+
+  let pendingApplications: Array<CompanyApplication | EmployeeApplication> = [];
+  if (isIssuer) {
+    const allEmployeeApplications = await getEmployeeApplicationsFromDb();
+    pendingApplications = pendingApplications.concat(
+      allEmployeeApplications.filter(
+        (app) =>
+          app.status === APPLICATION_STATUS.PENDING &&
+          app.companyAddress === session.user!.pkh,
+      ),
+    );
+  }
+  if (isRegistrar) {
+    pendingApplications = pendingApplications.concat(
+      await getCompanyApplicationsFromDb(),
+    );
+  }
+  pendingApplications = pendingApplications.map((app) => ({
+    ...app,
+    _id: app._id.toString(),
+  }));
 
   return {
     props: {
-      userCredentials: dbCredentials1.push(...dbCredentials2),
-      pendingEmployeeApplications: await getApplicationsFromDb(
-        COLLECTIONS.EMPLOYEE_APPLICATIONS,
-        session.user!.pkh,
-      ),
-      isIssuer: dbCredentials1.length > 0,
+      userCredentials,
+      userApplications: pendingOrRejectedUserApplications,
+      pendingApplications,
+      isIssuer,
+      isEmployee,
+      isRegistrar,
       apiHost: process.env.GLOBAL_SERVER_URL,
     },
   };

@@ -7,13 +7,7 @@ import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import Link from "next/link";
 import { getRegistrars } from "../lib/registryInteraction";
-import {
-  getTrustedIssuersFromDb,
-  getCredentialsFromDb,
-  getApplicationsFromDb,
-  userHasCredentialOrApplication,
-} from "@/lib/database";
-import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
+import { userHasCredentialOrApplication } from "@/lib/database";
 
 export default function Apply() {
   return (
@@ -50,18 +44,9 @@ export async function getServerSideProps(context: NextPageContext) {
 
   // user is a registrar
   const registrars = await getRegistrars();
-  if (registrars.includes(session.user.pkh)) {
-    return {
-      redirect: {
-        destination: "/issue",
-        permanent: false,
-      },
-    };
-  }
-
-  // user has at least one credential or application
+  const isRegistrar = registrars.includes(session.user.pkh);
   const isKnownUser = await userHasCredentialOrApplication(session.user.pkh);
-  if (registrars.includes(session.user.pkh)) {
+  if (isKnownUser || isRegistrar) {
     return {
       redirect: {
         destination: "/takeout",
@@ -71,5 +56,7 @@ export async function getServerSideProps(context: NextPageContext) {
   }
 
   // every other user should apply
-  return {};
+  return {
+    props: {},
+  };
 }

@@ -12,9 +12,11 @@ import { useRouter } from "next/router";
 export default function ApplyAsEmployee(props: any) {
   const { data: session } = useSession();
 
-  const [name, setName] = useState<string>("");
-  const [employeeId, setEmployeeId] = useState<string>("");
-  const [companyId, setCompanyId] = useState<string>("");
+  const [legalName, setName] = useState<string>("");
+  const [role, setRole] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [applicationText, setDescription] = useState<string>("");
+  const [companyAddress, setCompanyId] = useState<string>("");
   const [companies, setCompanies] = useState([]);
   const [companyName, setCompanyName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,10 +30,12 @@ export default function ApplyAsEmployee(props: any) {
     e.preventDefault(); // avoid default behaviour
     axios
       .post("/api/applyAsEmployee", {
-        name: name,
-        employeeId: employeeId,
-        companyId: companyId,
-        companyName: companyName,
+        legalName,
+        role,
+        email,
+        companyAddress,
+        companyName,
+        applicationText,
       })
       .then(function (response) {
         console.log(response);
@@ -49,6 +53,25 @@ export default function ApplyAsEmployee(props: any) {
 
   const form = (
     <form className="w-full max-w-xl" onSubmit={handleSubmit}>
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-gx-id"
+          >
+            Address
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-gx-id"
+            type="text"
+            value={session?.user?.pkh}
+            readOnly
+          />
+        </div>
+      </div>
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4">
           <label
@@ -71,19 +94,37 @@ export default function ApplyAsEmployee(props: any) {
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4">
           <label
-            className="block text-gray-200 font-bold  md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-role"
           >
-            Employee ID
+            Role
           </label>
         </div>
         <div className="md:w-3/4">
           <input
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
+            id="inline-full-name"
             type="text"
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
+            onChange={(e) => setRole(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-role"
+          >
+            Email
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-full-name"
+            type="text"
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -131,21 +172,20 @@ export default function ApplyAsEmployee(props: any) {
         <div className="md:w-1/4">
           <label
             className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
+            htmlFor="inline-description"
           >
-            Address
+            Application Text
           </label>
         </div>
         <div className="md:w-3/4">
-          <input
+          <textarea
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
-            type="text"
-            value={session?.user?.pkh}
-            readOnly
+            id="inline-description"
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
       </div>
+
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4"></div>
         <div className="md:w-3/4">
@@ -185,6 +225,7 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
   const issuers = await getTrustedIssuersFromDb();
+  console.log(issuers);
   const issuerList = Array.from(issuers.entries());
   return {
     props: {

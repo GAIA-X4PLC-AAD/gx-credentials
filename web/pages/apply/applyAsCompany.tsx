@@ -13,9 +13,15 @@ export default function ApplyAsCompany() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [name, setName] = useState<string>("");
-  const [gx_id, setGX_ID] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [legalName, setName] = useState<string>("");
+  const [registrationNumber, setNumber] = useState<string>("");
+  const [headquarterAddress, setHeadquarterAddress] = useState<string>("");
+  const [legalAddress, setLegalAddress] = useState<string>("");
+  const [parentOrganization, setParent] = useState<string>("");
+  const [subOrganization, setSub] = useState<string>("");
+
+  const [applicationText, setDescription] = useState<string>("");
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
@@ -24,9 +30,13 @@ export default function ApplyAsCompany() {
 
     axios
       .post("/api/applyAsCompany", {
-        name: name,
-        gx_id: gx_id,
-        description: description,
+        legalName,
+        registrationNumber,
+        headquarterAddress,
+        legalAddress,
+        parentOrganization,
+        subOrganization,
+        applicationText,
       })
       .then(function (response) {
         console.log(response);
@@ -48,9 +58,29 @@ export default function ApplyAsCompany() {
         <div className="md:w-1/4">
           <label
             className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-gx-id"
+          >
+            Tezos Address
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-gx-id"
+            type="text"
+            value={session?.user?.pkh}
+            readOnly
+          />
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
             htmlFor="inline-full-name"
           >
-            Full Name
+            Full Legal Name
           </label>
         </div>
         <div className="md:w-3/4">
@@ -69,7 +99,7 @@ export default function ApplyAsCompany() {
             className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
             htmlFor="inline-gx-id"
           >
-            GX ID
+            Registration Number
           </label>
         </div>
         <div className="md:w-3/4">
@@ -77,7 +107,83 @@ export default function ApplyAsCompany() {
             className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
             id="inline-gx-id"
             type="text"
-            onChange={(e) => setGX_ID(e.target.value)}
+            onChange={(e) => setNumber(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-hq"
+          >
+            Headquarter Address Code
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-hq"
+            type="text"
+            onChange={(e) => setHeadquarterAddress(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-legal-address"
+          >
+            Legal Address Code
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-legal-address"
+            type="text"
+            onChange={(e) => setLegalAddress(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-parent"
+          >
+            Parent Organization
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-parent"
+            type="text"
+            onChange={(e) => setParent(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/4">
+          <label
+            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
+            htmlFor="inline-sub"
+          >
+            Sub Organization
+          </label>
+        </div>
+        <div className="md:w-3/4">
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="inline-sub"
+            type="text"
+            onChange={(e) => setSub(e.target.value)}
           />
         </div>
       </div>
@@ -88,7 +194,7 @@ export default function ApplyAsCompany() {
             className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
             htmlFor="inline-description"
           >
-            Description
+            Application Text
           </label>
         </div>
         <div className="md:w-3/4">
@@ -100,25 +206,6 @@ export default function ApplyAsCompany() {
         </div>
       </div>
 
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/4">
-          <label
-            className="block text-gray-200 font-bold md:text-left mb-1 md:mb-0 pr-4"
-            htmlFor="inline-gx-id"
-          >
-            Address
-          </label>
-        </div>
-        <div className="md:w-3/4">
-          <input
-            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-            id="inline-gx-id"
-            type="text"
-            value={session?.user?.pkh}
-            readOnly
-          />
-        </div>
-      </div>
       <div className="md:flex md:items-center mb-6">
         <div className="md:w-1/4"></div>
         <div className="md:w-3/4">

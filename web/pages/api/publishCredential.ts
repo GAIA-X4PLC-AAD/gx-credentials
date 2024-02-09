@@ -21,16 +21,21 @@ export default async function handler(
     // Signed in
     try {
       // write credential to db
-      if (
-        !(await writeTrustedIssuerCredential(
-          req.body.credential,
-          req.body.role,
-        ))
-      )
-        res.status(500);
+      await addCredentialToDb(
+        req.body.application.role
+          ? COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS
+          : COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS,
+        req.body.credential,
+      );
+
       // update application for that credential on db
-      if (!(await updateApplicationStatus(req.body.credential, req.body.role)))
-        res.status(500);
+      await updateApplicationStatusInDb(
+        req.body.application.role
+          ? COLLECTIONS.EMPLOYEE_APPLICATIONS
+          : COLLECTIONS.COMPANY_APPLICATIONS,
+        req.body.application._id,
+      );
+
       res.status(200);
     } catch (e) {
       res.status(500);
@@ -59,30 +64,6 @@ const writeTrustedIssuerCredential = async (credential: any, role: string) => {
     return true;
   } catch (error) {
     console.error("Error adding document:", error);
-    return false;
-  }
-};
-
-// Helper function to update application status
-const updateApplicationStatus = async (credential: any, role: string) => {
-  let collection = "";
-  switch (role) {
-    case "company":
-      collection = COLLECTIONS.COMPANY_APPLICATIONS;
-      break;
-    case "employee":
-      collection = COLLECTIONS.EMPLOYEE_APPLICATIONS;
-      break;
-  }
-  if (!role) return false;
-  try {
-    await updateApplicationStatusInDb(
-      collection,
-      credential.credentialSubject.id.split(":").pop(),
-    );
-    return true;
-  } catch (error) {
-    console.error("Error updating application status: ", error);
     return false;
   }
 };

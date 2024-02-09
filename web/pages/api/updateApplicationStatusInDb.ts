@@ -12,11 +12,9 @@ export default async function handler(
 
   if (session) {
     try {
-      const { collection, address, status } = req.body;
-      console.log("Address: ", address);
-      console.log("Status: ", status);
+      const { collection, id, status } = req.body;
 
-      await updateApplicationStatusInDb(collection, address, status);
+      await updateApplicationStatusInDb(collection, id, status);
 
       res.status(200).json({
         message: "Application status and Address role updated successfully",

@@ -19,9 +19,13 @@ export default async function handler(
     // Signed in
     try {
       const ca: CompanyApplication = {
-        name: req.body.name,
-        gx_id: req.body.gx_id,
-        description: req.body.description,
+        legalName: req.body.legalName,
+        registrationNumber: req.body.registrationNumber,
+        headquarterAddress: req.body.headquarterAddress,
+        legalAddress: req.body.legalAddress,
+        parentOrganization: req.body.parentOrganization,
+        subOrganization: req.body.subOrganization,
+        applicationText: req.body.applicationText,
         address: session.user!.pkh,
         timestamp: new Date().getTime().toString(),
         status: APPLICATION_STATUS.PENDING,

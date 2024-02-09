@@ -19,9 +19,11 @@ export default async function handler(
     // Signed in
     try {
       const ea: EmployeeApplication = {
-        name: req.body.name,
-        employeeId: req.body.employeeId,
-        companyId: req.body.companyId,
+        legalName: req.body.legalName,
+        role: req.body.role,
+        email: req.body.email,
+        applicationText: req.body.applicationText,
+        companyAddress: req.body.companyAddress,
         companyName: req.body.companyName,
         address: session.user!.pkh,
         timestamp: new Date().getTime().toString(),

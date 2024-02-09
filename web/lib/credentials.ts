@@ -72,15 +72,15 @@ export const issueCompanyCredential = async (
     credentialSubject: {
       id: `did:pkh:tz:` + companyApplication.address,
       type: "gx:LegalParticipant",
-      "gx:legalName": companyApplication.name,
+      "gx:legalName": companyApplication.legalName,
       "gx:legalRegistrationNumber": {
-        "gx:vatID": companyApplication.gx_id,
+        "gx:vatID": companyApplication.registrationNumber,
       },
       "gx:headquarterAddress": {
-        "gx:countrySubdivisionCode": "DE-BY",
+        "gx:countrySubdivisionCode": companyApplication.headquarterAddress,
       },
       "gx:legalAddress": {
-        "gx:countrySubdivisionCode": "DE-BY",
+        "gx:countrySubdivisionCode": companyApplication.legalAddress,
       },
       "gx-terms-and-conditions:gaiaxTermsAndConditions":
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
@@ -113,12 +113,7 @@ export const issueEmployeeCredential = async (
     credentialSubject: {
       id: `did:pkh:tz:` + employeeApplication.address,
       type: "gx:LegalParticipant",
-      "gx:legalName": employeeApplication.name,
-      "gx:legalRegistrationNumber": {
-        "gx:vatID": employeeApplication.employeeId,
-      },
-      "gx:issuerCompanyName": employeeApplication.companyName,
-      "gx:issuerCompanyID": employeeApplication.companyId,
+      "gx:legalName": employeeApplication.legalName,
       "gx-terms-and-conditions:gaiaxTermsAndConditions":
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },

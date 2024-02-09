@@ -22,7 +22,12 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background-image: linear-gradient(to bottom right, #B900FF -5%, #000094 85%, #46DAFF 110%);
+  background-image: linear-gradient(
+    to bottom right,
+    #b900ff -5%,
+    #000094 85%,
+    #46daff 110%
+  );
   /* background: linear-gradient(
       to bottom,
       transparent,
