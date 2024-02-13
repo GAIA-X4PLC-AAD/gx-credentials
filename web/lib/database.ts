@@ -39,8 +39,38 @@ export const getTrustedIssuersFromDb = async () => {
 export const writeApplicationToDb = async (
   application: CompanyApplication | EmployeeApplication,
 ) => {
+  // if application does not have all of the fields of a CompanyApplication or EmployeeApplication, throw an error
+  if (
+    !(
+      application.hasOwnProperty("legalName") &&
+      application.hasOwnProperty("applicationText") &&
+      application.hasOwnProperty("address") &&
+      application.hasOwnProperty("timestamp") &&
+      application.hasOwnProperty("status")
+    )
+  ) {
+    return false;
+  }
+
+  let isCompany =
+    application.hasOwnProperty("registrationNumber") &&
+    application.hasOwnProperty("headquarterAddress") &&
+    application.hasOwnProperty("legalAddress") &&
+    application.hasOwnProperty("parentOrganization") &&
+    application.hasOwnProperty("subOrganization");
+
+  let isEmployee =
+    application.hasOwnProperty("role") &&
+    application.hasOwnProperty("email") &&
+    application.hasOwnProperty("companyAddress") &&
+    application.hasOwnProperty("companyName");
+
+  if (!isCompany && !isEmployee) {
+    return false;
+  }
+
   const { db } = await connectToDatabase();
-  let collectionName = (application as EmployeeApplication).role
+  let collectionName = isEmployee
     ? COLLECTIONS.EMPLOYEE_APPLICATIONS
     : COLLECTIONS.COMPANY_APPLICATIONS;
 
@@ -124,8 +154,9 @@ export const getWrappedEmployeeCredentialsFromDb = async (address?: string) => {
 
 export const getWrappedCredentialsFromDb = async (address: string) => {
   const companyCredentials = await getWrappedCompanyCredentialsFromDb(address);
-  const employeeCredentials =
-    await getWrappedEmployeeCredentialsFromDb(address);
+  const employeeCredentials = await getWrappedEmployeeCredentialsFromDb(
+    address,
+  );
   return [...companyCredentials, ...employeeCredentials].sort(
     (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
   );
