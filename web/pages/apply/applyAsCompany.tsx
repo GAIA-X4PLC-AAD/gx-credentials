@@ -5,11 +5,10 @@
 import React, { useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next";
-import { useProtected } from "../../hooks/useProtected";
 import axios from "axios";
 import { useRouter } from "next/router";
 
-export default function ApplyAsCompany() {
+export default function ApplyAsCompany(): JSX.Element {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -24,7 +23,7 @@ export default function ApplyAsCompany() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = (e: { preventDefault: () => void }): void => {
     e.preventDefault(); // avoid default behaviour
     setIsLoading(true); // Set loading state to true
 
@@ -236,7 +235,9 @@ export default function ApplyAsCompany() {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext) {
+export async function getServerSideProps(
+  context: NextPageContext,
+): Promise<unknown> {
   const session = await getSession(context);
   if (!session) {
     return {

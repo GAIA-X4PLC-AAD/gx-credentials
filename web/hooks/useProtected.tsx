@@ -5,12 +5,12 @@
 import { signOut } from "next-auth/react";
 import { dAppClient } from "../config/wallet";
 
-export function useProtected() {
+export function useProtected(): () => Promise<void> {
   // TODO: can the session be terminated somehow from the wallet side?
 
-  const handleSignout = async () => {
+  const handleSignout = async (): Promise<void> => {
     await signOut({ callbackUrl: "/" });
-    await dAppClient!.clearActiveAccount();
+    await dAppClient?.clearActiveAccount();
   };
 
   return handleSignout;

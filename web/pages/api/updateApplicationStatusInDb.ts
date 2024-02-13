@@ -5,8 +5,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res: NextApiResponse<any>,
-) {
+): Promise<void> {
   const session = await getServerSession(req, res, authOptions);
   console.log("Inside updateApplicationStatusInDb.ts");
 

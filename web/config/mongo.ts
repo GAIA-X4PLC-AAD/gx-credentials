@@ -1,7 +1,5 @@
 import { Db, MongoClient, MongoClientOptions, ServerApiVersion } from "mongodb";
 
-let clientPromise;
-
 if (!process.env.MONGODB_URI) {
   console.log("Mongo db ri: ", process.env.MONGODB_URI);
   throw new Error("Please add your Mongo URI to .env.local");
@@ -10,7 +8,7 @@ if (!process.env.MONGODB_URI) {
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
-export async function connectToDatabase() {
+export async function connectToDatabase():Promise<{client: MongoClient; db: Db}> {
   try {
     // check the cached.
     if (cachedClient && cachedDb) {
@@ -31,9 +29,9 @@ export async function connectToDatabase() {
     };
 
     // Connect to cluster
-    let client = new MongoClient(process.env.MONGODB_URI as string, opts);
+    const client = new MongoClient(process.env.MONGODB_URI as string, opts);
     await client.connect();
-    let db = client.db(process.env.MONGO_INITDB_DATABASE);
+    const db = client.db(process.env.MONGO_INITDB_DATABASE);
 
     // Send a ping to confirm a successful connection
     await client
@@ -67,7 +65,7 @@ const opts: MongoClientOptions = {
 };
 const client = new MongoClient(uri, opts);
 cachedClient = client;
-clientPromise = client.connect();
+const clientPromise = client.connect();
 cachedDb = client.db(process.env.MONGO_INITDB_DATABASE);
 
 // Export a module-scoped MongoClient promise. By doing this in a

@@ -9,7 +9,9 @@ import axios from "axios";
 import { getTrustedIssuersFromDb } from "@/lib/database";
 import { useRouter } from "next/router";
 
-export default function ApplyAsEmployee(props: any) {
+export default function ApplyAsEmployee(props: {
+  issuers: [string, string][];
+}): JSX.Element {
   const { data: session } = useSession();
 
   const [legalName, setName] = useState<string>("");
@@ -17,7 +19,7 @@ export default function ApplyAsEmployee(props: any) {
   const [email, setEmail] = useState<string>("");
   const [applicationText, setDescription] = useState<string>("");
   const [companyAddress, setCompanyId] = useState<string>("");
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState<[string, string][]>([]);
   const [companyName, setCompanyName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -26,7 +28,7 @@ export default function ApplyAsEmployee(props: any) {
     setCompanies(props.issuers);
   }, [props.issuers]);
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = (e: { preventDefault: () => void }): void => {
     e.preventDefault(); // avoid default behaviour
     axios
       .post("/api/applyAsEmployee", {
@@ -213,7 +215,9 @@ export default function ApplyAsEmployee(props: any) {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext) {
+export async function getServerSideProps(
+  context: NextPageContext,
+): Promise<unknown> {
   const session = await getSession(context);
   console.log("session", session);
   if (!session) {

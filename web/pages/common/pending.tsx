@@ -5,7 +5,7 @@
 import { useRouter } from "next/router";
 import React from "react";
 
-function pending() {
+function Pending(): JSX.Element {
   const router = useRouter();
 
   return (
@@ -20,4 +20,4 @@ function pending() {
   );
 }
 
-export default pending;
+export default Pending;

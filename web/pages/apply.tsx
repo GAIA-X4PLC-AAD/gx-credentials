@@ -9,7 +9,7 @@ import Link from "next/link";
 import { getRegistrars } from "../lib/registryInteraction";
 import { userHasCredentialOrApplication } from "@/lib/database";
 
-export default function Apply() {
+export default function Apply(): JSX.Element {
   return (
     <main className="h-screen flex flex-col align-center">
       <div className="flex justify-center">
@@ -30,7 +30,7 @@ export default function Apply() {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext) {
+export async function getServerSideProps(context: NextPageContext): Promise<unknown> {
   const session = await getSession(context);
   if (!session) {
     console.log("No session found.");

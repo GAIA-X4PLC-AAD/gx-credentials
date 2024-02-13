@@ -11,8 +11,9 @@ import { APPLICATION_STATUS } from "@/constants/constants";
 
 export default async function handler(
   req: NextApiRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res: NextApiResponse<any>,
-) {
+): Promise<void> {
   const session = await getServerSession(req, res, authOptions);
   console.log(session);
   if (session) {
@@ -26,7 +27,7 @@ export default async function handler(
         parentOrganization: req.body.parentOrganization,
         subOrganization: req.body.subOrganization,
         applicationText: req.body.applicationText,
-        address: session.user!.pkh,
+        address: session.user?.pkh,
         timestamp: new Date().getTime().toString(),
         status: APPLICATION_STATUS.PENDING,
       };

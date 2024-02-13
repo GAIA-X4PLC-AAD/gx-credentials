@@ -8,10 +8,12 @@ import {
 } from "@/types/CompanyApplication";
 import { APPLICATION_STATUS, COLLECTIONS } from "@/constants/constants";
 import { connectToDatabase } from "@/config/mongo";
-import { ObjectId } from "mongodb";
+import { Document, ObjectId, WithId } from "mongodb";
 
 // Get map of trusted issuers name and addresses from the TrustedIssuerCredentials collection
-export const getTrustedIssuersFromDb = async () => {
+export const getTrustedIssuersFromDb = async (): Promise<
+  Map<string, string>
+> => {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS);
@@ -21,7 +23,7 @@ export const getTrustedIssuersFromDb = async () => {
 
     const resultMap = new Map();
 
-    docs.forEach((doc: any) => {
+    docs.forEach((doc: Document) => {
       const legalName = doc.credential.credentialSubject["gx:legalName"]
         ? doc.credential.credentialSubject["gx:legalName"]
         : "UNKNOWN NAME";
@@ -38,39 +40,39 @@ export const getTrustedIssuersFromDb = async () => {
 
 export const writeApplicationToDb = async (
   application: CompanyApplication | EmployeeApplication,
-) => {
+): Promise<boolean> => {
   // if application does not have all of the fields of a CompanyApplication or EmployeeApplication, throw an error
   if (
     !(
-      application.hasOwnProperty("legalName") &&
-      application.hasOwnProperty("applicationText") &&
-      application.hasOwnProperty("address") &&
-      application.hasOwnProperty("timestamp") &&
-      application.hasOwnProperty("status")
+      Object.prototype.hasOwnProperty.call(application, "legalName") &&
+      Object.prototype.hasOwnProperty.call(application, "applicationText") &&
+      Object.prototype.hasOwnProperty.call(application, "address") &&
+      Object.prototype.hasOwnProperty.call(application, "timestamp") &&
+      Object.prototype.hasOwnProperty.call(application, "status")
     )
   ) {
     return false;
   }
 
-  let isCompany =
-    application.hasOwnProperty("registrationNumber") &&
-    application.hasOwnProperty("headquarterAddress") &&
-    application.hasOwnProperty("legalAddress") &&
-    application.hasOwnProperty("parentOrganization") &&
-    application.hasOwnProperty("subOrganization");
+  const isCompany =
+    Object.prototype.hasOwnProperty.call(application, "registrationNumber") &&
+    Object.prototype.hasOwnProperty.call(application, "headquarterAddress") &&
+    Object.prototype.hasOwnProperty.call(application, "legalAddress") &&
+    Object.prototype.hasOwnProperty.call(application, "parentOrganization") &&
+    Object.prototype.hasOwnProperty.call(application, "subOrganization");
 
-  let isEmployee =
-    application.hasOwnProperty("role") &&
-    application.hasOwnProperty("email") &&
-    application.hasOwnProperty("companyAddress") &&
-    application.hasOwnProperty("companyName");
+  const isEmployee =
+    Object.prototype.hasOwnProperty.call(application, "role") &&
+    Object.prototype.hasOwnProperty.call(application, "email") &&
+    Object.prototype.hasOwnProperty.call(application, "companyAddress") &&
+    Object.prototype.hasOwnProperty.call(application, "companyName");
 
   if (!isCompany && !isEmployee) {
     return false;
   }
 
   const { db } = await connectToDatabase();
-  let collectionName = isEmployee
+  const collectionName = isEmployee
     ? COLLECTIONS.EMPLOYEE_APPLICATIONS
     : COLLECTIONS.COMPANY_APPLICATIONS;
 
@@ -91,10 +93,11 @@ export const writeApplicationToDb = async (
 export const getCompanyApplicationsFromDb = async (
   address?: string,
   companyAddress?: string,
-) => {
+): Promise<Array<CompanyApplication>> => {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(COLLECTIONS.COMPANY_APPLICATIONS);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let filter: any = companyAddress ? { companyAddress: companyAddress } : {};
     filter = address ? { ...filter, address: address } : filter;
     const docs = await collection.find(filter).toArray();
@@ -105,11 +108,14 @@ export const getCompanyApplicationsFromDb = async (
   }
 };
 
-export const getEmployeeApplicationsFromDb = async (address?: string) => {
+export const getEmployeeApplicationsFromDb = async (
+  address?: string,
+): Promise<Array<EmployeeApplication>> => {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(COLLECTIONS.EMPLOYEE_APPLICATIONS);
-    let filter: any = address ? { address: address } : {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: any = address ? { address: address } : {};
     const docs = await collection.find(filter).toArray();
     return docs as unknown as Array<EmployeeApplication>;
   } catch (error) {
@@ -118,7 +124,9 @@ export const getEmployeeApplicationsFromDb = async (address?: string) => {
   }
 };
 
-export const getApplicationsFromDb = async (address: string) => {
+export const getApplicationsFromDb = async (
+  address: string,
+): Promise<Array<CompanyApplication | EmployeeApplication>> => {
   const companyApplications = await getCompanyApplicationsFromDb(address);
   const employeeApplications = await getEmployeeApplicationsFromDb(address);
   return [...companyApplications, ...employeeApplications].sort(
@@ -126,7 +134,9 @@ export const getApplicationsFromDb = async (address: string) => {
   );
 };
 
-export const getWrappedCompanyCredentialsFromDb = async (address?: string) => {
+export const getWrappedCompanyCredentialsFromDb = async (
+  address?: string,
+): Promise<WithId<Document>[]> => {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS);
@@ -139,7 +149,9 @@ export const getWrappedCompanyCredentialsFromDb = async (address?: string) => {
   }
 };
 
-export const getWrappedEmployeeCredentialsFromDb = async (address?: string) => {
+export const getWrappedEmployeeCredentialsFromDb = async (
+  address?: string,
+): Promise<WithId<Document>[]> => {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS);
@@ -152,7 +164,9 @@ export const getWrappedEmployeeCredentialsFromDb = async (address?: string) => {
   }
 };
 
-export const getWrappedCredentialsFromDb = async (address: string) => {
+export const getWrappedCredentialsFromDb = async (
+  address: string,
+): Promise<WithId<Document>[]> => {
   const companyCredentials = await getWrappedCompanyCredentialsFromDb(address);
   const employeeCredentials = await getWrappedEmployeeCredentialsFromDb(
     address,
@@ -166,7 +180,7 @@ export const updateApplicationStatusInDb = async (
   collectionName: string, // Name of the MongoDB collection
   id: string,
   status = APPLICATION_STATUS.APPROVED, // New status (default is "approved")
-) => {
+): Promise<void> => {
   try {
     const { db } = await connectToDatabase(); // Connect to the MongoDB
     const collection = db.collection(collectionName); // Get the specified collection
@@ -186,8 +200,9 @@ export const updateApplicationStatusInDb = async (
 
 export const addCredentialToDb = async (
   collectionName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   credential: any,
-) => {
+): Promise<void> => {
   const dbObj = {
     address: credential.credentialSubject.id.split(":").pop(),
     credential: credential,
@@ -204,7 +219,9 @@ export const addCredentialToDb = async (
   }
 };
 
-export const userHasCredentialOrApplication = async (address: string) => {
+export const userHasCredentialOrApplication = async (
+  address: string,
+): Promise<boolean> => {
   if ((await getApplicationsFromDb(address)).length > 0) return true;
   if ((await getWrappedCredentialsFromDb(address)).length > 0) return true;
   return false;

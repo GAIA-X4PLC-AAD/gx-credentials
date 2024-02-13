@@ -4,10 +4,10 @@
  */
 import React from "react";
 
-const unauthorised = () => {
+const Unauthorised = (): JSX.Element => {
   return (
     <h1 className="flex justify-center align-center">Unauthorised access.</h1>
   );
 };
 
-export default unauthorised;
+export default Unauthorised;

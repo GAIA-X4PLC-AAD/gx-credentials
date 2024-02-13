@@ -2,8 +2,8 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useEffect, useState } from "react";
-import { getSession, useSession } from "next-auth/react";
+import React, { useState } from "react";
+import { getSession } from "next-auth/react";
 import { NextPageContext } from "next";
 import {
   getWrappedCredentialsFromDb,
@@ -35,8 +35,10 @@ import {
 import axios from "axios";
 import { useRouter } from "next/router";
 import { getRegistrars } from "@/lib/registryInteraction";
+import { WithId } from "mongodb";
 
-export default function Takeout(props: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function Takeout(props: any): JSX.Element {
   const router = useRouter();
   const [applications, setApplications] = useState<
     (EmployeeApplication | CompanyApplication)[]
@@ -45,7 +47,8 @@ export default function Takeout(props: any) {
 
   const showIssuerTab = props.isIssuer || props.isRegistrar;
   const showCredentialsTab = !props.isRegistrar;
-  const downloadCredential = (credential: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const downloadCredential = (credential: any): void => {
     const data = JSON.stringify(credential);
     const blob = new Blob([data], { type: "application/json" });
     const link = document.createElement("a");
@@ -54,23 +57,19 @@ export default function Takeout(props: any) {
     link.click();
   };
 
-  const transferCredentialToWallet = async () => {
-    await dAppClient!.requestSignPayload({
+  const transferCredentialToWallet = async (): Promise<void> => {
+    await dAppClient?.requestSignPayload({
       signingType: SigningType.RAW,
       payload:
         "Get your GX Credential! #" + props.apiHost + "/api/takeoutCredential",
     });
   };
 
-  const whiteShadow = {
-    boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
-  };
-
   const handleIssuance = async (
     application: CompanyApplication | EmployeeApplication,
-  ) => {
+  ): Promise<void> => {
     setIsProcessing(true);
-    let isCompany = application.role ? false : true;
+    const isCompany = application.role ? false : true;
     let credential = null;
     try {
       if (isCompany)
@@ -116,7 +115,7 @@ export default function Takeout(props: any) {
 
   const handleRejectApplication = async (
     application: CompanyApplication | EmployeeApplication,
-  ) => {
+  ): Promise<void> => {
     setIsProcessing(true);
     try {
       const collection = application.role
@@ -169,27 +168,35 @@ export default function Takeout(props: any) {
                 <div>
                   <div className="overflow-x-auto pb-4">
                     <div className="grid-cols-1 sm:grid md:grid-cols-2 ">
-                      {props.userCredentials.map((credential: any) => (
-                        <CredentialCard wrappedCredential={credential}>
-                          <button
-                            onClick={transferCredentialToWallet}
-                            className="mr-2 drop-shadow-lg"
+                      {props.userCredentials.map(
+                        (credential: WithId<Document>) => (
+                          <CredentialCard
+                            key={credential._id.toString()}
+                            wrappedCredential={credential}
                           >
-                            Beacon Wallet
-                          </button>
-                          <button
-                            className="mr-2 drop-shadow-lg"
-                            onClick={() => downloadCredential(credential)}
-                          >
-                            Raw Download
-                          </button>
-                        </CredentialCard>
-                      ))}
+                            <button
+                              onClick={transferCredentialToWallet}
+                              className="mr-2 drop-shadow-lg"
+                            >
+                              Beacon Wallet
+                            </button>
+                            <button
+                              className="mr-2 drop-shadow-lg"
+                              onClick={() => downloadCredential(credential)}
+                            >
+                              Raw Download
+                            </button>
+                          </CredentialCard>
+                        ),
+                      )}
                       {props.userApplications.map(
                         (
                           application: CompanyApplication | EmployeeApplication,
                         ) => (
-                          <ApplicationCard application={application}>
+                          <ApplicationCard
+                            key={application._id.toString()}
+                            application={application}
+                          >
                             {application.status === "pending" ? (
                               <div>
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-800">
@@ -238,7 +245,7 @@ export default function Takeout(props: any) {
                 <div className="grid-cols-1 sm:grid md:grid-cols-2 ">
                   {props.pendingApplications.map(
                     (application: CompanyApplication | EmployeeApplication) => (
-                      <ApplicationCard application={application}>
+                      <ApplicationCard key={application._id.toString()} application={application}>
                         {application.status === "pending" ? (
                           <div className="whitespace-nowrap">
                             <button
@@ -289,7 +296,7 @@ export default function Takeout(props: any) {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext) {
+export async function getServerSideProps(context: NextPageContext): Promise<unknown> {
   const session = await getSession(context);
   if (!session) {
     return {
@@ -304,7 +311,7 @@ export async function getServerSideProps(context: NextPageContext) {
   const isRegistrar = registrars.includes(session.user.pkh);
 
   const userCredentials = (
-    await getWrappedCredentialsFromDb(session.user!.pkh)
+    await getWrappedCredentialsFromDb(session.user?.pkh)
   ).map((cred) => ({
     ...cred,
     _id: cred._id.toString(),
@@ -332,7 +339,7 @@ export async function getServerSideProps(context: NextPageContext) {
       allEmployeeApplications.filter(
         (app) =>
           app.status === APPLICATION_STATUS.PENDING &&
-          app.companyAddress === session.user!.pkh,
+          app.companyAddress === session.user?.pkh,
       ),
     );
   }

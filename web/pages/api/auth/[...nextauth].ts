@@ -36,15 +36,14 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         console.log("AUTHORIZING");
         console.log(credentials);
-        if (validateAddress(credentials?.pkh!) != 3) {
+        if (!credentials || validateAddress(credentials.pkh) != 3) {
           return null;
         }
 
-        // @ts-ignore
         const isVerified = verifySignature(
-          payloadBytesFromString(credentials?.formattedInput!),
-          credentials?.pk!,
-          credentials?.signature!,
+          payloadBytesFromString(credentials.formattedInput),
+          credentials.pk,
+          credentials.signature,
         );
 
         if (!isVerified) {
@@ -52,15 +51,13 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        if (getPkhfromPk(credentials?.pk!) !== credentials?.pkh) {
+        if (getPkhfromPk(credentials.pk) !== credentials.pkh) {
           return null;
         }
 
         const dappUrl = "gx-credentials.example.com";
         const input = "GX Credentials Login";
-        const inputSplit = credentials!
-          .formattedInput!.substring(22)
-          .split(" ");
+        const inputSplit = credentials.formattedInput.substring(22).split(" ");
 
         if (
           dappUrl !== inputSplit[0] ||
@@ -69,7 +66,7 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        var timeError =
+        const timeError =
           (new Date().getTime() - new Date(inputSplit[1]).getTime()) / 1000;
         if (timeError < 0 || timeError > 60) {
           return null;
@@ -94,7 +91,7 @@ export const authOptions: AuthOptions = {
       session.user.pkh = token.sub as string;
       return session;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user }) {
       if (user) {
         token.user = user;
       }

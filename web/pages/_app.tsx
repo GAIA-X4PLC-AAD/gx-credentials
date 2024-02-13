@@ -6,12 +6,10 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useProtected } from "@/hooks/useProtected";
-import { ThemeProvider } from "@material-tailwind/react";
 
-function Header() {
+function Header(): JSX.Element | null {
   const handleSignout = useProtected();
   const { data: session } = useSession();
   const router = useRouter();
@@ -28,7 +26,7 @@ function Header() {
   ) : null;
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps): JSX.Element {
   return (
     <SessionProvider session={pageProps.session}>
       <Header />

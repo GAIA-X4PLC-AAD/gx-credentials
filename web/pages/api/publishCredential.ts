@@ -13,8 +13,9 @@ import { COLLECTIONS } from "@/constants/constants";
 // It generates the credential from the application data , writes it to database, and updates the application status.
 export default async function handler(
   req: NextApiRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res: NextApiResponse<any>,
-) {
+): Promise<void> {
   const session = await getServerSession(req, res, authOptions);
   console.log(session);
   if (session) {
@@ -46,24 +47,3 @@ export default async function handler(
   }
   res.end();
 }
-
-// Helper function to write credential to db and update Address Role status
-const writeTrustedIssuerCredential = async (credential: any, role: string) => {
-  try {
-    let collection = "";
-    switch (role) {
-      case "company":
-        collection = COLLECTIONS.TRUSTED_ISSUER_CREDENTIALS;
-        break;
-      case "employee":
-        collection = COLLECTIONS.TRUSTED_EMPLOYEE_CREDENTIALS;
-        break;
-    }
-
-    await addCredentialToDb(collection, credential);
-    return true;
-  } catch (error) {
-    console.error("Error adding document:", error);
-    return false;
-  }
-};

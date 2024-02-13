@@ -4,8 +4,15 @@
  */
 import React from "react";
 import ContentCard from "./ContentCard";
+import {
+  EmployeeApplication,
+  CompanyApplication,
+} from "@/types/CompanyApplication";
 
-const ApplicationCard = (props: any) => {
+const ApplicationCard = (props: {
+  application: EmployeeApplication | CompanyApplication;
+  children: JSX.Element|JSX.Element[];
+}): JSX.Element => {
   const application = props.application;
   const applicationType = application.role
     ? "Employee Application"

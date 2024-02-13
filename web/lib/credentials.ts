@@ -56,9 +56,10 @@ export const credentialOutputDescriptor = {
 
 export const issueCompanyCredential = async (
   companyApplication: CompanyApplication,
-) => {
-  const account = await dAppClient!.getActiveAccount();
-  const did = `did:pkh:tz:` + account!.address;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
+  const account = await dAppClient?.getActiveAccount();
+  const did = `did:pkh:tz:` + account?.address;
   const rawCredential = {
     "@context": [
       "https://www.w3.org/2018/credentials/v1",
@@ -86,20 +87,17 @@ export const issueCompanyCredential = async (
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },
   };
-  try {
-    const credential = await issueCredential(rawCredential);
-    console.log(credential);
-    return credential;
-  } catch (error) {
-    throw error;
-  }
+  const credential = await issueCredential(rawCredential);
+  console.log(credential);
+  return credential;
 };
 
 export const issueEmployeeCredential = async (
   employeeApplication: EmployeeApplication,
-) => {
-  const account = await dAppClient!.getActiveAccount();
-  const did = `did:pkh:tz:` + account!.address;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
+  const account = await dAppClient?.getActiveAccount();
+  const did = `did:pkh:tz:` + account?.address;
   const rawCredential = {
     "@context": [
       "https://www.w3.org/2018/credentials/v1",
@@ -118,26 +116,22 @@ export const issueEmployeeCredential = async (
         "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
     },
   };
-  try {
-    const credential = await issueCredential(rawCredential);
-    console.log(credential);
-    return credential;
-  } catch (error) {
-    throw error;
-  }
+  const credential = await issueCredential(rawCredential);
+  console.log(credential);
+  return credential;
 };
 
-const issueCredential = async (rawCredential: any) => {
-  let rawCredentialString = JSON.stringify(rawCredential);
-  const account = await dAppClient!.getActiveAccount();
+const issueCredential = async (rawCredential: unknown): Promise<unknown> => {
+  const rawCredentialString = JSON.stringify(rawCredential);
+  const account = await dAppClient?.getActiveAccount();
   const proofOptions = {
-    verificationMethod: `did:pkh:tz:${account!.address}#TezosMethod2021`,
+    verificationMethod: `did:pkh:tz:${account?.address}#TezosMethod2021`,
     proofPurpose: "assertionMethod",
   };
 
   //public key of the issuer
-  const publicKeyJwkString = await JWKFromTezos(account!.publicKey);
-  let prepStr = await prepareIssueCredential(
+  const publicKeyJwkString = await JWKFromTezos(account?.publicKey + "");
+  const prepStr = await prepareIssueCredential(
     rawCredentialString,
     JSON.stringify(proofOptions),
     publicKeyJwkString,
@@ -155,9 +149,10 @@ const issueCredential = async (rawCredential: any) => {
     const payload: RequestSignPayloadInput = {
       signingType: SigningType.MICHELINE,
       payload: micheline,
-      sourceAddress: account!.address,
+      sourceAddress: account?.address,
     };
-    const { signature } = await dAppClient!.requestSignPayload(payload);
+    if (!dAppClient) throw new Error("No dAppClient");
+    const { signature } = await dAppClient.requestSignPayload(payload);
     credentialString = await completeIssueCredential(
       rawCredentialString,
       prepStr,

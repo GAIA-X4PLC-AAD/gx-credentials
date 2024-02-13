@@ -4,7 +4,7 @@
  */
 import React from "react";
 
-function rejected() {
+function Rejected(): JSX.Element {
   return (
     <div>
       Your application has been rejected. Please contact the concerned
@@ -13,4 +13,4 @@ function rejected() {
   );
 }
 
-export default rejected;
+export default Rejected;

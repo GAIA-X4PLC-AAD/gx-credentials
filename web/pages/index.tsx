@@ -8,9 +8,10 @@ import { useEffect } from "react";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-sdk";
 import { payloadBytesFromString } from "../lib/payload";
 
-export default function Home(props: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function Home(props: any): JSX.Element {
   useEffect(() => {
-    const initialize = async () => {
+    const initialize = async (): Promise<void> => {
       // If dAppClient exists and clearActiveAccount is available, await it
       if (dAppClient) {
         await dAppClient.clearActiveAccount();
@@ -20,7 +21,7 @@ export default function Home(props: any) {
     // Call the async function
     initialize();
 
-    const animateElements = () => {
+    const animateElements = (): void => {
       const gxElement = document.getElementById("gx-text");
       const buttonElement = document.getElementById("login-button");
 
@@ -45,7 +46,7 @@ export default function Home(props: any) {
     return <h3>Error connecting to database</h3>;
   }
 
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<void> => {
     try {
       const callbackUrl = "/apply";
       const activeAccount = await dAppClient?.getActiveAccount();
@@ -57,6 +58,9 @@ export default function Home(props: any) {
         activePk = activeAccount.publicKey;
       } else {
         const permissions = await requestRequiredPermissions();
+        if (!permissions) {
+          throw Error("No permissions granted");
+        }
         console.log("New connection:", permissions.address);
         activeAddress = permissions.address;
         activePk = permissions.publicKey;
@@ -80,8 +84,10 @@ export default function Home(props: any) {
         payload: payloadBytes,
         sourceAddress: activeAddress,
       };
-      const response = await dAppClient!.requestSignPayload(payload);
-
+      const response = await dAppClient?.requestSignPayload(payload);
+      if (!response) {
+        throw Error("No login signature");
+      }
       signIn("credentials", {
         pkh: activeAddress,
         pk: activePk,

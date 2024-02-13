@@ -2,10 +2,7 @@
  * Copyright (C) 2023, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  verifyCredential,
-  verifyPresentation,
-} from "@spruceid/didkit-wasm-node";
+import { verifyCredential, verifyPresentation } from "@spruceid/didkit-wasm";
 
 /**
  * Verify the given Verifiable Presentation object, which is expected to contain a credential of type "TezosAssociatedAddress" specifically. This is a specialized method and probably not safe for general use.
@@ -13,7 +10,11 @@ import {
  * @param {any} VP - The Verifiable Presentation object to be verified.
  * @return {Promise<boolean>} Returns a Promise that resolves to a boolean indicating whether the Verifiable Presentation was successfully verified or not.
  */
-export const verifyIdentificationPresentation = async (VP: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const verifyIdentificationPresentation = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  VP: any,
+): Promise<boolean> => {
   console.log("Verification endpoint triggered", VP);
   try {
     let status = false;
@@ -54,6 +55,7 @@ export const verifyIdentificationPresentation = async (VP: any) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const verifyPresentationHelper = async (VC: any, VP: any): Promise<boolean> => {
   // TezosAssociatedAddress VCs are signed with the Tezos key, but the VP is signed with a wallet did:key
   // we need to check that the wallet did:key matches the key confirmed with the Tezos key signature

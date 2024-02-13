@@ -4,7 +4,7 @@
  */
 import { char2Bytes } from "@taquito/utils";
 
-export function payloadBytesFromString(text: string) {
+export function payloadBytesFromString(text: string): string {
   const bytes = char2Bytes(text);
   const bytesLength = (bytes.length / 2).toString(16);
   const addPadding = `00000000${bytesLength}`;

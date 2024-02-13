@@ -18,7 +18,7 @@
       ]
     }
   },
-  "postCreateCommand": "curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh && sudo bash nodesource_setup.sh && sudo apt install -y nodejs && sudo npm install -g tslint-to-eslint-config typescript && sudo rm nodesource_setup.sh",
+  "postCreateCommand": "curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh && sudo bash nodesource_setup.sh && sudo apt install -y nodejs && sudo npm install -g tslint-to-eslint-config typescript && sudo rm nodesource_setup.sh && npm install -g pnpm",
   "runArgs": ["--network=host"]
 
   // Features to add to the dev container. More info: https://containers.dev/features.

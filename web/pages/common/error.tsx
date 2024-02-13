@@ -4,8 +4,8 @@
  */
 import React from "react";
 
-function error() {
+function Error(): JSX.Element {
   return <div className="ml-6">Error encountered.</div>;
 }
 
-export default error;
+export default Error;

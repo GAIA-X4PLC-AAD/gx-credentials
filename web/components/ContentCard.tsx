@@ -4,7 +4,11 @@
  */
 import React from "react";
 
-const ContentCard = (props: any) => {
+const ContentCard = (props: {
+  title: string;
+  subtitle: string;
+  children: JSX.Element|JSX.Element[];
+}): JSX.Element => {
   const whiteShadow = {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",
   };
@@ -23,9 +27,9 @@ const ContentCard = (props: any) => {
           viewBox="0 0 24 24"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M2 12a10 10 0 1 1 20 0 10 10 0 0 1-20 0Zm9-3a1.5 1.5 0 0 1 2.5 1.1 1.4 1.4 0 0 1-1.5 1.5 1 1 0 0 0-1 1V14a1 1 0 1 0 2 0v-.5a3.4 3.4 0 0 0 2.5-3.3 3.5 3.5 0 0 0-7-.3 1 1 0 0 0 2 .1c0-.4.2-.7.5-1Zm1 7a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z"
-            clip-rule="evenodd"
+            clipRule="evenodd"
           />
         </svg>
         <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
