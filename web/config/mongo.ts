@@ -1,7 +1,7 @@
 import { Db, MongoClient, MongoClientOptions, ServerApiVersion } from "mongodb";
 
 if (!process.env.MONGODB_URI) {
-  console.warn("Please add your Mongo URI to .env.local");
+  throw new Error("Please add your Mongo URI as env MONGODB_URI");
 }
 
 let cachedClient: MongoClient | null = null;
@@ -65,7 +65,7 @@ const opts: MongoClientOptions = {
     deprecationErrors: true,
   },
 };
-const client = new MongoClient(uri as string, opts);
+const client = new MongoClient(uri, opts);
 cachedClient = client;
 const clientPromise = client.connect();
 cachedDb = client.db(process.env.MONGO_INITDB_DATABASE);
