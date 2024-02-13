@@ -1,5 +1,7 @@
 # GX Credentials
 
+![build workflow](https://github.com/GAIA-X4PLC-AAD/gx-credentials/actions/workflows/node.js.yml/badge.svg)
+
 **Disclaimer: This repository is in active development and not production software.**
 
 This application explores an approach for issuing Verifiable Credentials to companies and their employees in a Gaia-X ecosystem. Employees could then use these credentials to authenticate with different services in the ecosystem.
