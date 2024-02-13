@@ -90,7 +90,7 @@ export default function Takeout(props: any): JSX.Element {
 
     // Update database with credential issuance
     axios
-      .post("/api/publishCredential", {
+      .post("/api/storeCredential", {
         credential: credential,
         application: application,
       })

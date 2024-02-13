@@ -51,7 +51,7 @@ export async function getServerSideProps(
   if (isKnownUser || isRegistrar) {
     return {
       redirect: {
-        destination: "/takeout",
+        destination: "/home",
         permanent: false,
       },
     };

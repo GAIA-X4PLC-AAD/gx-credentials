@@ -9,8 +9,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { addCredentialToDb, updateApplicationStatusInDb } from "@/lib/database";
 import { COLLECTIONS } from "@/constants/constants";
 
-// This is the publishCredential API route that is called by the frontend to publish a credential to the database.
-// It generates the credential from the application data , writes it to database, and updates the application status.
 export default async function handler(
   req: NextApiRequest,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
