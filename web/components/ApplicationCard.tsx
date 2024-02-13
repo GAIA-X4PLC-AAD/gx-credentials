@@ -11,7 +11,7 @@ import {
 
 const ApplicationCard = (props: {
   application: EmployeeApplication | CompanyApplication;
-  children: JSX.Element|JSX.Element[];
+  children: JSX.Element | JSX.Element[];
 }): JSX.Element => {
   const application = props.application;
   const applicationType = application.role

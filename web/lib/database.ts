@@ -168,9 +168,8 @@ export const getWrappedCredentialsFromDb = async (
   address: string,
 ): Promise<WithId<Document>[]> => {
   const companyCredentials = await getWrappedCompanyCredentialsFromDb(address);
-  const employeeCredentials = await getWrappedEmployeeCredentialsFromDb(
-    address,
-  );
+  const employeeCredentials =
+    await getWrappedEmployeeCredentialsFromDb(address);
   return [...companyCredentials, ...employeeCredentials].sort(
     (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
   );

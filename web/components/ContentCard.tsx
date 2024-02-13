@@ -7,7 +7,7 @@ import React from "react";
 const ContentCard = (props: {
   title: string;
   subtitle: string;
-  children: JSX.Element|JSX.Element[];
+  children: JSX.Element | JSX.Element[];
 }): JSX.Element => {
   const whiteShadow = {
     boxShadow: "0px 0px 10px 3px rgba(255,255,255,0.75)",

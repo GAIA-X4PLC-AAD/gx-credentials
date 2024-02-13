@@ -8,7 +8,10 @@ if (!process.env.MONGODB_URI) {
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
-export async function connectToDatabase():Promise<{client: MongoClient; db: Db}> {
+export async function connectToDatabase(): Promise<{
+  client: MongoClient;
+  db: Db;
+}> {
   try {
     // check the cached.
     if (cachedClient && cachedDb) {

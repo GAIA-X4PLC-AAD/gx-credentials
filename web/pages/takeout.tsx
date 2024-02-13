@@ -245,7 +245,10 @@ export default function Takeout(props: any): JSX.Element {
                 <div className="grid-cols-1 sm:grid md:grid-cols-2 ">
                   {props.pendingApplications.map(
                     (application: CompanyApplication | EmployeeApplication) => (
-                      <ApplicationCard key={application._id.toString()} application={application}>
+                      <ApplicationCard
+                        key={application._id.toString()}
+                        application={application}
+                      >
                         {application.status === "pending" ? (
                           <div className="whitespace-nowrap">
                             <button
@@ -296,7 +299,9 @@ export default function Takeout(props: any): JSX.Element {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext): Promise<unknown> {
+export async function getServerSideProps(
+  context: NextPageContext,
+): Promise<unknown> {
   const session = await getSession(context);
   if (!session) {
     return {

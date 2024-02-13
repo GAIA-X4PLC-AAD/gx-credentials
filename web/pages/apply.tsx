@@ -30,7 +30,9 @@ export default function Apply(): JSX.Element {
   );
 }
 
-export async function getServerSideProps(context: NextPageContext): Promise<unknown> {
+export async function getServerSideProps(
+  context: NextPageContext,
+): Promise<unknown> {
   const session = await getSession(context);
   if (!session) {
     console.log("No session found.");
