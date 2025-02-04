@@ -10,3 +10,7 @@
 
 # vscode settings
 .vscode
+
+# artefacts
+node_modules
+.next

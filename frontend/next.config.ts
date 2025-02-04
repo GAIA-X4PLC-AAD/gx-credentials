@@ -1,6 +1,40 @@
-import type { NextConfig } from "next";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import dotenv from "dotenv";
+import path from "path";
 
-const nextConfig: NextConfig = {
+// TODO: fix missing secret
+// Load the .env file from the root directory
+dotenv.config({ path: path.resolve("../.env") });
+
+interface NextConfig {
+  env: {
+    NEXT_PUBLIC_TEZOS_RPC_URL: string;
+    NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT: string;
+    AUTH_SECRET: string;
+    BACKEND_API_URL: string;
+  };
+  serverExternalPackages?: string[];
+}
+
+const nextConfig: NextConfig & { experimental: any; webpack: any } = {
+  env: {
+    NEXT_PUBLIC_TEZOS_RPC_URL: process.env.NEXT_PUBLIC_TEZOS_RPC_URL as string,
+    NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT: process.env
+      .NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT as string,
+    AUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
+    BACKEND_API_URL: process.env.BACKEND_API_URL as string,
+    // Add more env variables here
+  },
+
+  // adapted from https://github.com/olliejames-xtz/beacon-nextjs/blob/c367a94b566bb89203419cc958e47f1241bdb502/next.config.mjs
+  serverExternalPackages: ["@airgap/beacon-ui"],
+  experimental: {},
+  webpack: (config: any) => {
+    // Used for connectkit to work with nextjs
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    config.externals.push("pino-pretty", "lokijs", "encoding");
+    return config;
+  },
   /* config options here */
 };
 

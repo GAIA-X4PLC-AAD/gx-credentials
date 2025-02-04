@@ -2,15 +2,34 @@
   "name": "gx-credentials-backend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "tsx ./bin/www.ts",
+    "dev": "tsx watch app.ts"
   },
   "dependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/lodash": "^4.17.14",
+    "@types/morgan": "^1.9.9",
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.1"
+    "jade": "^0.29.0",
+    "kysely": "^0.27.5",
+    "lodash": "^4.17.21",
+    "morgan": "~1.9.1",
+    "pg": "^8.13.1",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
