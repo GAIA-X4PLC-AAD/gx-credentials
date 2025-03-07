@@ -1,79 +1,111 @@
 "use client";
 
-import { createDAppClient, WALLET_CONFIG } from "@/config/wallet";
-import { useToast } from "@/hooks/use-toast";
+import { WALLET_CONFIG } from "@/config/wallet";
+import { payloadBytesFromString } from "@/lib/payload";
 import { WalletContextValue } from "@/types/wallet";
-import { createContext, useEffect, useState } from "react";
+import {
+  AccountInfo,
+  DAppClient,
+  RequestSignPayloadInput,
+  SigningType,
+} from "@airgap/beacon-sdk";
+import { createContext, useCallback, useEffect, useState } from "react";
 
-const dAppClient: ReturnType<typeof createDAppClient> = createDAppClient();
+// const _dAppClient: DAppClient = new DAppClient({
+//   name: WALLET_CONFIG.name,
+//   preferredNetwork: WALLET_CONFIG.network,
+// });
 
 const DEFAULT_CONTEXT: WalletContextValue = {
-  dAppClient,
-  requestRequiredPermissions: async () => undefined,
-  error: null,
+  dAppClient: undefined,
+  connect: async () => {
+    console.log("not loaded");
+    return Promise.resolve(undefined);
+  },
+  disconnect: () => {
+    console.log("not loaded");
+  },
+  sign: async () => {
+    return "";
+  },
+  account: undefined,
 };
 
 export const WalletContext = createContext<WalletContextValue>(DEFAULT_CONTEXT);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
+  const [dAppClient, setDAppClient] = useState<DAppClient>();
+  const [account, setAccount] = useState<AccountInfo>();
 
   useEffect(() => {
-    const initialize = async (): Promise<void> => {
-      if (!dAppClient) return;
-
-      try {
-        await dAppClient.clearActiveAccount();
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to clear active account")
-        );
-        console.error("Clear active account error:", err);
-        void toast({
-          title: "Error",
-          description: "Failed to clear active account",
-          variant: "destructive",
-        });
-      }
-    };
-
-    initialize();
-
-    // Cleanup function
-    return () => {
-      setError(null);
-    };
-  }, []);
-
-  const requestRequiredPermissions = async () => {
-    if (!dAppClient) return undefined;
-
-    try {
-      setError(null);
-      return await dAppClient.requestPermissions({
-        network: {
-          type: WALLET_CONFIG.network,
-          rpcUrl: WALLET_CONFIG.rpcUrl,
-        },
+    if (dAppClient) {
+      dAppClient.getActiveAccount().then((account: AccountInfo | undefined) => {
+        console.log("Active account", account);
+        setAccount(account);
       });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to request permissions")
+    } else {
+      setDAppClient(
+        new DAppClient({
+          name: WALLET_CONFIG.name,
+          preferredNetwork: WALLET_CONFIG.network,
+        })
       );
-      console.error("Permission request error:", err);
-      return undefined;
     }
-  };
+  }, [dAppClient]);
+
+  const connect = useCallback(() => {
+    const requestPermissions = (async () => {
+      try {
+        const permissions = await dAppClient?.requestPermissions({
+          network: {
+            type: WALLET_CONFIG.network,
+            rpcUrl: WALLET_CONFIG.rpcUrl,
+          },
+        });
+        console.log(permissions);
+        setAccount(permissions?.accountInfo);
+        return permissions;
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return requestPermissions;
+  }, [dAppClient]);
+
+  const disconnect = useCallback(() => {
+    dAppClient?.clearActiveAccount().then(async () => {
+      setAccount(await dAppClient.getActiveAccount());
+    });
+  }, [dAppClient]);
+
+  const sign = useCallback(
+    (value: string) => {
+      return new Promise<string>(async (resolve, reject) => {
+        try {
+          const payloadBytes = payloadBytesFromString(value);
+          const payload: RequestSignPayloadInput = {
+            signingType: SigningType.MICHELINE,
+            payload: payloadBytes,
+            sourceAddress: account?.address,
+          };
+          const sig = await dAppClient?.requestSignPayload(payload);
+          return sig?.signature || "Unknown error";
+        } catch (e) {
+          reject(e);
+        }
+      });
+    },
+    [dAppClient, account]
+  );
 
   return (
     <WalletContext.Provider
       value={{
         dAppClient,
-        requestRequiredPermissions,
-        error,
+        connect,
+        disconnect,
+        sign,
+        account,
       }}
     >
       {children}

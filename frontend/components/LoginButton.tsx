@@ -1,20 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/use-wallet";
 import { login } from "@/lib/actions/auth";
 import { payloadBytesFromString } from "@/lib/payload";
 import { RequestSignPayloadInput, SigningType } from "@airgap/beacon-types";
 
 const LoginButton = () => {
-  const { toast } = useToast();
-  const { dAppClient, requestRequiredPermissions } = useWallet();
+  const { connect, account: activeAccount, dAppClient } = useWallet();
 
   const handleLogin = async (): Promise<void> => {
     try {
-      const activeAccount = await dAppClient?.getActiveAccount();
-
       let activeAddress;
       let activePk;
       if (activeAccount) {
@@ -22,7 +19,7 @@ const LoginButton = () => {
         activeAddress = activeAccount.address;
         activePk = activeAccount.publicKey;
       } else {
-        const permissions = await requestRequiredPermissions();
+        const permissions = await connect();
         if (!permissions) {
           throw Error("No permissions granted");
         }
@@ -48,9 +45,8 @@ const LoginButton = () => {
         payload: payloadBytes,
         sourceAddress: activeAddress,
       };
-
-      const response = await dAppClient?.requestSignPayload(payload);
-      if (!response) {
+      const { signature } = await dAppClient!.requestSignPayload(payload);
+      if (!signature) {
         throw Error("No login signature");
       }
 
@@ -58,10 +54,14 @@ const LoginButton = () => {
         activeAddress,
         activePk,
         formattedInput,
-        signature: response.signature,
+        signature,
+      }).then(() => {
+        // https://stackoverflow.com/questions/70165993/how-to-handle-login-failed-error-in-nextauth-js/70760933#70760933
+        window.location.replace("/home");
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error(error);
       if (error.message !== "NEXT_REDIRECT") {
         toast({
           title: "Error",
@@ -70,7 +70,6 @@ const LoginButton = () => {
           variant: "destructive",
         });
       }
-      console.log(error);
     }
   };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useWallet } from "@/hooks/use-wallet";
 import { logout } from "@/lib/actions/auth";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { Session } from "next-auth";
@@ -13,15 +14,13 @@ import { Skeleton } from "./ui/skeleton";
 export function Header() {
   const { data: session, status } = useSession();
   return (
-    <header className="flex justify-between py-4 container ">
-      <div className="mr-4 hidden md:flex">
+    <header className="flex justify-between py-4">
+      <div className="mr-4 flex">
         <Link
           href={session ? "/home" : "/"}
           className="mr-6 flex items-center space-x-2"
         >
-          <span className="hidden font-bold sm:inline-block">
-            GX Credentials
-          </span>
+          <span className="font-bold sm:inline-block">GX Credentials</span>
         </Link>
       </div>
       <div className="flex items-centers space-x-4">
@@ -31,7 +30,7 @@ export function Header() {
           <ProfileMenu session={session} />
         ) : (
           <Link href="/app" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">Login</span>
+            <span className="font-bold sm:inline-block">Login</span>
           </Link>
         )}
         <ModeToggle />
@@ -41,6 +40,12 @@ export function Header() {
 }
 
 function ProfileMenu({ session }: { session: Session }) {
+  const { dAppClient } = useWallet();
+
+  const handleLogout = async () => {
+    await dAppClient?.clearActiveAccount();
+    await logout();
+  };
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -55,7 +60,11 @@ function ProfileMenu({ session }: { session: Session }) {
             {session.user?.pkh}
           </code>
         </div>
-        <Button variant="secondary" onClick={() => logout()} className="w-full">
+        <Button
+          variant="secondary"
+          onClick={() => handleLogout()}
+          className="w-full"
+        >
           <ExitIcon className="w-4 h-4 mr-2" />
           Logout
         </Button>

@@ -1,4 +1,5 @@
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 import createError from "http-errors";
@@ -21,12 +22,19 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
-app.use("/api/", indexRouter);
+app.use("/", indexRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/credential", credentialRouter);
 

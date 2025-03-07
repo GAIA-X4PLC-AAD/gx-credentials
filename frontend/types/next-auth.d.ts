@@ -9,10 +9,13 @@ declare module "next-auth" {
   interface Session {
     user: {
       pkh: string;
+      exp: number;
+      // role: string;
     };
   }
 
   interface User {
     pkh?: string;
+    // role?: string;
   }
 }

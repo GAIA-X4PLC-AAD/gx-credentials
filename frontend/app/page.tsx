@@ -3,9 +3,17 @@
 import LoginButton from "@/components/LoginButton";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function Home() {
+  const { data: session } = useSession();
+
+  if (session) {
+    redirect("/home");
+  }
+
   return (
     <div className="items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
       <HeroHighlight>

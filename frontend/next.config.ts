@@ -10,6 +10,7 @@ interface NextConfig {
   env: {
     NEXT_PUBLIC_TEZOS_RPC_URL: string;
     NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT: string;
+    NEXTAUTH_URL: string;
     AUTH_SECRET: string;
     BACKEND_API_URL: string;
   };
@@ -23,6 +24,7 @@ const nextConfig: NextConfig & { experimental: any; webpack: any } = {
       .NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT as string,
     AUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
     BACKEND_API_URL: process.env.BACKEND_API_URL as string,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL as string,
     // Add more env variables here
   },
 

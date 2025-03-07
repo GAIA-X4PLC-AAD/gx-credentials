@@ -2,23 +2,27 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 // List of routes that require authentication
-const protectedRoutes = ["/home"];
+const protectedRoutes = ["/home", "/apply", "/issue", "/takeout"];
 
 export default auth((req) => {
+  console.log("cookie", req.cookies.get("authjs.session-token")?.value);
+
   const isLoggedIn = !!req.auth;
   const isProtectedRoute = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
 
-  if (isProtectedRoute && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+  console.log("isLoggedIn", isLoggedIn);
+  console.log("isProtectedRoute", isProtectedRoute);
+
+  // if (isProtectedRoute && !isLoggedIn) {
+  //   return NextResponse.redirect(new URL("/", req.url));
+  // }
 
   // Allow the request to proceed
   return NextResponse.next();
 });
 
-// https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
 export const config = {
-  matcher: ["/home"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -28,12 +28,23 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
       - PG_DB_ROOT_USERNAME=${PG_DB_ROOT_USERNAME}
       - PG_DB_ROOT_PASSWORD=${PG_DB_ROOT_PASSWORD}
       - PG_DB_DATABASE=${PG_DB_DATABASE}
       - PG_DB_PORT=${PG_DB_DOCKER_PORT}
       - PG_DB_HOST=db
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
 
   web:
     build:
@@ -45,6 +56,17 @@ services:
       - server
     environment:
       - GLOBAL_SERVER_URL=${GLOBAL_SERVER_URL}
+    env_file:
+      - .env
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
 
 volumes:
   postgres_data:

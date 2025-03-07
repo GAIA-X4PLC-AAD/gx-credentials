@@ -1,30 +1,29 @@
 "use client";
 
+import ApplyCard from "@/components/cards/apply-card";
 import LoginButton from "@/components/LoginButton";
-import { Button } from "@/components/ui/button";
-import { logout } from "@/lib/actions/auth";
-import { Separator } from "@radix-ui/react-dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 
 const Page = () => {
   const { data: session, status } = useSession();
 
-  // Force re-render on status change
-  useEffect(() => {}, [status]);
-
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <div className="py-8 space-y-4">Loading...</div>;
   }
 
   return (
     <div className="py-8 space-y-4">
       <h1 className="text-3xl">Welcome back!</h1>
-      <Separator className="w-full" />
-      {status === "authenticated" && session ? (
+      <Separator className="w-full my-4" />
+      <div className="flex space-x-4">
+        {(["company", "employee"] as const).map((type) => (
+          <ApplyCard key={type} type={type} />
+        ))}
+      </div>
+      {status === "authenticated" && session !== null ? (
         <>
           <pre>{JSON.stringify(session, null, 2)}</pre>
-          <Button onClick={() => logout()}>Log out</Button>
         </>
       ) : (
         <p>

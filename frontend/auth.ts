@@ -1,11 +1,10 @@
+import { getPkhfromPk, validateAddress, verifySignature } from "@taquito/utils";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
-import { getPkhfromPk, validateAddress, verifySignature } from "@taquito/utils";
 import { payloadBytesFromString } from "./lib/payload";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET || "secret",
   ...authConfig,
   providers: [
     Credentials({
@@ -35,6 +34,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         console.log("AUTHORIZING");
         console.log(credentials);
         if (!credentials || validateAddress(credentials.pkh as string) != 3) {
+          console.log("Invalid public key hash");
           return null;
         }
 
@@ -50,6 +50,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         if (getPkhfromPk(credentials.pk as string) !== credentials.pkh) {
+          console.error("Invalid public key");
           return null;
         }
 
@@ -63,18 +64,23 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           dappUrl !== inputSplit[0] ||
           input !== [inputSplit[2], inputSplit[3], inputSplit[4]].join(" ")
         ) {
+          console.log("Invalid input");
           return null;
         }
 
         const timeError =
           (new Date().getTime() - new Date(inputSplit[1]).getTime()) / 1000;
         if (timeError < 0 || timeError > 60) {
+          console.log("Invalid time");
           return null;
         }
+
+        // TODO: Add role check here
 
         const user = {
           id: credentials?.pkh as string,
           pkh: credentials?.pkh as string,
+          // role: credentials?.role ?? "gx_user",
         };
 
         console.log("Returning user:", user);

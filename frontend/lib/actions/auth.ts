@@ -1,7 +1,6 @@
 "use server";
 
 import { signIn, signOut } from "@/auth";
-import { DAppClient } from "@airgap/beacon-sdk";
 
 type LoginProps = {
   activeAddress?: string;
@@ -16,17 +15,22 @@ export const login = async ({
   formattedInput,
   signature,
 }: LoginProps) => {
-  const callbackUrl = "/home";
-  await signIn("credentials", {
+  console.log("Logging in...");
+  const { error } = await signIn("credentials", {
     pkh: activeAddress,
     pk: activePk,
     formattedInput,
     signature,
-    redirectTo: callbackUrl,
   });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  console.log("Login successful");
 };
 
-export const logout = async (dAppClient?: DAppClient) => {
+export const logout = async () => {
   await signOut({ redirectTo: "/" });
-  await dAppClient?.clearActiveAccount();
 };

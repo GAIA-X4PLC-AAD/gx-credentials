@@ -1,8 +1,9 @@
+import { ReactQueryClientProvider } from "@/components/react-query-client-provider";
+import { NextAuthProvider } from "@/components/session-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { WalletProvider } from "@/context/WalletContext";
 import type { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -24,23 +25,22 @@ export const metadata: Metadata = {
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en" suppressHydrationWarning>
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <SessionProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <WalletProvider>
-            <main>{children}</main>
-            <Toaster />
-          </WalletProvider>
-        </ThemeProvider>
-      </SessionProvider>
-    </body>
-  </html>
+  <ReactQueryClientProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <NextAuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <WalletProvider>
+              <main>{children}</main>
+              <Toaster />
+            </WalletProvider>
+          </ThemeProvider>
+        </NextAuthProvider>
+      </body>
+    </html>
+  </ReactQueryClientProvider>
 );
 
 export default RootLayout;

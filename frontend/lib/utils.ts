@@ -18,3 +18,8 @@ export const formatTokenAmount = (
     return amount ? +amount.toFixed(5) / 1 : 0;
   }
 };
+
+export const capitalize = (s: string): string => {
+  if (typeof s !== "string") return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
