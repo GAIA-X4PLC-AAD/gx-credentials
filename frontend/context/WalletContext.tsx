@@ -3,18 +3,12 @@
 import { WALLET_CONFIG } from "@/config/wallet";
 import { payloadBytesFromString } from "@/lib/payload";
 import { WalletContextValue } from "@/types/wallet";
-import {
+import type {
   AccountInfo,
   DAppClient,
   RequestSignPayloadInput,
-  SigningType,
 } from "@airgap/beacon-sdk";
 import { createContext, useCallback, useEffect, useState } from "react";
-
-// const _dAppClient: DAppClient = new DAppClient({
-//   name: WALLET_CONFIG.name,
-//   preferredNetwork: WALLET_CONFIG.network,
-// });
 
 const DEFAULT_CONTEXT: WalletContextValue = {
   dAppClient: undefined,
@@ -38,19 +32,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [account, setAccount] = useState<AccountInfo>();
 
   useEffect(() => {
-    if (dAppClient) {
-      dAppClient.getActiveAccount().then((account: AccountInfo | undefined) => {
-        console.log("Active account", account);
-        setAccount(account);
-      });
-    } else {
-      setDAppClient(
-        new DAppClient({
-          name: WALLET_CONFIG.name,
-          preferredNetwork: WALLET_CONFIG.network,
-        })
-      );
-    }
+    let mounted = true;
+
+    const initDAppClient = async () => {
+      if (!dAppClient) {
+        const { DAppClient } = await import("@airgap/beacon-sdk");
+        if (mounted) {
+          const client = new DAppClient({
+            name: WALLET_CONFIG.name,
+            preferredNetwork: WALLET_CONFIG.network,
+          });
+          setDAppClient(client);
+          const activeAccount = await client.getActiveAccount();
+          setAccount(activeAccount);
+        }
+      }
+    };
+
+    initDAppClient();
+
+    return () => {
+      mounted = false;
+    };
   }, [dAppClient]);
 
   const connect = useCallback(() => {
@@ -82,6 +85,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     (value: string) => {
       return new Promise<string>(async (resolve, reject) => {
         try {
+          const { SigningType } = await import("@airgap/beacon-sdk");
           const payloadBytes = payloadBytesFromString(value);
           const payload: RequestSignPayloadInput = {
             signingType: SigningType.MICHELINE,
@@ -95,7 +99,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       });
     },
-    [dAppClient, account]
+    [dAppClient, account],
   );
 
   return (

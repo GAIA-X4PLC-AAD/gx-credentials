@@ -41,7 +41,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const isVerified = verifySignature(
           payloadBytesFromString(credentials.formattedInput as string),
           credentials.pk as string,
-          credentials.signature as string
+          credentials.signature as string,
         );
 
         if (!isVerified) {

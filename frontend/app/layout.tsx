@@ -2,7 +2,7 @@ import { ReactQueryClientProvider } from "@/components/react-query-client-provid
 import { NextAuthProvider } from "@/components/session-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { WalletProvider } from "@/context/WalletContext";
+import { WalletProviderWrapper } from "@/components/wallet-provider-wrapper";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -32,10 +32,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
       >
         <NextAuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <WalletProvider>
+            <WalletProviderWrapper>
               <main>{children}</main>
               <Toaster />
-            </WalletProvider>
+            </WalletProviderWrapper>
           </ThemeProvider>
         </NextAuthProvider>
       </body>

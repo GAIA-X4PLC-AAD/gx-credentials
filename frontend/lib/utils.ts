@@ -10,7 +10,7 @@ export const shortenHash = (hash: string): string =>
 
 export const formatTokenAmount = (
   amount: number,
-  decimals?: number
+  decimals?: number,
 ): number => {
   if (decimals) {
     return amount ? +amount.toFixed(decimals) / 1 : 0;
