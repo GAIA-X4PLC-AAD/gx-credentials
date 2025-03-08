@@ -5,16 +5,26 @@ import {
   CreateApplication,
 } from "@/model/application";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { APIResponse, baseURL } from "./base";
 
 type GetApplicationsProps = {
-  type: ApplicationType;
+  type?: ApplicationType;
 };
 
 export const useGetApplications = ({ type }: GetApplicationsProps) => {
+  const { data: session } = useSession();
+
   const fetchApplications = async () => {
-    return fetch(`${baseURL}/application/${type}`, {
+    const url = new URL("application", baseURL);
+    if (type) url.searchParams.append("type", type);
+
+    return fetch(url, {
       mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
+      },
     }).then((res) => res.json() as Promise<Application[]>);
   };
 
@@ -28,7 +38,7 @@ export const useGetApplications = ({ type }: GetApplicationsProps) => {
   return {
     isLoading,
     isError,
-    federations: data,
+    applications: data,
     refetch,
     isFetching,
   };
@@ -38,14 +48,23 @@ type GetApplicationByIdProps = GetApplicationsProps & {
   id: string;
 };
 
-export const useGetApplicationById = ({
+export const useGetApplicationsByPkh = ({
   type,
   id,
-}: GetApplicationByIdProps) => {
+}: Partial<GetApplicationByIdProps>) => {
+  const { data: session } = useSession();
+
   const fetchApplication = async () => {
-    return fetch(`${baseURL}/application/${type}/${id}`, {
+    const url = new URL(`application/${id}`, baseURL);
+    if (type) url.searchParams.append("type", type);
+
+    return fetch(url, {
       mode: "cors",
-    }).then((res) => res.json() as Promise<Application>);
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
+      },
+    }).then((res) => res.json() as Promise<Application[]>);
   };
 
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
@@ -53,12 +72,13 @@ export const useGetApplicationById = ({
     queryFn: fetchApplication,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
+    enabled: !!id,
   });
 
   return {
     isLoading,
     isError,
-    application: data,
+    applications: data,
     refetch,
     isFetching,
   };
@@ -66,13 +86,17 @@ export const useGetApplicationById = ({
 
 export const useCreateApplication = () => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
 
   const createApplication = async (application: CreateApplication) => {
-    return fetch(`${baseURL}/application/${application.type}`, {
+    const url = new URL("application", baseURL);
+
+    return fetch(url, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
       },
       body: JSON.stringify(application),
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
@@ -88,13 +112,14 @@ export const useCreateApplication = () => {
   });
 };
 
-type UpdateApplicationProps = GetApplicationByIdProps & {
+type UpdateApplicationProps = Required<GetApplicationByIdProps> & {
   status: ApplicationStatus;
   metadata?: string;
 };
 
 export const useUpdateApplication = () => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
 
   const updateApplication = async ({
     status,
@@ -102,11 +127,15 @@ export const useUpdateApplication = () => {
     metadata,
     id,
   }: UpdateApplicationProps) => {
-    return fetch(`${baseURL}/application/${type}/${id}`, {
+    const url = new URL(`application/${id}`, baseURL);
+    url.searchParams.append("type", type);
+
+    return fetch(url, {
       method: "PUT",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
       },
       body: JSON.stringify({ status, metadata }),
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
@@ -129,11 +158,19 @@ type DeleteApplicationProps = {
 
 export const useDeleteApplication = () => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
 
   const deleteApplication = async ({ type, id }: DeleteApplicationProps) => {
-    return fetch(`${baseURL}/application/${type}/${id}`, {
+    const url = new URL(`application/${id}`, baseURL);
+    url.searchParams.append("type", type);
+
+    return fetch(url, {
       method: "DELETE",
       mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
+      },
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
   };
 

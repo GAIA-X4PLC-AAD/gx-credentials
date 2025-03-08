@@ -29,6 +29,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           type: "text",
           placeholder: "0x0",
         },
+        role: {
+          label: "Role",
+          type: "text",
+          placeholder: "gx_user",
+        },
       },
       async authorize(credentials) {
         console.log("AUTHORIZING");
@@ -41,7 +46,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const isVerified = verifySignature(
           payloadBytesFromString(credentials.formattedInput as string),
           credentials.pk as string,
-          credentials.signature as string,
+          credentials.signature as string
         );
 
         if (!isVerified) {
@@ -76,11 +81,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // TODO: Add role check here
+        credentials.role = "gx_user";
 
-        const user = {
+        const user: { id: string; pkh: string; role: string } = {
           id: credentials?.pkh as string,
           pkh: credentials?.pkh as string,
-          // role: credentials?.role ?? "gx_user",
+          role: (credentials?.role as string) ?? "gx_user",
         };
 
         console.log("Returning user:", user);

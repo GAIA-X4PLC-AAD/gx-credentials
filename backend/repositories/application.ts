@@ -9,28 +9,35 @@ import {
 } from "../db/schema";
 const { isEqual } = _;
 
+type ApplicationType = "employee" | "company";
+type Application = SelectEmployeeApplication | SelectCompanyApplication;
+type NewApplication = Omit<
+  NewEmployeeApplication | NewCompanyApplication,
+  "id" | "created_at" | "updated_at"
+>;
+
+const getTableName = (type: ApplicationType) => `${type}_applications` as const;
+
 export const ApplicationRepository = {
-  // Employee Applications
-  async createEmployeeApplication(
-    application: Omit<
-      NewEmployeeApplication,
-      "id" | "created_at" | "updated_at"
-    >
-  ): Promise<SelectEmployeeApplication> {
+  async createApplication(
+    type: ApplicationType,
+    application: NewApplication
+  ): Promise<Application> {
     return await db
-      .insertInto("employee_applications")
+      .insertInto(getTableName(type))
       .values(application)
       .returningAll()
       .executeTakeFirstOrThrow();
   },
 
-  async updateEmployeeApplication(
+  async updateApplication(
+    type: ApplicationType,
     id: string,
     status: ApplicationStatus,
     metadata: any
-  ): Promise<SelectEmployeeApplication | undefined> {
+  ): Promise<Application | undefined> {
     const existingApplication = await db
-      .selectFrom("employee_applications")
+      .selectFrom(getTableName(type))
       .where("id", "=", id)
       .select("metadata")
       .executeTakeFirst();
@@ -49,105 +56,91 @@ export const ApplicationRepository = {
     }
 
     return await db
-      .updateTable("employee_applications")
+      .updateTable(getTableName(type))
       .set(updates)
       .where("id", "=", id)
       .returningAll()
       .executeTakeFirst();
   },
 
-  async getAllEmployeeApplications(): Promise<SelectEmployeeApplication[]> {
-    return await db.selectFrom("employee_applications").selectAll().execute();
-  },
-
-  async getEmployeeApplicationByPkh(
-    pkh: string
-  ): Promise<SelectEmployeeApplication[]> {
-    return await db
-      .selectFrom("employee_applications")
-      .where("pkh", "=", pkh)
-      .selectAll()
-      .execute();
-  },
-
-  async deleteEmployeeApplication(
-    id: string
-  ): Promise<SelectEmployeeApplication | undefined> {
-    const deletedApplication = await db
-      .deleteFrom("employee_applications")
-      .where("id", "=", id)
-      .returningAll()
-      .executeTakeFirst();
-
-    return deletedApplication;
-  },
-
-  // Company Applications
-  async getAllCompanyApplications(): Promise<SelectCompanyApplication[]> {
-    return await db.selectFrom("company_applications").selectAll().execute();
-  },
-
-  async createCompanyApplication(
-    application: Omit<NewCompanyApplication, "id" | "created_at" | "updated_at">
-  ): Promise<SelectCompanyApplication> {
-    return await db
-      .insertInto("company_applications")
-      .values(application)
-      .returningAll()
-      .executeTakeFirstOrThrow();
-  },
-
-  async updateCompanyApplication(
-    id: string,
-    status: ApplicationStatus,
-    metadata: any
-  ): Promise<SelectCompanyApplication | undefined> {
-    const existingApplication = await db
-      .selectFrom("company_applications")
-      .where("id", "=", id)
-      .select("metadata")
-      .executeTakeFirst();
-
-    const updates: any = {
-      status,
-      updated_at: new Date(),
-    };
-
-    if (
-      metadata &&
-      Object.keys(metadata).length > 0 &&
-      !isEqual(metadata, existingApplication?.metadata)
-    ) {
-      updates.metadata = metadata;
+  async getAllApplications(type?: ApplicationType): Promise<Application[]> {
+    if (type) {
+      return await db.selectFrom(getTableName(type)).selectAll().execute();
     }
 
-    return await db
-      .updateTable("company_applications")
-      .set(updates)
-      .where("id", "=", id)
-      .returningAll()
-      .executeTakeFirst();
+    const [employeeApps, companyApps] = await Promise.all([
+      db.selectFrom("employee_applications").selectAll().execute(),
+      db.selectFrom("company_applications").selectAll().execute(),
+    ]);
+
+    return [...employeeApps, ...companyApps];
   },
 
-  async getCompanyApplicationByPkh(
-    pkh: string
-  ): Promise<SelectCompanyApplication[]> {
-    return await db
-      .selectFrom("company_applications")
-      .where("pkh", "=", pkh)
-      .selectAll()
-      .execute();
+  async getApplicationsByPkh(
+    pkh: string,
+    type?: ApplicationType
+  ): Promise<Application[]> {
+    if (type) {
+      return await db
+        .selectFrom(getTableName(type))
+        .where("pkh", "=", pkh)
+        .selectAll()
+        .execute();
+    }
+
+    const [employeeApps, companyApps] = await Promise.all([
+      db
+        .selectFrom("employee_applications")
+        .where("pkh", "=", pkh)
+        .selectAll()
+        .execute(),
+      db
+        .selectFrom("company_applications")
+        .where("pkh", "=", pkh)
+        .selectAll()
+        .execute(),
+    ]);
+
+    return [...employeeApps, ...companyApps];
   },
 
-  async deleteCompanyApplication(
+  async deleteApplication(
+    type: ApplicationType,
     id: string
-  ): Promise<SelectCompanyApplication | undefined> {
-    const deletedApplication = await db
-      .deleteFrom("company_applications")
+  ): Promise<Application | undefined> {
+    return await db
+      .deleteFrom(getTableName(type))
       .where("id", "=", id)
       .returningAll()
       .executeTakeFirst();
-
-    return deletedApplication;
   },
+
+  // Convenience methods
+  // createEmployeeApplication: (application: NewApplication) =>
+  //   ApplicationRepository.createApplication("employee", application),
+  // createCompanyApplication: (application: NewApplication) =>
+  //   ApplicationRepository.createApplication("company", application),
+  // updateEmployeeApplication: (
+  //   id: string,
+  //   status: ApplicationStatus,
+  //   metadata: any
+  // ) =>
+  //   ApplicationRepository.updateApplication("employee", id, status, metadata),
+  // updateCompanyApplication: (
+  //   id: string,
+  //   status: ApplicationStatus,
+  //   metadata: any
+  // ) => ApplicationRepository.updateApplication("company", id, status, metadata),
+  // getAllEmployeeApplications: () =>
+  //   ApplicationRepository.getAllApplications("employee"),
+  // getAllCompanyApplications: () =>
+  //   ApplicationRepository.getAllApplications("company"),
+  // getEmployeeApplicationByPkh: (pkh: string) =>
+  //   ApplicationRepository.getApplicationByPkh("employee", pkh),
+  // getCompanyApplicationByPkh: (pkh: string) =>
+  //   ApplicationRepository.getApplicationByPkh("company", pkh),
+  // deleteEmployeeApplication: (id: string) =>
+  //   ApplicationRepository.deleteApplication("employee", id),
+  // deleteCompanyApplication: (id: string) =>
+  //   ApplicationRepository.deleteApplication("company", id),
 };

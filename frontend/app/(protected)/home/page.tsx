@@ -15,6 +15,7 @@ const Page = () => {
   return (
     <div className="py-8 space-y-4">
       <h1 className="text-3xl">Welcome back!</h1>
+      <p>Manage credentials and applications here.</p>
       <Separator className="w-full my-4" />
       <div className="flex space-x-4">
         {(["company", "employee"] as const).map((type) => (

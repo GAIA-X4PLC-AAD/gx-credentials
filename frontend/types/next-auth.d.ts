@@ -8,14 +8,17 @@ import NextAuth from "next-auth";
 declare module "next-auth" {
   interface Session {
     user: {
+      id: string;
       pkh: string;
-      exp: number;
-      // role: string;
+      jwt: string;
+      role: string;
     };
   }
 
   interface User {
+    id: string;
     pkh?: string;
-    // role?: string;
+    jwt?: string;
+    role?: string;
   }
 }

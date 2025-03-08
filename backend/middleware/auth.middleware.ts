@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { importJWK, jwtVerify } from "jose";
 
 interface DecodedToken {
   userId: string;
@@ -15,39 +15,26 @@ declare global {
   }
 }
 
-export const authMiddleware = (
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
-  let token = null;
-
-  // Option 1: Get from cookie
-  if (req.cookies["authjs.session-token"]) {
-    token = req.cookies["authjs.session-token"];
-  }
-
-  // Option 2: Get from Authorization header (often needed for API calls)
-  //   const authHeader = req.headers.authorization;
-  //   if (authHeader && authHeader.startsWith("Bearer ")) {
-  //     token = authHeader.substring(7);
-  //   }
-
-  console.log("Token:", token);
+): Promise<void> => {
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
 
   try {
-    // Verify the token using the same secret as NextAuth
-    const decoded = jwt.verify(
-      token,
-      process.env.NEXTAUTH_SECRET as string
-    ) as DecodedToken;
-    req.user = decoded;
+    const secret = process.env.NEXTAUTH_SECRET as string;
+    const jwk = await importJWK({ k: secret, alg: "HS256", kty: "oct" });
+    const { payload } = await jwtVerify(token, jwk);
+    console.log("Decoded token:", payload);
+
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ error: "Invalid token" });
   }
 };

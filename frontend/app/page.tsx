@@ -5,14 +5,24 @@ import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { status } = useSession();
+  const router = useRouter();
 
-  if (session) {
-    redirect("/home");
-  }
+  useEffect(() => {
+    if (status === "authenticated") {
+      toast({
+        title: "Redirecting...",
+        description: "You are already logged in. Redirecting you to home...",
+        duration: 2000,
+      });
+      router.push("/home");
+    }
+  }, [status, router]);
 
   return (
     <div className="items-center justify-items-center font-[family-name:var(--font-geist-sans)]">

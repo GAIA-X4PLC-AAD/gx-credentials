@@ -1,6 +1,6 @@
-"use server";
+"use client";
 
-import { signIn, signOut } from "@/auth";
+import { signIn, signOut } from "next-auth/react";
 
 type LoginProps = {
   activeAddress?: string;
@@ -16,15 +16,16 @@ export const login = async ({
   signature,
 }: LoginProps) => {
   console.log("Logging in...");
-  const { error } = await signIn("credentials", {
+  const response = await signIn("credentials", {
     pkh: activeAddress,
     pk: activePk,
     formattedInput,
     signature,
+    redirectTo: "/home",
   });
 
-  if (error) {
-    console.error(error);
+  if (!response?.ok) {
+    console.error("Login failed", response?.error);
     return;
   }
 

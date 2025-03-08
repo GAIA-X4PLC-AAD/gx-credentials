@@ -1,85 +1,135 @@
 import { Request, Response } from "express";
-import { ApplicationRepository } from "../repositories/application";
 import { ApplicationStatus } from "../db/schema";
+import { ApplicationRepository } from "../repositories/application";
 
-export const EmployeeApplicationController = {
+export const ApplicationController = {
   /**
-   * Get all employee applications.
+   * Get all applications of specified type.
    */
   getAll: async (req: Request, res: Response): Promise<void> => {
     try {
-      const applications =
-        await ApplicationRepository.getAllEmployeeApplications();
+      const type = req.query.type as "employee" | "company";
+      const validTypes = ["employee", "company"] as const;
 
-      if (!applications) {
-        res.status(404).json({ message: "Applications not found" });
+      if (type && !validTypes.includes(type)) {
+        res.status(400).json({ message: "Invalid application type" });
+        return;
+      }
+
+      const applications = await ApplicationRepository.getAllApplications(type);
+
+      if (!applications || applications.length === 0) {
+        res.status(404).json({ message: "No applications found" });
+        return;
       }
 
       res.status(200).json(applications);
     } catch (error) {
-      console.error("Error fetching employee applications:", error);
+      console.error(`Error fetching ${req.query.type} applications:`, error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Get a single employee application by ID.
+   * Get applications by public key hash.
    */
-  getById: async (req: Request, res: Response): Promise<void> => {
+  getByPkh: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const application =
-        await ApplicationRepository.getEmployeeApplicationByPkh(id);
+      const { pkh } = req.params;
+      const type = req.query.type as "employee" | "company";
 
-      if (!application) {
-        res.status(404).json({ message: "Application not found" });
+      if (!pkh) {
+        res.status(400).json({ message: "Public key hash is required" });
+        return;
       }
 
-      res.status(200).json(application);
+      const validTypes = ["employee", "company"] as const;
+      if (type && !validTypes.includes(type)) {
+        res.status(400).json({ message: "Invalid application type" });
+        return;
+      }
+
+      const applications = await ApplicationRepository.getApplicationsByPkh(
+        pkh,
+        type
+      );
+
+      if (!applications || applications.length === 0) {
+        res.status(404).json({ message: "No applications found" });
+        return;
+      }
+
+      res.status(200).json(applications);
     } catch (error) {
-      console.error("Error fetching employee application by ID:", error);
+      console.error(`Error fetching application by ID:`, error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Create a new employee application.
+   * Create a new application.
    */
   create: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { pkh, metadata } = req.body;
+      const { pkh, metadata, type } = req.body;
+      if (!type || !["employee", "company"].includes(type)) {
+        res
+          .status(400)
+          .json({ message: "Valid type query parameter is required" });
+        return;
+      }
 
       if (!pkh) {
         res.status(400).json({ message: "ID is required" });
+        return;
       }
 
-      await ApplicationRepository.createCompanyApplication({
+      const newApp = await ApplicationRepository.createApplication(type, {
         pkh,
         status: ApplicationStatus.Open,
         metadata,
       });
-      res.status(201).json({ message: "Application created successfully" });
+
+      res.status(201).json({
+        message: "Application created successfully",
+        application: newApp,
+      });
     } catch (error) {
-      console.error("Error creating employee application:", error);
+      console.error(`Error creating application:`, error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Update an employee application.
+   * Update an application.
    */
   update: async (req: Request, res: Response): Promise<void> => {
     try {
+      const type = req.query.type as "employee" | "company";
+      if (!type || !["employee", "company"].includes(type)) {
+        res
+          .status(400)
+          .json({ message: "Valid type query parameter is required" });
+        return;
+      }
+
       const { id } = req.params;
       const { status, metadata } = req.body;
+
+      if (!id) {
+        res.status(400).json({ message: "ID is required" });
+        return;
+      }
 
       if (!status && !metadata) {
         res
           .status(400)
           .json({ message: "At least one field is required for update" });
+        return;
       }
 
-      const application = await ApplicationRepository.updateEmployeeApplication(
+      const application = await ApplicationRepository.updateApplication(
+        type,
         id,
         status,
         metadata
@@ -87,144 +137,59 @@ export const EmployeeApplicationController = {
 
       if (!application) {
         res.status(404).json({ message: "Application not found" });
+        return;
       }
 
       res.status(200).json(application);
     } catch (error) {
-      console.error("Error updating employee application status:", error);
+      console.error(`Error updating application:`, error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Delete an employee application.
+   * Delete an application.
    */
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const application = await ApplicationRepository.deleteEmployeeApplication(
-        id
-      );
-
-      if (!application) {
-        res.status(404).json({ message: "Application not found" });
-      }
-
-      res.status(200).json({ message: "Application deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting employee application:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-};
-
-export const CompanyApplicationController = {
-  /**
-   * Get all company applications.
-   *
-   */
-  getAll: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const applications =
-        await ApplicationRepository.getAllCompanyApplications();
-      res.status(200).json(applications);
-    } catch (error) {
-      console.error("Error fetching company applications:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Get a single company application by ID.
-   */
-  getById: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const application =
-        await ApplicationRepository.getCompanyApplicationByPkh(id);
-
-      if (!application) {
-        res.status(404).json({ message: "Application not found" });
-      }
-
-      res.status(200).json(application);
-    } catch (error) {
-      console.error("Error fetching company application by ID:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Create a new company application.
-   */
-  create: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { pkh, metadata } = req.body;
-
-      if (!pkh) {
-        res.status(400).json({ message: "ID is required" });
-      }
-
-      await ApplicationRepository.createCompanyApplication({
-        pkh,
-        status: ApplicationStatus.Open,
-        metadata,
-      });
-      res.status(201).json({ message: "Application created successfully" });
-    } catch (error) {
-      console.error("Error creating company application:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Update a company application.
-   */
-  update: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { status, metadata } = req.body;
-
-      if (!status && !metadata) {
+      const type = req.query.type as "employee" | "company";
+      if (!type || !["employee", "company"].includes(type)) {
         res
           .status(400)
-          .json({ message: "At least one field is required for update" });
+          .json({ message: "Valid type query parameter is required" });
+        return;
       }
 
-      const application = await ApplicationRepository.updateCompanyApplication(
-        id,
-        status,
-        metadata
-      );
-
-      if (!application) {
-        res.status(404).json({ message: "Application not found" });
-      }
-
-      res.status(200).json(application);
-    } catch (error) {
-      console.error("Error updating company application status:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Delete a company application.
-   */
-  delete: async (req: Request, res: Response): Promise<void> => {
-    try {
       const { id } = req.params;
-      const application = await ApplicationRepository.deleteCompanyApplication(
+
+      if (!id) {
+        res.status(400).json({ message: "ID is required" });
+        return;
+      }
+
+      if (type === "company") {
+        res
+          .status(400)
+          .json({ message: "Company applications cannot be deleted" });
+        return;
+      }
+
+      const deletedApp = await ApplicationRepository.deleteApplication(
+        type,
         id
       );
 
-      if (!application) {
+      if (!deletedApp) {
         res.status(404).json({ message: "Application not found" });
+        return;
       }
 
-      res.status(200).json({ message: "Application deleted successfully" });
+      res.status(200).json({
+        message: "Application deleted successfully",
+        application: deletedApp,
+      });
     } catch (error) {
-      console.error("Error deleting company application:", error);
+      console.error(`Error deleting application:`, error);
       res.status(500).json({ message: "Internal server error" });
     }
   },

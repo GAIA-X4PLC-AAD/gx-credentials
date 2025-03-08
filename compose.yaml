@@ -38,9 +38,9 @@ services:
       - PG_DB_HOST=db
     develop:
       watch:
-        - action: sync
-          path: ./backend
+        - path: ./backend
           target: /app
+          action: rebuild
           ignore:
             - node_modules/
         - action: rebuild

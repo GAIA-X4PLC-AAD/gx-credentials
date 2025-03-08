@@ -99,7 +99,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       });
     },
-    [dAppClient, account],
+    [dAppClient, account]
   );
 
   return (

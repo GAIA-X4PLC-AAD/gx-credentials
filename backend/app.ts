@@ -21,7 +21,7 @@ const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.NEXTAUTH_SECRET)); // uses the same secret as NextAuth for parsing session token
 app.use(
   cors({
     origin: ["http://localhost:3000"],

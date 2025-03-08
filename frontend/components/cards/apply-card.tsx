@@ -7,10 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { capitalize } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
+import { BackpackIcon, PersonIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowRightIcon } from "lucide-react";
 
 type Props = {
   type: "company" | "employee";
@@ -18,22 +19,33 @@ type Props = {
 
 const ApplyCard = ({ type }: Props) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{`Apply as ${capitalize(type)}`}</CardTitle>
-        <CardDescription>
-          Apply for a <b>{type}</b> credential.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Button asChild className="w-full">
-          <Link href={`/apply/${type}`}>
-            Apply
-            <ArrowRightIcon className="w-4 h-4 ml-1" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <Link href={`/apply/${type}`}>
+      <Card
+        className={cn(
+          "cursor-pointer transition-all duration-500",
+          "hover:shadow-lg hover:scale-105 hover:bg-secondary"
+        )}
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            {type === "company" ? (
+              <BackpackIcon className="size-4 mr-1" />
+            ) : (
+              <PersonIcon className="size-4 mr-1" />
+            )}{" "}
+            {`Apply as ${capitalize(type)}`}
+          </CardTitle>
+          <CardDescription>
+            Apply for a <b>{type}</b> credential.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="default" className="w-full">
+            Apply <ArrowRightIcon className="w-4 h-4 ml-1" />
+          </Button>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

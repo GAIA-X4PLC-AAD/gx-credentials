@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { JWTPayload, SignJWT, importJWK } from "jose";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -10,7 +11,7 @@ export const shortenHash = (hash: string): string =>
 
 export const formatTokenAmount = (
   amount: number,
-  decimals?: number,
+  decimals?: number
 ): number => {
   if (decimals) {
     return amount ? +amount.toFixed(decimals) / 1 : 0;
@@ -22,4 +23,22 @@ export const formatTokenAmount = (
 export const capitalize = (s: string): string => {
   if (typeof s !== "string") return "";
   return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+/**
+ * Generates a JWT token with optional payload. Used for creating a JWT for the separate backend.
+ * @param payload - Optional JWT payload to include
+ * @returns Promise resolving to a signed JWT string
+ */
+export const generateJWT = async (payload?: JWTPayload) => {
+  const secret = process.env.NEXTAUTH_SECRET;
+  const jwk = await importJWK({ k: secret, alg: "HS256", kty: "oct" });
+
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("24h")
+    .sign(jwk);
+
+  return jwt;
 };

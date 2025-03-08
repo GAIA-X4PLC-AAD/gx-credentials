@@ -25,11 +25,9 @@ export const metadata: Metadata = {
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <ReactQueryClientProvider>
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+  <html lang="en" suppressHydrationWarning>
+    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <ReactQueryClientProvider>
         <NextAuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <WalletProvider>
@@ -38,9 +36,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
             </WalletProvider>
           </ThemeProvider>
         </NextAuthProvider>
-      </body>
-    </html>
-  </ReactQueryClientProvider>
+      </ReactQueryClientProvider>
+    </body>
+  </html>
 );
 
 export default RootLayout;

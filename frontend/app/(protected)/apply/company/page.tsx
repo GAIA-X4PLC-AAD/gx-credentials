@@ -96,7 +96,7 @@ const Page = () => {
             <FormItem>
               <FormLabel>PKH</FormLabel>
               <FormControl>
-                <Input placeholder="Public Key Hash" {...field} />
+                <Input placeholder="Public Key Hash" {...field} disabled />
               </FormControl>
               <FormDescription>
                 Public key hash of your Tezos account.

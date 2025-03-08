@@ -55,9 +55,6 @@ const LoginButton = () => {
         activePk,
         formattedInput,
         signature,
-      }).then(() => {
-        // https://stackoverflow.com/questions/70165993/how-to-handle-login-failed-error-in-nextauth-js/70760933#70760933
-        window.location.replace("/home");
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

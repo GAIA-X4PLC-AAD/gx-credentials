@@ -57,7 +57,7 @@ function ProfileMenu({ session }: { session: Session }) {
         <div className="grid gap-2">
           <p className="font-semibold">Logged in as:</p>{" "}
           <code className="inline-block w-auto bg-secondary px-1 rounded-md">
-            {session.user?.pkh}
+            {session.user?.id}
           </code>
         </div>
         <Button

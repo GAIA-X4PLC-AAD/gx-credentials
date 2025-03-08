@@ -1,10 +1,12 @@
 import express from "express";
 import {
-  EmployeeCredentialController,
   CompanyCredentialController,
+  EmployeeCredentialController,
 } from "../controllers/credential.controller";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
+router.use(authMiddleware);
 
 router.post("/", (req, res) => {
   const { type } = req.body;

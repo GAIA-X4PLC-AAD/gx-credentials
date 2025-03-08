@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useCreateApplication } from "@/hooks/api/application";
 import { toast } from "@/hooks/use-toast";
 import { ResetIcon } from "@radix-ui/react-icons";
@@ -27,20 +28,23 @@ const formSchema = z.object({
   legalName: z.string().min(1, {
     message: "Legal Name is required.",
   }),
-  registrationNumber: z.string().min(1, {
-    message: "Registration Number is required.",
+  role: z.string().min(1, {
+    message: "Role is required.",
   }),
-  headquarterAddress: z.string().min(1, {
-    message: "Headquarters Address is required.",
+  email: z
+    .string()
+    .min(1, {
+      message: "Email is required.",
+    })
+    .email("Invalid email address."),
+  companyAddress: z.string().min(1, {
+    message: "Company Address is required.",
   }),
-  legalAddress: z.string().min(1, {
-    message: "Legal Address is required.",
-  }),
-  parentOrganization: z.string().min(1, {
+  companyName: z.string().min(1, {
     message: "Parent Organization is required.",
   }),
-  subOrganization: z.string().min(1, {
-    message: "Sub Organization is required.",
+  applicationText: z.string().min(1, {
+    message: "Application text is required.",
   }),
 });
 
@@ -52,11 +56,11 @@ const Page = () => {
     defaultValues: {
       pkh: session?.user?.pkh,
       legalName: "",
-      registrationNumber: "",
-      headquarterAddress: "",
-      legalAddress: "",
-      parentOrganization: "",
-      subOrganization: "",
+      role: "",
+      email: "",
+      companyAddress: "",
+      companyName: "",
+      applicationText: "",
     },
   });
 
@@ -75,10 +79,10 @@ const Page = () => {
       });
       toast({
         title: "Success",
-        description: "Application created successfully.",
+        description: "Employee Application created successfully.",
       });
     } catch (error) {
-      console.error("Error creating company application:", error);
+      console.error("Error creating employee application:", error);
       toast({
         title: "Error",
         description: "An error occurred while creating the application.",
@@ -96,7 +100,7 @@ const Page = () => {
             <FormItem>
               <FormLabel>PKH</FormLabel>
               <FormControl>
-                <Input placeholder="Public Key Hash" {...field} />
+                <Input placeholder="Public Key Hash" {...field} disabled />
               </FormControl>
               <FormDescription>
                 Public key hash of your Tezos account.
@@ -121,12 +125,12 @@ const Page = () => {
           />
           <FormField
             control={form.control}
-            name="registrationNumber"
+            name="role"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Registration Number</FormLabel>
+              <FormItem>
+                <FormLabel>Role</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter registration number" {...field} />
+                  <Input placeholder="Enter employee role" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,39 +139,27 @@ const Page = () => {
         </div>
         <FormField
           control={form.control}
-          name="headquarterAddress"
+          name="email"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Headquarters Address</FormLabel>
+            <FormItem className="flex-1">
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Enter headquarters address" {...field} />
+                <Input placeholder="Enter email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="legalAddress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Legal Address</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter legal address" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <div className="flex space-x-2">
           <FormField
             control={form.control}
-            name="parentOrganization"
+            name="companyName"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Parent Organization</FormLabel>
+                <FormLabel>Company Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter parent organization" {...field} />
+                  <Input placeholder="Enter company name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -175,18 +167,31 @@ const Page = () => {
           />
           <FormField
             control={form.control}
-            name="subOrganization"
+            name="companyAddress"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Sub Organization</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter sub organization" {...field} />
+                <FormLabel>Company Address</FormLabel>
+                <FormControl className="flex-1">
+                  <Input placeholder="Enter company address" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+        <FormField
+          control={form.control}
+          name="applicationText"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Application Message</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Enter application message" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="flex w-full space-x-2 justify-between">
           <Button
             type="button"
