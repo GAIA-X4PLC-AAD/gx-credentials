@@ -9,9 +9,15 @@ export interface RegistryStorage {
   owner: string;
 }
 
-const RPC_URL = process.env.NEXT_PUBLIC_TEZOS_RPC_URL as string;
-const CONTRACT_ADDRESS = process.env
-  .NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT as string;
+if (!process.env.NEXT_PUBLIC_TEZOS_RPC_URL) {
+  throw new Error("NEXT_PUBLIC_TEZOS_RPC_URL is not defined");
+}
+if (!process.env.NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT) {
+  throw new Error("NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT is not defined");
+}
+
+const RPC_URL = process.env.NEXT_PUBLIC_TEZOS_RPC_URL;
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT;
 
 const tezos = new TezosToolkit(RPC_URL);
 
