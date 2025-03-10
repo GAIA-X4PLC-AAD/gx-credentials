@@ -21,6 +21,7 @@
     "express": "^4.21.2",
     "http-errors": "~1.6.3",
     "jade": "^0.29.0",
+    "jose": "^6.0.8",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.5",
     "lodash": "^4.17.21",
