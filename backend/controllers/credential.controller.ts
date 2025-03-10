@@ -1,182 +1,184 @@
 import { Request, Response } from "express";
 import { CredentialRepository } from "../repositories/credential";
 
-// Controller for employee credentials
-export const EmployeeCredentialController = {
+type CredentialType = "employee" | "company";
+
+export const CredentialController = {
   /**
-   * Get all employee credentials.
+   * Get all credentials (both employee and company).
    */
   getAll: async (req: Request, res: Response): Promise<void> => {
     try {
-      const credentials =
-        await CredentialRepository.getAllEmployeeCredentials();
+      const { type } = req.query;
 
-      if (!credentials) {
-        res.status(404).json({ message: "Credentials not found" });
+      if (type) {
+        if (!["employee", "company"].includes(type as string)) {
+          res.status(400).json({ message: "Invalid credential type" });
+          return;
+        }
+
+        const table = `${type}_credentials` as
+          | "employee_credentials"
+          | "company_credentials";
+        const credentials = await CredentialRepository.getAll(table);
+        res.status(200).json({ [type as string]: credentials || [] });
+        return;
       }
+
+      // if type is not given then fetch all credentials from both tables
+      const [employeeCredentials, companyCredentials] = await Promise.all([
+        CredentialRepository.getAll("employee_credentials"),
+        CredentialRepository.getAll("company_credentials"),
+      ]);
+
+      const credentials = {
+        employee: employeeCredentials || [],
+        company: companyCredentials || [],
+      };
 
       res.status(200).json(credentials);
     } catch (error) {
-      console.error("Error fetching employee credentials:", error);
+      console.error("Error fetching credentials:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Get a single employee credential by ID.
+   * Get credentials by public key hash (searches both employee and company).
    */
-  getById: async (req: Request, res: Response): Promise<void> => {
+  getByPkh: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const credential = await CredentialRepository.getEmployeeCredential(id);
+      const { pkh } = req.params;
+      const [employeeCredential, companyCredential] = await Promise.all([
+        CredentialRepository.getByPkh("employee_credentials", pkh),
+        CredentialRepository.getByPkh("company_credentials", pkh),
+      ]);
+
+      const credential = employeeCredential || companyCredential;
 
       if (!credential) {
         res.status(404).json({ message: "Credential not found" });
+        return;
       }
 
       res.status(200).json(credential);
     } catch (error) {
-      console.error("Error fetching employee credential by ID:", error);
+      console.error("Error fetching credential by ID:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Create a new employee credential.
+   * Create a new credential.
    */
   create: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { holder_pkh, ...credentialData } = req.body;
+      const { holder_pkh, type, ...credentialData } = req.body;
 
       if (!holder_pkh) {
-        res.status(400).json({ message: "ID is required" });
+        res.status(400).json({ message: "Holder public key hash is required" });
+        return;
       }
 
-      await CredentialRepository.createEmployeeCredential({
+      if (!type) {
+        res.status(400).json({ message: "Credential type is required" });
+        return;
+      }
+
+      const credentialPayload = {
         holder_pkh,
         ...credentialData,
-      });
+      };
+
+      switch (type as CredentialType) {
+        case "employee":
+          await CredentialRepository.create(
+            "employee_credentials",
+            credentialPayload
+          );
+          break;
+        case "company":
+          await CredentialRepository.create(
+            "company_credentials",
+            credentialPayload
+          );
+          break;
+        default:
+          res.status(400).json({ message: "Invalid credential type" });
+          return;
+      }
+
       res.status(201).json({ message: "Credential created successfully" });
     } catch (error) {
-      console.error("Error creating employee credential:", error);
+      console.error("Error creating credential:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Update an employee credential.
+   * Update a credential.
    */
   update: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { holder_pkh, ...credentialData } = req.body;
 
-      await CredentialRepository.updateEmployeeCredential(id, credentialData);
-      res.status(200).json({ message: "Credential updated successfully" });
-    } catch (error) {
-      console.error("Error updating employee credential:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-  delete: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await CredentialRepository.deleteEmployeeCredential(id);
-      res.status(200).json({ message: "Credential deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting employee credential:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-};
-
-// Controller for company credentials
-export const CompanyCredentialController = {
-  /**
-   * Get all company credentials.
-   */
-  getAll: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const credentials = await CredentialRepository.getAllCompanyCredentials();
-
-      if (!credentials) {
-        res.status(404).json({ message: "Credentials not found" });
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
       }
 
-      res.status(200).json(credentials);
-    } catch (error) {
-      console.error("Error fetching company credentials:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
+      // Try to update in both databases
+      const [employeeUpdated, companyUpdated] = await Promise.all([
+        CredentialRepository.update(
+          "employee_credentials",
+          id,
+          credentialData
+        ).catch(() => false),
+        CredentialRepository.update(
+          "company_credentials",
+          id,
+          credentialData
+        ).catch(() => false),
+      ]);
 
-  /**
-   * Get a single company credential by ID.
-   */
-  getById: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const credential = await CredentialRepository.getCompanyCredential(id);
-
-      if (!credential) {
+      if (!employeeUpdated && !companyUpdated) {
         res.status(404).json({ message: "Credential not found" });
+        return;
       }
 
-      res.status(200).json(credential);
-    } catch (error) {
-      console.error("Error fetching company credential by ID:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Create a new company credential.
-   */
-  create: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { holder_pkh, ...credentialData } = req.body;
-
-      if (!holder_pkh) {
-        res.status(400).json({ message: "ID is required" });
-      }
-
-      await CredentialRepository.createCompanyCredential({
-        holder_pkh,
-        ...credentialData,
-      });
-      res.status(201).json({ message: "Credential created successfully" });
-    } catch (error) {
-      console.error("Error creating company credential:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Update a company credential.
-   */
-  update: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { holder_pkh, ...credentialData } = req.body;
-
-      await CredentialRepository.updateCompanyCredential(id, credentialData);
       res.status(200).json({ message: "Credential updated successfully" });
     } catch (error) {
-      console.error("Error updating company credential:", error);
+      console.error("Error updating credential:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
   /**
-   * Delete a company credential.
+   * Delete a credential by ID (searches both employee and company).
    */
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      await CredentialRepository.deleteCompanyCredential(id);
+
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
+      }
+
+      const [employeeDeleted, companyDeleted] = await Promise.all([
+        CredentialRepository.delete("employee_credentials", id),
+        CredentialRepository.delete("company_credentials", id),
+      ]);
+
+      if (!employeeDeleted && !companyDeleted) {
+        res.status(404).json({ message: "Credential not found" });
+        return;
+      }
+
       res.status(200).json({ message: "Credential deleted successfully" });
     } catch (error) {
-      console.error("Error deleting company credential:", error);
+      console.error("Error deleting credential:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },

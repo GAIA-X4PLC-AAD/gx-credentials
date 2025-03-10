@@ -1,25 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { APIResponse, baseURL } from "./base";
 import {
   CreateCredential,
   Credential,
   CredentialType,
 } from "@/model/credential";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { APIResponse, baseURL } from "./base";
 
-type GetCredentialsProps = {
-  type: CredentialType;
-};
-
-export const useGetCredentials = ({ type }: GetCredentialsProps) => {
-  const fetchCredentials = async () => {
-    return fetch(`${baseURL}/credential/${type}`, {
-      mode: "cors",
-    }).then((res) => res.json() as Promise<Credential[]>);
-  };
-
+export const useGetCredentials = () => {
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
-    queryKey: ["getCredentials", type],
-    queryFn: fetchCredentials,
+    queryKey: ["getCredentials"],
+    queryFn: () => getAllCredentials(),
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
   });
@@ -33,19 +23,23 @@ export const useGetCredentials = ({ type }: GetCredentialsProps) => {
   };
 };
 
-type GetCredentialByIdProps = GetCredentialsProps & {
+type GetCredentialByIdProps = {
+  type: CredentialType;
   id: string;
 };
 
-export const useGetCredentialById = ({ type, id }: GetCredentialByIdProps) => {
+export const useGetCredentialsByPkh = ({
+  type,
+  id,
+}: GetCredentialByIdProps) => {
   const fetchCredential = async () => {
-    return fetch(`${baseURL}/credential/${type}/${id}`, {
-      mode: "cors",
-    }).then((res) => res.json() as Promise<Credential>);
+    const url = new URL(`credential/${id}`, baseURL);
+    url.searchParams.append("type", type);
+    return getCredentialsByPkh(id, type);
   };
 
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
-    queryKey: ["getCredentialById", type, id],
+    queryKey: ["getCredentialByPkh", type, id],
     queryFn: fetchCredential,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
@@ -54,7 +48,33 @@ export const useGetCredentialById = ({ type, id }: GetCredentialByIdProps) => {
   return {
     isLoading,
     isError,
-    credential: data,
+    credentials: data,
+    refetch,
+    isFetching,
+  };
+};
+
+export const useGetAllCredentialsByPkh = ({
+  id: pkh,
+}: Pick<GetCredentialByIdProps, "id">) => {
+  const fetchCredential = async () => {
+    return Promise.all([
+      getCredentialsByPkh(pkh, "employee"),
+      getCredentialsByPkh(pkh, "company"),
+    ]).then(([employee, company]) => [...employee, ...company]);
+  };
+
+  const { isLoading, isError, data, refetch, isFetching } = useQuery({
+    queryKey: ["getAllCredentialsByPkh", pkh],
+    queryFn: fetchCredential,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60_000,
+  });
+
+  return {
+    isLoading,
+    isError,
+    credentials: data,
     refetch,
     isFetching,
   };
@@ -64,7 +84,7 @@ export const useCreateCredential = () => {
   const queryClient = useQueryClient();
 
   const createCredential = async (credential: CreateCredential) => {
-    return fetch(`${baseURL}/credential/${credential.type}`, {
+    return fetch(`${baseURL}/credential`, {
       method: "POST",
       mode: "cors",
       headers: {
@@ -95,7 +115,9 @@ export const useUpdateCredential = () => {
     credential,
     type,
   }: UpdateCredentialProps) => {
-    return fetch(`${baseURL}/credential/${type}/${credential.holder_pkh}`, {
+    const url = new URL(`credential/${credential.holder_pkh}`, baseURL);
+    url.searchParams.append("type", type);
+    return fetch(url, {
       method: "PUT",
       mode: "cors",
       headers: {
@@ -115,13 +137,13 @@ export const useUpdateCredential = () => {
   });
 };
 
-type DeleteCredentialProps = GetCredentialByIdProps;
+type DeleteCredentialProps = Pick<GetCredentialByIdProps, "id">;
 
 export const useDeleteCredential = () => {
   const queryClient = useQueryClient();
 
-  const deleteCredential = async ({ type, id }: DeleteCredentialProps) => {
-    return fetch(`${baseURL}/credential/${type}/${id}`, {
+  const deleteCredential = async ({ id }: DeleteCredentialProps) => {
+    return fetch(`${baseURL}/credential/${id}`, {
       method: "DELETE",
       mode: "cors",
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
@@ -135,4 +157,27 @@ export const useDeleteCredential = () => {
       });
     },
   });
+};
+
+// helpers
+export const getAllCredentials = async (type?: CredentialType) => {
+  const url = new URL("credential", baseURL);
+  if (type) url.searchParams.append("type", type);
+  return fetch(url, {
+    mode: "cors",
+  }).then((res) => res.json() as Promise<Credential[]>);
+};
+
+export const getCredentialsByPkh = async (
+  pkh: string,
+  type: CredentialType
+) => {
+  const url = new URL(`credential/${pkh}`, baseURL);
+  url.searchParams.append("type", type);
+  return fetch(url, {
+    mode: "cors",
+    headers: {
+      Accept: "application/json",
+    },
+  }).then((res) => res.json() as Promise<Credential[]>);
 };

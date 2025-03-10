@@ -6,104 +6,61 @@ import {
   SelectEmployeeCredential,
 } from "../db/schema";
 
+type TableName = "employee_credentials" | "company_credentials";
+type NewCredential = NewEmployeeCredential | NewCompanyCredential;
+type SelectCredential = SelectEmployeeCredential | SelectCompanyCredential;
+
 export const CredentialRepository = {
-  // Employee Credentials
-  async createEmployeeCredential(
-    credential: Omit<NewEmployeeCredential, "created_at" | "updated_at">
-  ): Promise<SelectEmployeeCredential> {
-    return await db
-      .insertInto("employee_credentials")
+  async create<T extends NewCredential, R extends SelectCredential>(
+    table: TableName,
+    credential: Omit<T, "created_at" | "updated_at">
+  ): Promise<R> {
+    return (await db
+      .insertInto(table)
       .values(credential)
       .returningAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirstOrThrow()) as R;
   },
 
-  async updateEmployeeCredential(
-    holder_pkh: string,
-    credential: Partial<NewEmployeeCredential>
-  ): Promise<SelectEmployeeCredential | undefined> {
-    return await db
-      .updateTable("employee_credentials")
+  async update<T extends NewCredential, R extends SelectCredential>(
+    table: TableName,
+    id: string,
+    credential: Partial<T>
+  ): Promise<R | undefined> {
+    return (await db
+      .updateTable(table)
       .set({
         ...credential,
         updated_at: new Date(),
       })
-      .where("holder_pkh", "=", holder_pkh)
+      .where("id", "=", id)
       .returningAll()
-      .executeTakeFirst();
+      .executeTakeFirst()) as R | undefined;
   },
 
-  async getAllEmployeeCredentials(): Promise<SelectEmployeeCredential[]> {
-    return await db.selectFrom("employee_credentials").selectAll().execute();
+  async getAll<R extends SelectCredential>(table: TableName): Promise<R[]> {
+    return (await db.selectFrom(table).selectAll().execute()) as R[];
   },
 
-  async getEmployeeCredential(
+  async getByPkh<R extends SelectCredential>(
+    table: TableName,
     holder_pkh: string
-  ): Promise<SelectEmployeeCredential | undefined> {
-    return await db
-      .selectFrom("employee_credentials")
+  ): Promise<R[] | undefined> {
+    return (await db
+      .selectFrom(table)
       .where("holder_pkh", "=", holder_pkh)
       .selectAll()
-      .executeTakeFirst();
+      .execute()) as R[] | undefined;
   },
 
-  async deleteEmployeeCredential(
-    holder_pkh: string
-  ): Promise<SelectEmployeeCredential | undefined> {
-    return await db
-      .deleteFrom("employee_credentials")
-      .where("holder_pkh", "=", holder_pkh)
+  async delete<R extends SelectCredential>(
+    table: TableName,
+    id: string
+  ): Promise<R | undefined> {
+    return (await db
+      .deleteFrom(table)
+      .where("id", "=", id)
       .returningAll()
-      .executeTakeFirst();
-  },
-
-  // Company Credentials
-  async createCompanyCredential(
-    credential: Omit<NewCompanyCredential, "created_at" | "updated_at">
-  ): Promise<SelectCompanyCredential> {
-    return await db
-      .insertInto("company_credentials")
-      .values(credential)
-      .returningAll()
-      .executeTakeFirstOrThrow();
-  },
-
-  async updateCompanyCredential(
-    holder_pkh: string,
-    credential: Partial<NewCompanyCredential>
-  ): Promise<SelectCompanyCredential | undefined> {
-    return await db
-      .updateTable("company_credentials")
-      .set({
-        ...credential,
-        updated_at: new Date(),
-      })
-      .where("holder_pkh", "=", holder_pkh)
-      .returningAll()
-      .executeTakeFirst();
-  },
-
-  async deleteCompanyCredential(
-    holder_pkh: string
-  ): Promise<SelectCompanyCredential | undefined> {
-    return await db
-      .deleteFrom("company_credentials")
-      .where("holder_pkh", "=", holder_pkh)
-      .returningAll()
-      .executeTakeFirst();
-  },
-
-  async getAllCompanyCredentials(): Promise<SelectCompanyCredential[]> {
-    return await db.selectFrom("company_credentials").selectAll().execute();
-  },
-
-  async getCompanyCredential(
-    holder_pkh: string
-  ): Promise<SelectCompanyCredential | undefined> {
-    return await db
-      .selectFrom("company_credentials")
-      .where("holder_pkh", "=", holder_pkh)
-      .selectAll()
-      .executeTakeFirst();
+      .executeTakeFirst()) as R | undefined;
   },
 };

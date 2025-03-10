@@ -19,7 +19,7 @@ type NewApplication = Omit<
 const getTableName = (type: ApplicationType) => `${type}_applications` as const;
 
 export const ApplicationRepository = {
-  async createApplication(
+  async create(
     type: ApplicationType,
     application: NewApplication
   ): Promise<Application> {
@@ -30,7 +30,7 @@ export const ApplicationRepository = {
       .executeTakeFirstOrThrow();
   },
 
-  async updateApplication(
+  async update(
     type: ApplicationType,
     id: string,
     status: ApplicationStatus,
@@ -63,7 +63,7 @@ export const ApplicationRepository = {
       .executeTakeFirst();
   },
 
-  async getAllApplications(type?: ApplicationType): Promise<Application[]> {
+  async getAll(type?: ApplicationType): Promise<Application[]> {
     if (type) {
       return await db.selectFrom(getTableName(type)).selectAll().execute();
     }
@@ -76,10 +76,7 @@ export const ApplicationRepository = {
     return [...employeeApps, ...companyApps];
   },
 
-  async getApplicationsByPkh(
-    pkh: string,
-    type?: ApplicationType
-  ): Promise<Application[]> {
+  async getByPkh(pkh: string, type?: ApplicationType): Promise<Application[]> {
     if (type) {
       return await db
         .selectFrom(getTableName(type))
@@ -104,7 +101,7 @@ export const ApplicationRepository = {
     return [...employeeApps, ...companyApps];
   },
 
-  async deleteApplication(
+  async delete(
     type: ApplicationType,
     id: string
   ): Promise<Application | undefined> {
@@ -114,33 +111,4 @@ export const ApplicationRepository = {
       .returningAll()
       .executeTakeFirst();
   },
-
-  // Convenience methods
-  // createEmployeeApplication: (application: NewApplication) =>
-  //   ApplicationRepository.createApplication("employee", application),
-  // createCompanyApplication: (application: NewApplication) =>
-  //   ApplicationRepository.createApplication("company", application),
-  // updateEmployeeApplication: (
-  //   id: string,
-  //   status: ApplicationStatus,
-  //   metadata: any
-  // ) =>
-  //   ApplicationRepository.updateApplication("employee", id, status, metadata),
-  // updateCompanyApplication: (
-  //   id: string,
-  //   status: ApplicationStatus,
-  //   metadata: any
-  // ) => ApplicationRepository.updateApplication("company", id, status, metadata),
-  // getAllEmployeeApplications: () =>
-  //   ApplicationRepository.getAllApplications("employee"),
-  // getAllCompanyApplications: () =>
-  //   ApplicationRepository.getAllApplications("company"),
-  // getEmployeeApplicationByPkh: (pkh: string) =>
-  //   ApplicationRepository.getApplicationByPkh("employee", pkh),
-  // getCompanyApplicationByPkh: (pkh: string) =>
-  //   ApplicationRepository.getApplicationByPkh("company", pkh),
-  // deleteEmployeeApplication: (id: string) =>
-  //   ApplicationRepository.deleteApplication("employee", id),
-  // deleteCompanyApplication: (id: string) =>
-  //   ApplicationRepository.deleteApplication("company", id),
 };

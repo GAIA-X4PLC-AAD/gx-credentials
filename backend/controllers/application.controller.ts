@@ -16,7 +16,7 @@ export const ApplicationController = {
         return;
       }
 
-      const applications = await ApplicationRepository.getAllApplications(type);
+      const applications = await ApplicationRepository.getAll(type);
 
       if (!applications || applications.length === 0) {
         res.status(404).json({ message: "No applications found" });
@@ -49,10 +49,7 @@ export const ApplicationController = {
         return;
       }
 
-      const applications = await ApplicationRepository.getApplicationsByPkh(
-        pkh,
-        type
-      );
+      const applications = await ApplicationRepository.getByPkh(pkh, type);
 
       if (!applications || applications.length === 0) {
         res.status(404).json({ message: "No applications found" });
@@ -84,7 +81,7 @@ export const ApplicationController = {
         return;
       }
 
-      const newApp = await ApplicationRepository.createApplication(type, {
+      const newApp = await ApplicationRepository.create(type, {
         pkh,
         status: ApplicationStatus.Open,
         metadata,
@@ -128,7 +125,7 @@ export const ApplicationController = {
         return;
       }
 
-      const application = await ApplicationRepository.updateApplication(
+      const application = await ApplicationRepository.update(
         type,
         id,
         status,
@@ -174,10 +171,7 @@ export const ApplicationController = {
         return;
       }
 
-      const deletedApp = await ApplicationRepository.deleteApplication(
-        type,
-        id
-      );
+      const deletedApp = await ApplicationRepository.delete(type, id);
 
       if (!deletedApp) {
         res.status(404).json({ message: "Application not found" });

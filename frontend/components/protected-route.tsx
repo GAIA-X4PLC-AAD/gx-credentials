@@ -18,7 +18,7 @@ export default function ProtectedRoute({
   useEffect(() => {
     if (status === "unauthenticated") {
       setIsRedirecting(true);
-      router.push("/login");
+      router.push("/");
     }
   }, [status, router]);
 

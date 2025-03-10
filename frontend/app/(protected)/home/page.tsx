@@ -21,6 +21,7 @@ const Page = () => {
         {(["company", "employee"] as const).map((type) => (
           <ApplyCard key={type} type={type} />
         ))}
+        {}
       </div>
       {status === "authenticated" && session !== null ? (
         <>

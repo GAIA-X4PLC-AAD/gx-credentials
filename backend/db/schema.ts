@@ -21,6 +21,7 @@ interface BaseApplication {
 }
 
 interface BaseCredential {
+  id: Generated<string>; // UUID
   holder_pkh: string;
   subject: string;
   issuer: string;

@@ -26,9 +26,7 @@ export const capitalize = (s: string): string => {
 };
 
 /**
- * Generates a JWT token with optional payload. Used for creating a JWT for the separate backend.
- * @param payload - Optional JWT payload to include
- * @returns Promise resolving to a signed JWT string
+ * Generates a JWT for the separate backend.
  */
 export const generateJWT = async (payload?: JWTPayload) => {
   const secret = process.env.NEXTAUTH_SECRET;

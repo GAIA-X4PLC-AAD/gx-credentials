@@ -4,6 +4,7 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth from "next-auth";
+import { Role } from "./rbac";
 
 declare module "next-auth" {
   interface Session {
@@ -11,7 +12,7 @@ declare module "next-auth" {
       id: string;
       pkh: string;
       jwt: string;
-      role: string;
+      role: Role;
     };
   }
 
@@ -19,6 +20,6 @@ declare module "next-auth" {
     id: string;
     pkh?: string;
     jwt?: string;
-    role?: string;
+    role?: Role;
   }
 }
