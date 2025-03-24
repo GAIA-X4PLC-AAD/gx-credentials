@@ -36,12 +36,23 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
     const initDAppClient = async () => {
       if (!dAppClient) {
-        const { DAppClient } = await import("@airgap/beacon-sdk");
+        const { DAppClient, BeaconEvent } = await import("@airgap/beacon-sdk");
         if (mounted) {
           const client = new DAppClient({
             name: WALLET_CONFIG.name,
             preferredNetwork: WALLET_CONFIG.network,
           });
+
+          // since beacon-sdk 4.2, the event must be subscribed
+          // https://docs.walletbeacon.io/guides/migration-guide/
+          client.subscribeToEvent(BeaconEvent.ACTIVE_ACCOUNT_SET, (account) => {
+            //TODO: in the long run it may be best to start all login flows from the account being connected here?
+            console.log(
+              `${BeaconEvent.ACTIVE_ACCOUNT_SET} triggered: `,
+              account,
+            );
+          });
+
           setDAppClient(client);
           const activeAccount = await client.getActiveAccount();
           setAccount(activeAccount);
@@ -67,6 +78,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         });
         console.log(permissions);
         setAccount(permissions?.accountInfo);
+
         return permissions;
       } catch (e) {
         console.error(e);
