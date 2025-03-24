@@ -19,7 +19,7 @@ export function StatusPill({ status, className }: StatusPillProps) {
           "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500",
         status === ApplicationStatus.Accepted &&
           "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500",
-        className
+        className,
       )}
     >
       {status.charAt(0).toUpperCase() + status.slice(1)}

@@ -33,7 +33,7 @@ const nextConfig: NextConfig & { experimental: any; webpack: any } = {
   experimental: {},
   webpack: (
     config: any,
-    { isServer, dev }: { isServer: boolean; dev: boolean }
+    { isServer, dev }: { isServer: boolean; dev: boolean },
   ) => {
     // Used for connectkit to work with nextjs
     config.resolve.fallback = { fs: false, net: false, tls: false };
@@ -91,7 +91,7 @@ class WasmChunksFixPlugin {
             const name = pathname.split("/")[1];
             const info = compilation.assetsInfo.get(pathname);
             compilation.emitAsset(name, source, info);
-          })
+          }),
       );
     });
   }

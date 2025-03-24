@@ -21,7 +21,7 @@ export function EntityTypePill({ type, className }: EntityTypePillProps) {
           "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500",
         type === EntityType.Company &&
           "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-500",
-        className
+        className,
       )}
     >
       {type.charAt(0).toUpperCase() + type.slice(1)}

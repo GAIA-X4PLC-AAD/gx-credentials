@@ -20,7 +20,7 @@ const getTableName = (type: ApplicationType) => `${type}_applications` as const;
 export const ApplicationRepository = {
   async create(
     type: ApplicationType,
-    application: NewApplication
+    application: NewApplication,
   ): Promise<Application> {
     return await db
       .insertInto(getTableName(type))
@@ -33,7 +33,7 @@ export const ApplicationRepository = {
     type: ApplicationType,
     id: string,
     status: ApplicationStatus,
-    metadata: any
+    metadata: any,
   ): Promise<Application | undefined> {
     const existingApplication = await db
       .selectFrom(getTableName(type))
@@ -102,7 +102,7 @@ export const ApplicationRepository = {
 
   async delete(
     type: ApplicationType,
-    id: string
+    id: string,
   ): Promise<Application | undefined> {
     return await db
       .deleteFrom(getTableName(type))

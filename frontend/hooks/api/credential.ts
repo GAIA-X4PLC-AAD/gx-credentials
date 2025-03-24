@@ -195,7 +195,7 @@ export const useDeleteCredential = () => {
 export const getCredentialsByPkh = async (
   pkh: string,
   type: CredentialType,
-  session: Session
+  session: Session,
 ) => {
   const url = new URL(`credential/${pkh}`, baseURL);
   url.searchParams.append("type", type);

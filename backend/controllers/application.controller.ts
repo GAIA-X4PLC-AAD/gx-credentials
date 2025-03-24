@@ -129,7 +129,7 @@ export const ApplicationController = {
         type,
         id,
         status,
-        metadata
+        metadata,
       );
 
       if (!application) {

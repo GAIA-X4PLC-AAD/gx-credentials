@@ -6,7 +6,7 @@ const protectedRoutes = ["/home", "/apply", "/issue", "/takeout"];
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isProtectedRoute = protectedRoutes.some((route) =>
-    req.nextUrl.pathname.startsWith(route)
+    req.nextUrl.pathname.startsWith(route),
   );
 
   console.log("isLoggedIn", isLoggedIn);

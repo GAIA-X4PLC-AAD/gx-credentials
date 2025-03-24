@@ -13,7 +13,7 @@ type SelectCredential = SelectEmployeeCredential | SelectCompanyCredential;
 export const CredentialRepository = {
   async create<T extends NewCredential, R extends SelectCredential>(
     table: TableName,
-    credential: Omit<T, "created_at" | "updated_at">
+    credential: Omit<T, "created_at" | "updated_at">,
   ): Promise<R> {
     return (await db
       .insertInto(table)
@@ -25,7 +25,7 @@ export const CredentialRepository = {
   async update<T extends NewCredential, R extends SelectCredential>(
     table: TableName,
     id: string,
-    credential: Partial<T>
+    credential: Partial<T>,
   ): Promise<R | undefined> {
     return (await db
       .updateTable(table)
@@ -44,7 +44,7 @@ export const CredentialRepository = {
 
   async getByPkh<R extends SelectCredential>(
     table: TableName,
-    holder_pkh: string
+    holder_pkh: string,
   ): Promise<R[] | undefined> {
     return (await db
       .selectFrom(table)
@@ -55,7 +55,7 @@ export const CredentialRepository = {
 
   async delete<R extends SelectCredential>(
     table: TableName,
-    id: string
+    id: string,
   ): Promise<R | undefined> {
     return (await db
       .deleteFrom(table)

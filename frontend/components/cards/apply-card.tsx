@@ -23,7 +23,7 @@ const ApplyCard = ({ type }: Props) => {
       <Card
         className={cn(
           "cursor-pointer transition-all duration-500",
-          "hover:shadow-lg hover:scale-105 hover:bg-secondary"
+          "hover:shadow-lg hover:scale-105 hover:bg-secondary",
         )}
       >
         <CardHeader>

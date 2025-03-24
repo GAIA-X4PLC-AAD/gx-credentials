@@ -27,7 +27,7 @@ export function hasPermission(userRole: Role, permission: Permission): boolean {
 
   const userPermissions = ROLE_PERMISSIONS[userRole] || [];
   return userPermissions.some(
-    (p) => p.action === permission.action && p.resource === permission.resource
+    (p) => p.action === permission.action && p.resource === permission.resource,
   );
 }
 
@@ -46,7 +46,7 @@ export function canApproveApplications(userRole: Role): boolean {
 export function canReviewCredentials(
   userRole: Role,
   userCompanyId?: string,
-  targetCompanyId?: string
+  targetCompanyId?: string,
 ): boolean {
   // COMPANY role can only review credentials for their own employees
   if (userRole === Role.COMPANY && userCompanyId !== targetCompanyId) {

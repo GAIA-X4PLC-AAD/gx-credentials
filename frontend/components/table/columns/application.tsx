@@ -64,7 +64,7 @@ export const applicationColumns: ColumnDef<Application>[] = [
     cell: ({ row }) => {
       const entityType = Object.prototype.hasOwnProperty.call(
         row.getValue("metadata"),
-        "role"
+        "role",
       )
         ? "employee"
         : "company";
@@ -92,7 +92,7 @@ export const applicationColumns: ColumnDef<Application>[] = [
 
 function DisplayApplicationMenu(
   row: Row<Application>,
-  metadata: string | number | boolean | object
+  metadata: string | number | boolean | object,
 ): React.ReactNode {
   const { mutateAsync: updateApplication, isPending } = useUpdateApplication();
   const { mutateAsync: createCredential } = useCreateCredential();
@@ -101,7 +101,7 @@ function DisplayApplicationMenu(
 
   const entityType = Object.prototype.hasOwnProperty.call(
     row.getValue("metadata"),
-    "role"
+    "role",
   )
     ? "employee"
     : "company";
@@ -129,7 +129,7 @@ function DisplayApplicationMenu(
         const credential = (await issueCredential(
           row.original as Application,
           credentialType,
-          dAppClient
+          dAppClient,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as any; // Credential
 
@@ -150,7 +150,7 @@ function DisplayApplicationMenu(
         console.log("Storing credential DB...", credentialPayload);
 
         const createCredentialResponse = await createCredential(
-          credentialPayload
+          credentialPayload,
         ).then((res) => res.message);
 
         console.log("Credential stored:", createCredentialResponse);

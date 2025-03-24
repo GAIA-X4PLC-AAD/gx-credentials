@@ -15,7 +15,7 @@ export function useIssueCredential() {
   const issueCredential = async (
     application: Application,
     type: "employee" | "company",
-    dAppClient: DAppClient
+    dAppClient: DAppClient,
   ) => {
     setIsLoading(true);
     setError(null);
@@ -75,7 +75,7 @@ export function useIssueCredential() {
   const issue = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawCredential: any,
-    dAppClient: DAppClient
+    dAppClient: DAppClient,
   ): Promise<unknown> => {
     const rawCredentialString = JSON.stringify(rawCredential);
     const account = await dAppClient?.getActiveAccount();
@@ -94,7 +94,7 @@ export function useIssueCredential() {
     console.log("public key", account?.publicKey);
 
     const publicKeyJwkString = await didkit.JWKFromTezos(
-      account?.publicKey + ""
+      account?.publicKey + "",
     );
     const publicKeyJwk = JSON.parse(publicKeyJwkString);
     console.log("Public key JWK: ", publicKeyJwk);
@@ -102,7 +102,7 @@ export function useIssueCredential() {
     const prepStr = await didkit.prepareIssueCredential(
       rawCredentialString,
       JSON.stringify(proofOptions),
-      publicKeyJwkString
+      publicKeyJwkString,
     );
     console.log("Preparation string: ", prepStr);
 
@@ -125,7 +125,7 @@ export function useIssueCredential() {
       credentialString = await didkit.completeIssueCredential(
         rawCredentialString,
         prepStr,
-        signature
+        signature,
       );
     } catch (error) {
       console.log("Error generating credential. ", error);
@@ -134,7 +134,7 @@ export function useIssueCredential() {
 
     const verifyOptionsString = "{}";
     const verifyResult = JSON.parse(
-      await didkit.verifyCredential(credentialString, verifyOptionsString)
+      await didkit.verifyCredential(credentialString, verifyOptionsString),
     );
     if (verifyResult.errors.length > 0) {
       console.log("Error verifying new credential: ", verifyResult.errors);

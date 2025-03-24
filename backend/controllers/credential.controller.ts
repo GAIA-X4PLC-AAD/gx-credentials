@@ -94,13 +94,13 @@ export const CredentialController = {
         case "employee":
           await CredentialRepository.create(
             "employee_credentials",
-            credentialPayload
+            credentialPayload,
           );
           break;
         case "company":
           await CredentialRepository.create(
             "company_credentials",
-            credentialPayload
+            credentialPayload,
           );
           break;
         default:
@@ -133,12 +133,12 @@ export const CredentialController = {
         CredentialRepository.update(
           "employee_credentials",
           id,
-          credentialData
+          credentialData,
         ).catch(() => false),
         CredentialRepository.update(
           "company_credentials",
           id,
-          credentialData
+          credentialData,
         ).catch(() => false),
       ]);
 
