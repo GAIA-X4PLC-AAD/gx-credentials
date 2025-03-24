@@ -21,6 +21,6 @@ jobs:
       - name: Run build
         uses: marigold-dev/ligo-action@v1.0.0
         with:
-          ligo_version: 1.3.0
+          ligo_version: 1.9.2
           command: compile contract ./GXCRegistry.jsligo -m GXCRegistry -o gxcregistry.tz
           working_directory: tezos
