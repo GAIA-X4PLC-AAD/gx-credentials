@@ -10,7 +10,7 @@ on:
 
 jobs:
   ligo:
-    runs-on: ubuntu-latest
+    runs-on: ligolang/ligo:1.9.2
 
     steps:
       - name: Checkout
@@ -19,8 +19,5 @@ jobs:
           # Make sure the actual branch is checked out when running on pull requests
           ref: ${{ github.head_ref }}
       - name: Compile contract
-        uses: ecadlabs/taqueria-github-action@v0.13.0
-        with:
-          project_directory: tezos
-          compile_contracts: GXCRegistry.jsligo
-          compile_plugin: ligo
+        run: ligo compile contract ./GXCRegistry.jsligo -m GXCRegistry -o gxcregistry.tz
+        working-directory: tezos
