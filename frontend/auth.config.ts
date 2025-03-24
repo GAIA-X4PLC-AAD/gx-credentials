@@ -4,22 +4,23 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET as string,
+  session: {
+    jwt: true,
+  },
   callbacks: {
-    async session({ session, token }) {
-      session.user.jwt = token.jwt as string;
-      session.user.id = token.sub as string;
-      session.user.pkh = token.sub as string;
-      session.user.role = (token.role as Role) ?? Role.COMPANY; // TODO: change to basic
+    session({ session, token }) {
+      session.user.id = token.id as string;
+      session.user.pkh = token.id as string;
+      session.user.role = token.role as Role;
 
       return session;
     },
-    async jwt({ token }) {
-      token.jwt = await generateJWT({
-        id: token.sub,
-        pkh: token.sub,
-        role: token.role,
-      });
-
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.pkh;
+        token.pkh = user.pkh;
+        token.role = user.role;
+      }
       return token;
     },
   },
