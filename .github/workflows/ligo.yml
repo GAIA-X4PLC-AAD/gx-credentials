@@ -18,9 +18,9 @@ jobs:
         with:
           # Make sure the actual branch is checked out when running on pull requests
           ref: ${{ github.head_ref }}
-      - name: Run build
-        uses: marigold-dev/ligo-action@v1.0.0
+      - name: Compile contract
+        uses: ecadlabs/taqueria-github-action@v0.13.0
         with:
-          ligo_version: 1.9.2
-          command: compile contract ./GXCRegistry.jsligo -m GXCRegistry -o gxcregistry.tz
-          working_directory: tezos
+          project_directory: tezos
+          compile_contracts: GXCRegistry.jsligo
+          compile_plugin: ligo
