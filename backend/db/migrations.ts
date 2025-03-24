@@ -43,6 +43,9 @@ async function up(db: Kysely<any>): Promise<void> {
   // Create employee_credentials table
   await db.schema
     .createTable("employee_credentials")
+    .addColumn("id", "uuid", (col) =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
+    )
     .addColumn("holder_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())
@@ -64,6 +67,9 @@ async function up(db: Kysely<any>): Promise<void> {
   // Create company_credentials table
   await db.schema
     .createTable("company_credentials")
+    .addColumn("id", "uuid", (col) =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
+    )
     .addColumn("holder_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())

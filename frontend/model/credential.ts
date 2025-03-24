@@ -1,4 +1,4 @@
-enum CredentialFormat {
+export enum CredentialFormat {
   LD = "LD",
   JWT = "JWT",
 }
@@ -10,6 +10,7 @@ type CredentialData = {
 type CredentialType = "employee" | "company";
 
 type TCredential = {
+  id?: string;
   holder_pkh?: string;
   subject?: string;
   issuer?: string;
@@ -35,7 +36,6 @@ type CreateCredential = Pick<
 export type {
   CreateCredential,
   CredentialData,
-  CredentialFormat,
   TCredential as Credential,
   CredentialType,
 };

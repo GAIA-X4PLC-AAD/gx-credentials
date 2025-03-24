@@ -9,7 +9,7 @@ export const authConfig = {
       session.user.jwt = token.jwt as string;
       session.user.id = token.sub as string;
       session.user.pkh = token.sub as string;
-      session.user.role = (token.role as Role) ?? Role.BASIC;
+      session.user.role = (token.role as Role) ?? Role.COMPANY; // TODO: change to basic
 
       return session;
     },

@@ -1,6 +1,6 @@
-import { ReactQueryClientProvider } from "@/components/react-query-client-provider";
-import { NextAuthProvider } from "@/components/session-provider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ReactQueryClientProvider } from "@/components/providers/react-query-client-provider";
+import { NextAuthProvider } from "@/components/providers/session-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { WalletProvider } from "@/context/WalletContext";
 import type { Metadata } from "next";

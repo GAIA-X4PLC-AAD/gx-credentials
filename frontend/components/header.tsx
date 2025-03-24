@@ -49,7 +49,7 @@ function ProfileMenu({ session }: { session: Session }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="max-w-32">
+        <Button className="max-w-32">
           <code className="inline-block truncate">{session.user?.pkh}</code>
         </Button>
       </PopoverTrigger>

@@ -137,7 +137,7 @@ export const ApplicationController = {
         return;
       }
 
-      res.status(200).json(application);
+      res.status(200).json({ message: "Application updated." });
     } catch (error) {
       console.error(`Error updating application:`, error);
       res.status(500).json({ message: "Internal server error" });

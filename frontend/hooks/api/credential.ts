@@ -4,12 +4,27 @@ import {
   CredentialType,
 } from "@/model/credential";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
 import { APIResponse, baseURL } from "./base";
 
 export const useGetCredentials = () => {
+  const { data: session } = useSession();
+
+  const getAllCredentials = async () => {
+    const url = new URL("credential", baseURL);
+    return fetch(url, {
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
+      },
+    }).then((res) => res.json() as Promise<Credential[]>);
+  };
+
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
     queryKey: ["getCredentials"],
-    queryFn: () => getAllCredentials(),
+    queryFn: getAllCredentials,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
   });
@@ -32,10 +47,12 @@ export const useGetCredentialsByPkh = ({
   type,
   id,
 }: GetCredentialByIdProps) => {
+  const { data: session } = useSession();
+
   const fetchCredential = async () => {
-    const url = new URL(`credential/${id}`, baseURL);
+    const url = new URL(`credential/did:pkh:tz:${id}`, baseURL);
     url.searchParams.append("type", type);
-    return getCredentialsByPkh(id, type);
+    return getCredentialsByPkh(id, type, session as Session);
   };
 
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
@@ -55,13 +72,18 @@ export const useGetCredentialsByPkh = ({
 };
 
 export const useGetAllCredentialsByPkh = ({
-  id: pkh,
+  id,
 }: Pick<GetCredentialByIdProps, "id">) => {
+  const { data: session } = useSession();
+  const pkh = `did:pkh:tz:${id}`;
   const fetchCredential = async () => {
     return Promise.all([
-      getCredentialsByPkh(pkh, "employee"),
-      getCredentialsByPkh(pkh, "company"),
-    ]).then(([employee, company]) => [...employee, ...company]);
+      getCredentialsByPkh(pkh, "employee", session as Session),
+      getCredentialsByPkh(pkh, "company", session as Session),
+    ]).then(([employee, company]) => [
+      ...(employee ?? []),
+      ...(company ?? []),
+    ]) as Promise<Credential[]>;
   };
 
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
@@ -81,14 +103,17 @@ export const useGetAllCredentialsByPkh = ({
 };
 
 export const useCreateCredential = () => {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const createCredential = async (credential: CreateCredential) => {
-    return fetch(`${baseURL}/credential`, {
+    const url = new URL("credential", baseURL);
+    return fetch(url, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
       },
       body: JSON.stringify(credential),
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
@@ -109,6 +134,7 @@ type UpdateCredentialProps = GetCredentialByIdProps & {
 };
 
 export const useUpdateCredential = () => {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const updateCredential = async ({
@@ -122,6 +148,7 @@ export const useUpdateCredential = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
       },
       body: JSON.stringify(credential),
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
@@ -140,12 +167,17 @@ export const useUpdateCredential = () => {
 type DeleteCredentialProps = Pick<GetCredentialByIdProps, "id">;
 
 export const useDeleteCredential = () => {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const deleteCredential = async ({ id }: DeleteCredentialProps) => {
     return fetch(`${baseURL}/credential/${id}`, {
       method: "DELETE",
       mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.jwt}`,
+      },
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
   };
 
@@ -160,17 +192,10 @@ export const useDeleteCredential = () => {
 };
 
 // helpers
-export const getAllCredentials = async (type?: CredentialType) => {
-  const url = new URL("credential", baseURL);
-  if (type) url.searchParams.append("type", type);
-  return fetch(url, {
-    mode: "cors",
-  }).then((res) => res.json() as Promise<Credential[]>);
-};
-
 export const getCredentialsByPkh = async (
   pkh: string,
-  type: CredentialType
+  type: CredentialType,
+  session: Session
 ) => {
   const url = new URL(`credential/${pkh}`, baseURL);
   url.searchParams.append("type", type);
@@ -178,6 +203,7 @@ export const getCredentialsByPkh = async (
     mode: "cors",
     headers: {
       Accept: "application/json",
+      Authorization: `Bearer ${session?.user?.jwt}`,
     },
   }).then((res) => res.json() as Promise<Credential[]>);
 };

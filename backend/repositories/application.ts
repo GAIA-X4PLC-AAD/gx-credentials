@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import lodash from "lodash";
 import { db } from "../db";
 import {
   ApplicationStatus,
@@ -7,7 +7,6 @@ import {
   SelectCompanyApplication,
   SelectEmployeeApplication,
 } from "../db/schema";
-const { isEqual } = _;
 
 type ApplicationType = "employee" | "company";
 type Application = SelectEmployeeApplication | SelectCompanyApplication;
@@ -50,7 +49,7 @@ export const ApplicationRepository = {
     if (
       metadata &&
       Object.keys(metadata).length > 0 &&
-      !isEqual(metadata, existingApplication?.metadata)
+      !lodash.isEqual(metadata, existingApplication?.metadata)
     ) {
       updates.metadata = metadata;
     }

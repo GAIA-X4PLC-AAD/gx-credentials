@@ -11,6 +11,7 @@ type ApplicationMetadata = {
 };
 
 type Application = {
+  issuer: string | undefined;
   id?: string;
   pkh?: string;
   status: ApplicationStatus;
@@ -23,10 +24,10 @@ type CreateApplication = Pick<Application, "pkh" | "metadata"> & {
   type: ApplicationType;
 };
 
-export type {
-  Application,
-  ApplicationMetadata,
+export {
   ApplicationStatus,
-  ApplicationType,
-  CreateApplication,
+  type Application,
+  type ApplicationMetadata,
+  type ApplicationType,
+  type CreateApplication,
 };

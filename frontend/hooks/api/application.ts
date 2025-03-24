@@ -64,11 +64,18 @@ export const useGetApplicationsByPkh = ({
         "Content-Type": "application/json",
         Authorization: `Bearer ${session?.user?.jwt}`,
       },
-    }).then((res) => res.json() as Promise<Application[]>);
+    })
+      .then((res) => res.json())
+      .then(({ message, data }) => {
+        if (message) {
+          throw new Error(message);
+        }
+        return data as Application[];
+      });
   };
 
-  const { isLoading, isError, data, refetch, isFetching } = useQuery({
-    queryKey: ["getApplicationById", type, id],
+  const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
+    queryKey: ["getApplicationById", id],
     queryFn: fetchApplication,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
@@ -78,6 +85,7 @@ export const useGetApplicationsByPkh = ({
   return {
     isLoading,
     isError,
+    error,
     applications: data,
     refetch,
     isFetching,
@@ -106,7 +114,7 @@ export const useCreateApplication = () => {
     mutationFn: createApplication,
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["getApplications"],
+        queryKey: ["getApplicationById"],
       });
     },
   });
@@ -145,7 +153,7 @@ export const useUpdateApplication = () => {
     mutationFn: updateApplication,
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["getApplications"],
+        queryKey: ["getApplicationById"],
       });
     },
   });
@@ -178,7 +186,7 @@ export const useDeleteApplication = () => {
     mutationFn: deleteApplication,
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["getApplications"],
+        queryKey: ["getApplicationById"],
       });
     },
   });

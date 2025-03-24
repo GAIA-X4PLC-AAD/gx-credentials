@@ -2,10 +2,7 @@ import { getPkhfromPk, validateAddress, verifySignature } from "@taquito/utils";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
-// import { getCredentialsByPkh } from "./hooks/api/credential";
 import { payloadBytesFromString } from "./lib/payload";
-// import { getTrustAnchors } from "./lib/registry";
-import { getCredentialsByPkh } from "./hooks/api/credential";
 import { getTrustAnchors } from "./lib/registry";
 import { Role } from "./types/rbac";
 
@@ -86,23 +83,30 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // role check
-        const trustAnchors = await getTrustAnchors();
-        const companyCredentials = await getCredentialsByPkh(
-          credentials.pkh,
-          "company"
-        );
-        if (trustAnchors.includes(credentials.pkh as string)) {
-          credentials.role = Role.TRUST_ANCHOR;
-        } else if (companyCredentials.length > 0) {
-          credentials.role = Role.COMPANY;
-        } else {
-          credentials.role = Role.BASIC;
-        }
+        // const trustAnchors = await getTrustAnchors();
+        // const { company: companyCredentials } = await fetch(
+        //   `${process.env.NEXTAUTH_URL}/api/credential`
+        // ).then(
+        //   (res) =>
+        //     res.json() as Promise<{
+        //       employee: Credential[];
+        //       company: Credential[];
+        //     }>
+        // );
+
+        // if (trustAnchors.includes(credentials.pkh as string)) {
+        //   credentials.role = Role.TRUST_ANCHOR;
+        // }
+        // else if (companyCredentials.length > 0) {
+        //   credentials.role = Role.COMPANY;
+        // } else {
+        //   credentials.role = Role.BASIC;
+        // }
 
         const user: { id: string; pkh: string; role: Role } = {
           id: credentials?.pkh as string,
           pkh: credentials?.pkh as string,
-          role: credentials?.role as Role,
+          role: (credentials?.role as Role) ?? Role.TRUST_ANCHOR,
         };
 
         console.log("Returning user:", user);
