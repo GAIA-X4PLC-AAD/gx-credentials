@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "tsx ./bin/www.ts",
-    "dev": "tsx watch app.ts"
+    "dev": "tsx watch app.ts",
+    "lint": "npx eslint"
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.8",
@@ -30,11 +31,15 @@
     "uuid": "^11.0.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.23.0",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.10.5",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.27.0"
   }
 }
