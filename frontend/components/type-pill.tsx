@@ -12,7 +12,10 @@ interface EntityTypePillProps {
   className?: string;
 }
 
-export function EntityTypePill({ type, className }: EntityTypePillProps) {
+export function EntityTypePill({
+  type,
+  className,
+}: EntityTypePillProps): JSX.Element {
   return (
     <span
       className={cn(

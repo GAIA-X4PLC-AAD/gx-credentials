@@ -41,7 +41,9 @@ export const applicationColumns: ColumnDef<Application>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="max-w-[10rem] truncate">{row.getValue("id")}</div>
+      <div className="sm:max-w-[12rem] lg:max-w-full truncate">
+        <code>{row.getValue("id")}</code>
+      </div>
     ),
   },
   {
@@ -179,12 +181,12 @@ function DisplayApplicationMenu(
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <DotsHorizontalIcon />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <Dialog>
+    <Dialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <DotsHorizontalIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
           <DialogTrigger asChild>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               View
@@ -199,8 +201,6 @@ function DisplayApplicationMenu(
             </DialogHeader>
             <ApplicationFormDisplay data={metadata} />
           </DialogContent>
-        </Dialog>
-        <Dialog>
           <DialogTrigger asChild>
             <DropdownMenuItem
               className="text-green-500"
@@ -238,22 +238,22 @@ function DisplayApplicationMenu(
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-        <DropdownMenuItem
-          className="text-red-500"
-          onClick={async () => {
-            console.log("reject");
-            await handleIssuance(ApplicationStatus.Rejected).then(() => {
-              toast({
-                title: "Rejected",
-                description: "Application has been rejected.",
+          <DropdownMenuItem
+            className="text-red-500"
+            onClick={async () => {
+              console.log("reject");
+              await handleIssuance(ApplicationStatus.Rejected).then(() => {
+                toast({
+                  title: "Rejected",
+                  description: "Application has been rejected.",
+                });
               });
-            });
-          }}
-        >
-          Reject
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            }}
+          >
+            Reject
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </Dialog>
   );
 }

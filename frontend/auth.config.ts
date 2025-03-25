@@ -4,9 +4,6 @@ import { generateJWT } from "./lib/utils";
 
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET as string,
-  session: {
-    jwt: true,
-  },
   callbacks: {
     async session({ session, token }) {
       session.user.id = token.id as string;
