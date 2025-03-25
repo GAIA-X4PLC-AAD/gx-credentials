@@ -43,7 +43,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const isVerified = verifySignature(
           payloadBytesFromString(credentials.formattedInput as string),
           credentials.pk as string,
-          credentials.signature as string,
+          credentials.signature as string
         );
 
         if (!isVerified) {
@@ -78,23 +78,23 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // role check
-        // const trustAnchors = await getTrustAnchors();
-        // const { company: companyCredentials } = await fetch(
-        //   `${process.env.NEXTAUTH_URL}/api/credential`,
-        // ).then(
-        //   (res) =>
-        //     res.json() as Promise<{
-        //       employee: Credential[];
-        //       company: Credential[];
-        //     }>,
-        // );
+        const trustAnchors = await getTrustAnchors();
+        const { company: companyCredentials } = await fetch(
+          `${process.env.NEXTAUTH_URL}/api/credential`
+        ).then(
+          (res) =>
+            res.json() as Promise<{
+              employee: Credential[];
+              company: Credential[];
+            }>
+        );
 
         let role = Role.BASIC;
-        // if (trustAnchors.includes(credentials.pkh as string)) {
-        //   role = Role.TRUST_ANCHOR;
-        // } else if (companyCredentials.length > 0) {
-        //   role = Role.COMPANY;
-        // }
+        if (trustAnchors.includes(credentials.pkh as string)) {
+          role = Role.TRUST_ANCHOR;
+        } else if (companyCredentials.length > 0) {
+          role = Role.COMPANY;
+        }
 
         const user: { id: string; pkh: string; role: Role } = {
           id: credentials?.pkh as string,
