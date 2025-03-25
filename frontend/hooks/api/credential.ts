@@ -4,7 +4,6 @@ import {
   CredentialType,
 } from "@/model/credential";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { APIResponse, baseURL } from "./base";
 
@@ -17,7 +16,7 @@ export const useGetCredentials = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
     }).then((res) => res.json() as Promise<Credential[]>);
   };
@@ -39,55 +38,30 @@ export const useGetCredentials = () => {
 };
 
 type GetCredentialByIdProps = {
-  type: CredentialType;
   id: string;
+  type?: CredentialType;
 };
 
 export const useGetCredentialsByPkh = ({
-  type,
   id,
+  type,
 }: GetCredentialByIdProps) => {
   const { data: session } = useSession();
 
   const fetchCredential = async () => {
     const url = new URL(`credential/did:pkh:tz:${id}`, baseURL);
-    url.searchParams.append("type", type);
-    return getCredentialsByPkh(id, type, session as Session);
+    if (type) url.searchParams.append("type", type);
+    return fetch(url, {
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${session?.jwt}`,
+      },
+    }).then((res) => res.json() as Promise<Credential[]>);
   };
 
   const { isLoading, isError, data, refetch, isFetching } = useQuery({
     queryKey: ["getCredentialByPkh", type, id],
-    queryFn: fetchCredential,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60_000,
-  });
-
-  return {
-    isLoading,
-    isError,
-    credentials: data,
-    refetch,
-    isFetching,
-  };
-};
-
-export const useGetAllCredentialsByPkh = ({
-  id,
-}: Pick<GetCredentialByIdProps, "id">) => {
-  const { data: session } = useSession();
-  const pkh = `did:pkh:tz:${id}`;
-  const fetchCredential = async () => {
-    return Promise.all([
-      getCredentialsByPkh(pkh, "employee", session as Session),
-      getCredentialsByPkh(pkh, "company", session as Session),
-    ]).then(([employee, company]) => [
-      ...(employee ?? []),
-      ...(company ?? []),
-    ]) as Promise<Credential[]>;
-  };
-
-  const { isLoading, isError, data, refetch, isFetching } = useQuery({
-    queryKey: ["getAllCredentialsByPkh", pkh],
     queryFn: fetchCredential,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
@@ -113,7 +87,7 @@ export const useCreateCredential = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify(credential),
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
@@ -142,13 +116,13 @@ export const useUpdateCredential = () => {
     type,
   }: UpdateCredentialProps) => {
     const url = new URL(`credential/${credential.holder_pkh}`, baseURL);
-    url.searchParams.append("type", type);
+    if (type) url.searchParams.append("type", type);
     return fetch(url, {
       method: "PUT",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify(credential),
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
@@ -176,7 +150,7 @@ export const useDeleteCredential = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
     }).then((res) => res.json() as Promise<APIResponse<Credential>>);
   };
@@ -189,21 +163,4 @@ export const useDeleteCredential = () => {
       });
     },
   });
-};
-
-// helpers
-export const getCredentialsByPkh = async (
-  pkh: string,
-  type: CredentialType,
-  session: Session,
-) => {
-  const url = new URL(`credential/${pkh}`, baseURL);
-  url.searchParams.append("type", type);
-  return fetch(url, {
-    mode: "cors",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${session?.user?.jwt}`,
-    },
-  }).then((res) => res.json() as Promise<Credential[]>);
 };

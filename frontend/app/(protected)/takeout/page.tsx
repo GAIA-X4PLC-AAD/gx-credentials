@@ -6,7 +6,7 @@ import { DataTable } from "@/components/table/data-table";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetApplicationsByPkh } from "@/hooks/api/application";
-import { useGetAllCredentialsByPkh } from "@/hooks/api/credential";
+import { useGetCredentialsByPkh } from "@/hooks/api/credential";
 
 import { useSession } from "next-auth/react";
 
@@ -15,7 +15,7 @@ const Page = () => {
   const { applications } = useGetApplicationsByPkh({
     id: token?.user?.pkh ?? "",
   });
-  const { credentials } = useGetAllCredentialsByPkh({
+  const { credentials } = useGetCredentialsByPkh({
     id: token?.user?.pkh ?? "",
   });
 

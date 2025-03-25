@@ -1,6 +1,6 @@
-import { generateJWT } from "@/lib/utils";
 import { Role } from "@/types/rbac";
 import type { NextAuthConfig } from "next-auth";
+import { generateJWT } from "./lib/utils";
 
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET as string,
@@ -8,10 +8,13 @@ export const authConfig = {
     jwt: true,
   },
   callbacks: {
-    session({ session, token }) {
+    async session({ session, token }) {
       session.user.id = token.id as string;
       session.user.pkh = token.id as string;
       session.user.role = token.role as Role;
+      session.jwt = await generateJWT({
+        ...token,
+      });
 
       return session;
     },

@@ -23,7 +23,7 @@ export const useGetApplications = ({ type }: GetApplicationsProps) => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
     }).then((res) => res.json() as Promise<Application[]>);
   };
@@ -62,13 +62,13 @@ export const useGetApplicationsByPkh = ({
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
     })
       .then((res) => res.json())
-      .then(({ message, data }) => {
-        if (message) {
-          throw new Error(message);
+      .then((data) => {
+        if (data.message) {
+          throw new Error(data.message);
         }
         return data as Application[];
       });
@@ -104,7 +104,7 @@ export const useCreateApplication = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify(application),
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
@@ -143,7 +143,7 @@ export const useUpdateApplication = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify({ status, metadata }),
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
@@ -177,7 +177,7 @@ export const useDeleteApplication = () => {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.jwt}`,
+        Authorization: `Bearer ${session?.jwt}`,
       },
     }).then((res) => res.json() as Promise<APIResponse<Application>>);
   };

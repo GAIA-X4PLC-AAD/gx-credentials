@@ -13,6 +13,7 @@ declare module "next-auth" {
       pkh: string;
       role: Role;
     };
+    jwt: string;
   }
 
   interface User {
