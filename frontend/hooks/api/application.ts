@@ -92,6 +92,51 @@ export const useGetApplicationsByPkh = ({
   };
 };
 
+// TODO: could probably be more efficient
+// and also allow only getting applications for one company or for registrars
+// NOTE: right now this only fetches company applications
+export const useGetApplicationsForIssuer =
+  ({}: Partial<GetApplicationByIdProps>) => {
+    const { data: session } = useSession();
+
+    const fetchApplication = async () => {
+      const url = new URL(`application`, baseURL);
+      url.searchParams.append("type", "company");
+
+      return fetch(url, {
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.jwt}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.message) {
+            throw new Error(data.message);
+          }
+          return data as Application[];
+        });
+    };
+
+    const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
+      queryKey: ["getApplicationsForIssuer", session.user.pkh],
+      queryFn: fetchApplication,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60_000,
+      enabled: !!session.user.pkh,
+    });
+
+    return {
+      isLoading,
+      isError,
+      error,
+      applications: data,
+      refetch,
+      isFetching,
+    };
+  };
+
 export const useCreateApplication = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
