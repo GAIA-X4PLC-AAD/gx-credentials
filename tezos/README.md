@@ -13,7 +13,7 @@ Fund your new address with a faucet (e.g., <https://faucet.ghostnet.teztnets.com
 Create a file for the initial storage just named `storage`. This sets the owner of the contract and any initial registrars. It looks like this:
 
 ```jsligo
-{owner:"tz1XXX" as address,registrars: Set.literal(["tz1YYY" as address,"tz1ZZZ" as address])}
+{owner:"tz1XXX" as address,registrars: Set.literal(["tz1YYY" as address,"tz1ZZZ" as address]),companies: Set.empty}
 ```
 
 Next, compile the contract:

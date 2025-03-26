@@ -3,4 +3,4 @@ INITIAL=$(ligo compile storage -m GXCRegistry ./GXCRegistry.jsligo "$(cat ./stor
 octez-client originate contract gxcregistry \
   transferring 0 from "$1" \
   running gxcregistry.tz \
-  --init "$INITIAL" --burn-cap 0.5
+  --init "$INITIAL" --burn-cap 0.5 --force

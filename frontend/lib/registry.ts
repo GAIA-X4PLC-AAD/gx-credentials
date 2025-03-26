@@ -26,7 +26,6 @@ async function getTrustAnchors(): Promise<string[]> {
     const contract: ContractAbstraction<ContractProvider> =
       await tezos.contract.at(CONTRACT_ADDRESS);
     const storage = await contract.storage<RegistryStorage>();
-
     return [...storage.registrars, storage.owner];
   } catch (error) {
     console.error("Failed to get registrars:", error);
@@ -34,4 +33,16 @@ async function getTrustAnchors(): Promise<string[]> {
   }
 }
 
-export { getTrustAnchors, tezos };
+async function getTrustedCompanies(): Promise<string[]> {
+  try {
+    const contract: ContractAbstraction<ContractProvider> =
+      await tezos.contract.at(CONTRACT_ADDRESS);
+    const storage = await contract.storage<RegistryStorage>();
+    return storage.companies || [];
+  } catch (error) {
+    console.error("Failed to get trusted companies:", error);
+    throw error;
+  }
+}
+
+export { getTrustAnchors, getTrustedCompanies, tezos };

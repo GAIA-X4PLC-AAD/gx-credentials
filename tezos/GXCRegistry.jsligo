@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 namespace GXCRegistry {
-    export type storage = { owner: address, registrars: set<address> };
+    export type storage = { owner: address, registrars: set<address>, companies: set<address> };
     type ret = [list<operation>, storage];
     @entry
     const add_registrar = (acc: address, store: storage): ret => {
@@ -24,6 +24,28 @@ namespace GXCRegistry {
             return [
                 list([]),
                 { ...store, registrars: Set.remove(acc, store.registrars) }
+            ];
+        };
+    }
+    @entry
+    const add_company = (acc: address, store: storage): ret => {
+        if (Set.mem(Tezos.get_sender(),store.registrars) && Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, companies: Set.add(acc, store.companies) }
+            ];
+        };
+    }
+    @entry
+    const remove_company = (acc: address, store: storage): ret => {
+        if (Set.mem(Tezos.get_sender(),store.registrars) && Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, companies: Set.remove(acc, store.companies) }
             ];
         };
     }

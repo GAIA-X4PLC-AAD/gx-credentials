@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { payloadBytesFromString } from "./lib/payload";
-import { getTrustAnchors } from "./lib/registry";
+import { getTrustAnchors, getTrustedCompanies } from "./lib/registry";
 import { Role } from "./types/rbac";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -78,7 +78,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // role check
-        const trustAnchors = await getTrustAnchors();
         const { company: companyCredentials } = await fetch(
           `${process.env.NEXTAUTH_URL}/api/credential`,
         ).then(
@@ -90,10 +89,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         );
 
         let role = Role.BASIC;
+        const trustAnchors = await getTrustAnchors();
         if (trustAnchors.includes(credentials.pkh as string)) {
           role = Role.TRUST_ANCHOR;
-        } else if (companyCredentials.length > 0) {
-          role = Role.COMPANY;
+        } else {
+          const trustedCompanies = await getTrustedCompanies();
+          if (trustedCompanies.includes(credentials.pkh as string)) {
+            role = Role.COMPANY;
+          }
         }
 
         const user: { id: string; pkh: string; role: Role } = {
