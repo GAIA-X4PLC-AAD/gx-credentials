@@ -92,50 +92,58 @@ export const useGetApplicationsByPkh = ({
   };
 };
 
+type GetAppsForIssuerProps = Partial<
+  GetApplicationByIdProps & {
+    companyName: string;
+  }
+>;
+
 // TODO: could probably be more efficient
 // and also allow only getting applications for one company or for registrars
 // NOTE: right now this only fetches company applications
-export const useGetApplicationsForIssuer =
-  ({}: Partial<GetApplicationByIdProps>) => {
-    const { data: session } = useSession();
+export const useGetApplicationsForIssuer = ({
+  companyName,
+}: GetAppsForIssuerProps) => {
+  const { data: session } = useSession();
 
-    const fetchApplication = async () => {
-      const url = new URL(`application`, baseURL);
-      url.searchParams.append("type", "company");
+  const fetchApplication = async () => {
+    const url = new URL(`application`, baseURL);
+    url.searchParams.append("type", "company");
+    if (companyName) url.searchParams.append("company", companyName);
 
-      return fetch(url, {
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.jwt}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.message) {
-            throw new Error(data.message);
-          }
-          return data as Application[];
-        });
-    };
-
-    const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
-      queryKey: ["getApplicationsForIssuer", session.user.pkh],
-      queryFn: fetchApplication,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60_000,
-      enabled: !!session.user.pkh,
-    });
-
-    return {
-      isLoading,
-      isError,
-      error,
-      applications: data,
-      refetch,
-      isFetching,
-    };
+    return fetch(url, {
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.jwt}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message) {
+          throw new Error(data.message);
+        }
+        return data as Application[];
+      });
   };
+
+  const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
+    queryKey: ["getApplicationsForIssuer", session?.user.pkh],
+    queryFn: fetchApplication,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60_000,
+    enabled: !!session?.user.pkh,
+  });
+
+  return {
+    isLoading,
+    isError,
+    error,
+    applications: data,
+    refetch,
+    isFetching,
+  };
+};
 
 export const useCreateApplication = () => {
   const queryClient = useQueryClient();
@@ -199,6 +207,9 @@ export const useUpdateApplication = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["getApplicationById"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["getApplicationsForIssuer"],
       });
     },
   });

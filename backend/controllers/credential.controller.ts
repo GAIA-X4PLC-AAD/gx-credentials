@@ -49,6 +49,8 @@ export const CredentialController = {
   getByPkh: async (req: Request, res: Response): Promise<void> => {
     try {
       const { pkh } = req.params;
+      const companyName = req.query.companyName as string;
+
       const [employeeCredential, companyCredential] = await Promise.all([
         CredentialRepository.getByPkh("employee_credentials", pkh),
         CredentialRepository.getByPkh("company_credentials", pkh),
@@ -61,6 +63,21 @@ export const CredentialController = {
 
       if (!credential) {
         res.status(404).json({ message: "No credentials found" });
+        return;
+      }
+
+      if (companyName && companyCredential) {
+        const filteredCredentials = companyCredential.filter(
+          (cred) =>
+            cred.credential.credentialSubject["gx:legalName"] === companyName
+        );
+        if (filteredCredentials.length === 0) {
+          res.status(404).json({
+            message: `No credentials found for the company name ${companyName}`,
+          });
+          return;
+        }
+        res.status(200).json(filteredCredentials);
         return;
       }
 

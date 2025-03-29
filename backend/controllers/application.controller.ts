@@ -37,6 +37,7 @@ export const ApplicationController = {
     try {
       const { pkh } = req.params;
       const type = req.query.type as "employee" | "company";
+      const company = req.query.company as string;
 
       if (!pkh) {
         res.status(400).json({ message: "Public key hash is required" });
@@ -53,6 +54,21 @@ export const ApplicationController = {
 
       if (!applications || applications.length === 0) {
         res.status(404).json({ message: "No applications found" });
+        return;
+      }
+
+      // if company name given
+      if (type === "employee" && company) {
+        const employeeApps = applications.filter(
+          (app) => app.metadata?.companyName === company
+        );
+        if (employeeApps.length === 0) {
+          res.status(404).json({
+            message: `No employee applications for the company name ${company} found.`,
+          });
+          return;
+        }
+        res.status(200).json(employeeApps);
         return;
       }
 
@@ -129,7 +145,7 @@ export const ApplicationController = {
         type,
         id,
         status,
-        metadata,
+        metadata
       );
 
       if (!application) {

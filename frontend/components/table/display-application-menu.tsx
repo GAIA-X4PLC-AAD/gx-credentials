@@ -131,6 +131,31 @@ export const DisplayApplicationMenu = ({
     }
   };
 
+  const handleReject = async () => {
+    try {
+      const applicationId = row.getValue("id") as string;
+      const updateResponse = await updateApplication({
+        id: applicationId,
+        type: entityType,
+        status: ApplicationStatus.Rejected,
+        metadata: JSON.stringify(metadata),
+      }).then((res) => res.message);
+
+      if (!updateResponse) {
+        throw new Error("Failed to update application.");
+      }
+
+      console.log("Application updated:", updateResponse);
+    } catch (error) {
+      console.error("Failed to process application:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process application. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -142,7 +167,7 @@ export const DisplayApplicationMenu = ({
         <DropdownMenuItem
           className="text-red-500"
           onClick={async () => {
-            await handleIssuance(ApplicationStatus.Rejected).then(() => {
+            await handleReject().then(() => {
               toast({
                 title: "Rejected",
                 description: "Application has been rejected.",
