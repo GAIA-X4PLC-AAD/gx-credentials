@@ -18,7 +18,7 @@ declare global {
 export const authMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -31,7 +31,6 @@ export const authMiddleware = async (
     const secret = process.env.NEXTAUTH_SECRET as string;
     const jwk = await importJWK({ k: secret, alg: "HS256", kty: "oct" });
     const { payload } = await jwtVerify(token, jwk);
-    console.log("Decoded token:", payload);
 
     next();
   } catch (error) {

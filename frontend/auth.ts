@@ -78,9 +78,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // role check
-        const { company: companyCredentials } = await fetch(
-          `${process.env.NEXTAUTH_URL}/api/credential`,
-        ).then(
+        await fetch(`${process.env.NEXTAUTH_URL}/api/credential`).then(
           (res) =>
             res.json() as Promise<{
               employee: Credential[];

@@ -77,7 +77,6 @@ export const credentialColumns: ColumnDef<Credential>[] = [
   },
   {
     id: "actions",
-    accessorKey: "metadata",
     cell: ({ row }) => {
       const credential = row.original.credential as CredentialData;
       return (

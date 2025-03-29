@@ -7,6 +7,7 @@ import {
 export interface RegistryStorage {
   registrars: string[];
   owner: string;
+  companies: string[];
 }
 
 if (!process.env.NEXT_PUBLIC_TEZOS_RPC_URL) {
@@ -45,4 +46,17 @@ async function getTrustedCompanies(): Promise<string[]> {
   }
 }
 
-export { getTrustAnchors, getTrustedCompanies, tezos };
+async function addTrustedCompany(company_pkh: string): Promise<void> {
+  try {
+    const contract: ContractAbstraction<ContractProvider> =
+      await tezos.contract.at(CONTRACT_ADDRESS);
+    const op = await contract.methodsObject.add_company(company_pkh).send();
+    await op.confirmation(1);
+    console.log("Company added, hash:", op.hash);
+  } catch (error) {
+    console.error("Failed to add trusted company:", error);
+    throw error;
+  }
+}
+
+export { addTrustedCompany, getTrustAnchors, getTrustedCompanies, tezos };

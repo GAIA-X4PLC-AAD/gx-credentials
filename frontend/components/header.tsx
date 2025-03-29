@@ -18,9 +18,12 @@ export function Header() {
       <div className="mr-4 flex">
         <Link
           href={session ? "/home" : "/"}
-          className="mr-6 flex items-center space-x-2"
+          className="mr-6 flex items-center space-x-1"
         >
-          <span className="font-bold sm:inline-block">GX Credentials</span>
+          <>
+            <span className="font-bold text-purple-500">GX</span>
+            <span className="font-bold"> Credentials</span>
+          </>
         </Link>
       </div>
       <div className="flex items-centers space-x-4">
