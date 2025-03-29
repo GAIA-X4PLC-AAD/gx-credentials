@@ -60,7 +60,7 @@ export const ApplicationController = {
       // if company name given
       if (type === "employee" && company) {
         const employeeApps = applications.filter(
-          (app) => app.metadata?.companyName === company
+          (app) => app.metadata?.companyName === company,
         );
         if (employeeApps.length === 0) {
           res.status(404).json({
@@ -145,7 +145,7 @@ export const ApplicationController = {
         type,
         id,
         status,
-        metadata
+        metadata,
       );
 
       if (!application) {

@@ -69,7 +69,7 @@ export const CredentialController = {
       if (companyName && companyCredential) {
         const filteredCredentials = companyCredential.filter(
           (cred) =>
-            cred.credential.credentialSubject["gx:legalName"] === companyName
+            cred.credential.credentialSubject["gx:legalName"] === companyName,
         );
         if (filteredCredentials.length === 0) {
           res.status(404).json({
