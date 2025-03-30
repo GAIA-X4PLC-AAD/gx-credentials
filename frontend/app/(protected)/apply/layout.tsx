@@ -14,8 +14,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return <div className="py-8 space-y-4">Loading...</div>;
   }
   return (
-    <div className="py-8 space-y-4">
-      <h1 className="text-3xl">
+    <div className="py-8 space-y-4 animate-appear min-h-[80vh]">
+      <h1 className="text-3xl font-bold">
         <ReaderIcon className="w-7 h-7 inline-block mr-2 mb-1" />
         Application
       </h1>

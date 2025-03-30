@@ -18,7 +18,7 @@ export function Header() {
       <div className="mr-4 flex">
         <Link
           href={session ? "/home" : "/"}
-          className="mr-6 flex items-center space-x-1"
+          className="mr-6 flex items-center space-x-1 hover:scale-105 transition-all duration-300"
         >
           <>
             <span className="font-bold text-purple-500">GX</span>

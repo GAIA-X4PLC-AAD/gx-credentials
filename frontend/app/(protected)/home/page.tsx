@@ -3,7 +3,6 @@
 import ApplyCard from "@/components/cards/apply-card";
 import IssueCard from "@/components/cards/issue-card";
 import TakeoutCard from "@/components/cards/takeout-card";
-import LoginButton from "@/components/LoginButton";
 import { Separator } from "@/components/ui/separator";
 import { useGetApplicationsByPkh } from "@/hooks/api/application";
 import { useGetCredentialsByPkh } from "@/hooks/api/credential";
@@ -48,8 +47,8 @@ const Page = () => {
   }
 
   return (
-    <div className="py-8 space-y-4">
-      <h1 className="text-3xl">Welcome back 👋</h1>
+    <div className="py-8 space-y-4 animate-appear min-h-[80vh]">
+      <h1 className="text-3xl font-bold">Welcome back 👋</h1>
       <p>Manage credentials and applications here.</p>
       <Separator className="w-full my-4" />
       <div className="flex flex-wrap gap-4">
@@ -72,15 +71,6 @@ const Page = () => {
           numCreds={credentials?.length}
         />
       </div>
-      {status === "authenticated" && session !== null ? (
-        <>
-          <pre>{JSON.stringify(session, null, 2)}</pre>
-        </>
-      ) : (
-        <p>
-          You are not authenticated. <LoginButton />
-        </p>
-      )}
     </div>
   );
 };

@@ -1,13 +1,13 @@
 "use client";
 
 import LoginButton from "@/components/LoginButton";
-import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
+import { SebisLogo } from "@/components/sebis-logo";
+import { HeroHighlight } from "@/components/ui/hero-highlight";
+import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
   const { status } = useSession();
@@ -46,23 +46,7 @@ export default function Home() {
             <p className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-primary-foreground via-purple-400 to-primary">
               GX Credentials
             </p>
-            <Link
-              className="text-base"
-              href="https://wwwmatthes.in.tum.de/pages/t5ma0jrv6q7k/sebis-Public-Website-Home"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span className="font-medium text-base">
-                by{" "}
-                <Highlight className="text-black dark:text-white">
-                  sebis
-                </Highlight>{" "}
-                @{" "}
-                <span className="text-sky-700 font-extrabold hover:scale-105 transition-all duration-300">
-                  TUM
-                </span>
-              </span>
-            </Link>
+            <SebisLogo />
           </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

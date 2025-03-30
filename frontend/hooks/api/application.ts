@@ -103,12 +103,13 @@ type GetAppsForIssuerProps = Partial<
 // NOTE: right now this only fetches company applications
 export const useGetApplicationsForIssuer = ({
   companyName,
+  type,
 }: GetAppsForIssuerProps) => {
   const { data: session } = useSession();
 
   const fetchApplication = async () => {
     const url = new URL(`application`, baseURL);
-    url.searchParams.append("type", "company");
+    if (type) url.searchParams.append("type", type);
     if (companyName) url.searchParams.append("company", companyName);
 
     return fetch(url, {
@@ -133,6 +134,7 @@ export const useGetApplicationsForIssuer = ({
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
     enabled: !!session?.user.pkh,
+    retry: false,
   });
 
   return {

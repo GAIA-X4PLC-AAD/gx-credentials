@@ -1,5 +1,6 @@
 "use client";
 
+import Footer from "@/components/footer";
 import { Header } from "@/components/header";
 import ProtectedRoute from "@/components/protected-route";
 
@@ -9,6 +10,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
       <ProtectedRoute>
         <Header />
         {children}
+        <Footer />
       </ProtectedRoute>
     </div>
   );

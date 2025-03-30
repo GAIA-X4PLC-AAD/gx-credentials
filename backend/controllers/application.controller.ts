@@ -4,12 +4,13 @@ import { ApplicationRepository } from "../repositories/application";
 
 export const ApplicationController = {
   /**
-   * Get all applications of specified type.
+   * Get all applications of specified type and optionally filter by company name.
    */
   getAll: async (req: Request, res: Response): Promise<void> => {
     try {
       const type = req.query.type as "employee" | "company";
       const validTypes = ["employee", "company"] as const;
+      const company = req.query.company as string;
 
       if (type && !validTypes.includes(type)) {
         res.status(400).json({ message: "Invalid application type" });
@@ -20,6 +21,21 @@ export const ApplicationController = {
 
       if (!applications || applications.length === 0) {
         res.status(404).json({ message: "No applications found" });
+        return;
+      }
+
+      // if company name given
+      if (type === "employee" && company) {
+        const employeeApps = applications.filter(
+          (app) => app.metadata?.companyName === company
+        );
+        if (employeeApps.length === 0) {
+          res.status(404).json({
+            message: `No employee applications for the company name ${company} found.`,
+          });
+          return;
+        }
+        res.status(200).json(employeeApps);
         return;
       }
 
@@ -60,7 +76,7 @@ export const ApplicationController = {
       // if company name given
       if (type === "employee" && company) {
         const employeeApps = applications.filter(
-          (app) => app.metadata?.companyName === company,
+          (app) => app.metadata?.companyName === company
         );
         if (employeeApps.length === 0) {
           res.status(404).json({
@@ -145,7 +161,7 @@ export const ApplicationController = {
         type,
         id,
         status,
-        metadata,
+        metadata
       );
 
       if (!application) {

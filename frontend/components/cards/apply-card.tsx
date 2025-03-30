@@ -23,7 +23,7 @@ const ApplyCard = ({ type }: Props) => {
     <Link href={`/apply/${type}`}>
       <Card
         className={cn(
-          "cursor-pointer transition-all duration-500 h-full",
+          "cursor-pointer transition-all duration-300 h-full",
           "hover:shadow-lg hover:scale-105",
           type === "company"
             ? "bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/40"

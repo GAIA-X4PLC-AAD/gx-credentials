@@ -24,8 +24,8 @@ const Page = () => {
   }
 
   return (
-    <div className="py-8 space-y-4">
-      <h1 className="text-3xl">Credentials</h1>
+    <div className="py-8 space-y-4 animate-appear min-h-[80vh]">
+      <h1 className="text-3xl font-bold">Credentials</h1>
       <p>View pending applications and manage your credentials here.</p>
       <Separator className="w-full my-4" />
       <Tabs defaultValue="applications" className="w-full">
