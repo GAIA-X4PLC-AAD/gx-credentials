@@ -1,9 +1,9 @@
 import express from "express";
 import { ApplicationController } from "../controllers/application.controller";
-import { authMiddleware } from "../middleware/auth.middleware";
+// import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 router.get("/", ApplicationController.getAll);
 router.get("/:pkh", ApplicationController.getByPkh);

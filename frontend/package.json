@@ -1,28 +1,32 @@
 {
-  "name": "react-dapp-starter",
+  "name": "gx-credentials-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@airgap/beacon-sdk": "4.4.0",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-navigation-menu": "^1.2.5",
     "@radix-ui/react-slot": "^1.1.2",
-    "@reown/appkit": "^1.6.9",
-    "@reown/appkit-adapter-wagmi": "^1.6.9",
     "@tailwindcss/postcss": "^4.0.10",
     "@tailwindcss/vite": "^4.0.10",
     "@tanstack/react-query": "^5.67.2",
+    "@taquito/taquito": "^21.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.6.3",
     "lucide-react": "^0.477.0",
+    "mini-svg-data-uri": "^1.4.4",
     "next-themes": "^0.4.4",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-responsive": "^10.0.0",
@@ -30,8 +34,6 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.10",
-    "viem": "^2.23.9",
-    "wagmi": "^2.14.12",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
@@ -60,6 +62,7 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
+    "vite-plugin-node-polyfills": "^0.23.0",
     "vite-plugin-svgr": "^4.3.0"
   }
 }
