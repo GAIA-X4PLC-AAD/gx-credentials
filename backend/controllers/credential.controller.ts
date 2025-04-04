@@ -4,56 +4,39 @@ import { CredentialRepository } from "../repositories/credential";
 type CredentialType = "employee" | "company";
 
 export const CredentialController = {
-  /**
-   * Get all credentials (both employee and company).
-   */
-  getAll: async (req: Request, res: Response): Promise<void> => {
+  get: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { type } = req.query;
-
-      if (type) {
-        if (!["employee", "company"].includes(type as string)) {
-          res.status(400).json({ message: "Invalid credential type" });
-          return;
-        }
-
-        const table = `${type}_credentials` as
-          | "employee_credentials"
-          | "company_credentials";
-        const credentials = await CredentialRepository.getAll(table);
-        res.status(200).json({ [type as string]: credentials || [] });
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
         return;
       }
 
-      // if type is not given then fetch all credentials from both tables
-      const [employeeCredentials, companyCredentials] = await Promise.all([
-        CredentialRepository.getAll("employee_credentials"),
-        CredentialRepository.getAll("company_credentials"),
-      ]);
+      const credential = await CredentialRepository.get(id);
 
-      const credentials = {
-        employee: employeeCredentials || [],
-        company: companyCredentials || [],
-      };
+      if (!credential || credential.holder_pkh !== req.user?.pkh) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
 
-      res.status(200).json(credentials);
+      res.status(200).json(credential);
     } catch (error) {
-      console.error("Error fetching credentials:", error);
+      console.error("Error fetching credential by ID:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
 
-  /**
-   * Get credentials by public key hash (searches both employee and company).
-   */
-  getByPkh: async (req: Request, res: Response): Promise<void> => {
+  getByHolder: async (req: Request, res: Response): Promise<void> => {
     try {
       const { pkh } = req.params;
-      const companyName = req.query.companyName as string;
+      if (pkh !== req.user?.pkh) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
 
       const [employeeCredential, companyCredential] = await Promise.all([
-        CredentialRepository.getByPkh("employee_credentials", pkh),
-        CredentialRepository.getByPkh("company_credentials", pkh),
+        CredentialRepository.getByHolder("employee_credentials", pkh),
+        CredentialRepository.getByHolder("company_credentials", pkh),
       ]);
 
       const credential = [
@@ -66,21 +49,6 @@ export const CredentialController = {
         return;
       }
 
-      if (companyName && companyCredential) {
-        const filteredCredentials = companyCredential.filter(
-          (cred) =>
-            cred.credential.credentialSubject["gx:legalName"] === companyName,
-        );
-        if (filteredCredentials.length === 0) {
-          res.status(404).json({
-            message: `No credentials found for the company name ${companyName}`,
-          });
-          return;
-        }
-        res.status(200).json(filteredCredentials);
-        return;
-      }
-
       res.status(200).json(credential);
     } catch (error) {
       console.error("Error fetching credential by ID:", error);
@@ -88,9 +56,6 @@ export const CredentialController = {
     }
   },
 
-  /**
-   * Create a new credential.
-   */
   create: async (req: Request, res: Response): Promise<void> => {
     try {
       const { holder_pkh, type, ...credentialData } = req.body;
@@ -102,6 +67,11 @@ export const CredentialController = {
 
       if (!type) {
         res.status(400).json({ message: "Credential type is required" });
+        return;
+      }
+
+      if (!(req.user?.isRegistrar || req.user?.companyCredential)) {
+        res.status(401).json({ error: "Unauthorized" });
         return;
       }
 
@@ -135,12 +105,17 @@ export const CredentialController = {
     }
   },
 
-  /**
-   * Update a credential.
-   */
   update: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+      const credential = await CredentialRepository.get(id);
+
+      if (!credential || credential.issuer_pkh !== req.user?.pkh) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { holder_pkh, ...credentialData } = req.body;
 
       if (!id) {
@@ -170,35 +145,6 @@ export const CredentialController = {
       res.status(200).json({ message: "Credential updated successfully" });
     } catch (error) {
       console.error("Error updating credential:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  /**
-   * Delete a credential by ID (searches both employee and company).
-   */
-  delete: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-
-      if (!id) {
-        res.status(400).json({ message: "Credential ID is required" });
-        return;
-      }
-
-      const [employeeDeleted, companyDeleted] = await Promise.all([
-        CredentialRepository.delete("employee_credentials", id),
-        CredentialRepository.delete("company_credentials", id),
-      ]);
-
-      if (!employeeDeleted && !companyDeleted) {
-        res.status(404).json({ message: "Credential not found" });
-        return;
-      }
-
-      res.status(200).json({ message: "Credential deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting credential:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },

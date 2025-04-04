@@ -42,15 +42,34 @@ export const CredentialRepository = {
     return (await db.selectFrom(table).selectAll().execute()) as R[];
   },
 
-  async getByPkh<R extends SelectCredential>(
+  async getByHolder<R extends SelectCredential>(
     table: TableName,
     holder_pkh: string,
   ): Promise<R[] | undefined> {
     return (await db
       .selectFrom(table)
+      .where("revoked", "=", false)
       .where("holder_pkh", "=", holder_pkh)
       .selectAll()
       .execute()) as R[] | undefined;
+  },
+
+  async get<R extends SelectCredential>(id: string): Promise<R | undefined> {
+    const [employeeCred, companyCred] = await Promise.all([
+      db
+        .selectFrom("employee_credentials")
+        .where("revoked", "=", false)
+        .where("id", "=", id)
+        .selectAll()
+        .executeTakeFirst(),
+      db
+        .selectFrom("company_credentials")
+        .where("revoked", "=", false)
+        .where("id", "=", id)
+        .selectAll()
+        .executeTakeFirst(),
+    ]);
+    return (employeeCred as R) || (companyCred as R) || undefined;
   },
 
   async delete<R extends SelectCredential>(

@@ -33,6 +33,7 @@ export const ApplicationRepository = {
     type: ApplicationType,
     id: string,
     status: ApplicationStatus,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: any,
   ): Promise<Application | undefined> {
     const existingApplication = await db
@@ -41,6 +42,7 @@ export const ApplicationRepository = {
       .select("metadata")
       .executeTakeFirst();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: any = {
       status,
       updated_at: new Date(),
@@ -75,7 +77,10 @@ export const ApplicationRepository = {
     return [...employeeApps, ...companyApps];
   },
 
-  async getByPkh(pkh: string, type?: ApplicationType): Promise<Application[]> {
+  async getByApplicant(
+    pkh: string,
+    type?: ApplicationType,
+  ): Promise<Application[]> {
     if (type) {
       return await db
         .selectFrom(getTableName(type))
@@ -98,6 +103,41 @@ export const ApplicationRepository = {
     ]);
 
     return [...employeeApps, ...companyApps];
+  },
+
+  async getByIssuer(pkh: string): Promise<Application[]> {
+    // registrar placeholder pkh
+    if (pkh === "registrar") {
+      return await db
+        .selectFrom("company_applications")
+        .where("issuer_pkh", "=", pkh)
+        .selectAll()
+        .execute();
+    }
+
+    // any other pkh must be of a company and every pkh should only be of one company
+    return await db
+      .selectFrom("employee_applications")
+      .where("issuer_pkh", "=", pkh)
+      .selectAll()
+      .execute();
+  },
+
+  async get(id: string): Promise<Application | undefined> {
+    const [employeeApps, companyApps] = await Promise.all([
+      db
+        .selectFrom("employee_applications")
+        .where("id", "=", id)
+        .selectAll()
+        .execute(),
+      db
+        .selectFrom("company_applications")
+        .where("id", "=", id)
+        .selectAll()
+        .execute(),
+    ]);
+    const results = [...employeeApps, ...companyApps];
+    return results.length > 0 ? results[0] : undefined;
   },
 
   async delete(

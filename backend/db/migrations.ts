@@ -9,6 +9,7 @@ async function up(db: Kysely<any>): Promise<void> {
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
     )
     .addColumn("pkh", "varchar", (col) => col.notNull())
+    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("status", "varchar", (col) =>
       col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`),
     )
@@ -28,6 +29,7 @@ async function up(db: Kysely<any>): Promise<void> {
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
     )
     .addColumn("pkh", "varchar", (col) => col.notNull())
+    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("status", "varchar", (col) =>
       col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`),
     )
@@ -47,11 +49,13 @@ async function up(db: Kysely<any>): Promise<void> {
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
     )
     .addColumn("holder_pkh", "varchar", (col) => col.notNull())
+    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())
     .addColumn("format", "varchar", (col) =>
       col.notNull().check(sql`format IN ('LD', 'JWT')`),
     )
+    .addColumn("revoked", "boolean", (col) => col.notNull())
     .addColumn("credential", "jsonb", (col) => col.notNull())
     .addColumn("application_id", "uuid", (col) =>
       col.references("employee_applications.id").onDelete("cascade").notNull(),
@@ -71,11 +75,13 @@ async function up(db: Kysely<any>): Promise<void> {
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
     )
     .addColumn("holder_pkh", "varchar", (col) => col.notNull())
+    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())
     .addColumn("format", "varchar", (col) =>
       col.notNull().check(sql`format IN ('LD', 'JWT')`),
     )
+    .addColumn("revoked", "boolean", (col) => col.notNull())
     .addColumn("credential", "jsonb", (col) => col.notNull())
     .addColumn("application_id", "uuid", (col) =>
       col.references("company_applications.id").onDelete("cascade").notNull(),

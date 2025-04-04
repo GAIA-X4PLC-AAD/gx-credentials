@@ -14,6 +14,7 @@ export enum CredentialFormat {
 interface BaseApplication {
   id: Generated<string>; // UUID
   pkh: string;
+  issuer_pkh: string; // company key or "registrar"
   status: ApplicationStatus;
   metadata: any; // JSONB
   created_at: Generated<Date>;
@@ -23,9 +24,11 @@ interface BaseApplication {
 interface BaseCredential {
   id: Generated<string>; // UUID
   holder_pkh: string;
+  issuer_pkh: string;
   subject: string;
   issuer: string;
   format: CredentialFormat;
+  revoked: boolean;
   credential: any; // JSONB
   application_id: string; // UUID
   created_at: Generated<Date>;
