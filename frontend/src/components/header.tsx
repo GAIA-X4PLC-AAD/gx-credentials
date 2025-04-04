@@ -1,24 +1,25 @@
 "use client";
 
-import { useWallet } from "@/hooks/use-wallet";
-import { logout } from "@/lib/actions/auth";
 import { ExitIcon } from "@radix-ui/react-icons";
-import { Session } from "next-auth";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
+import { Link } from "react-router";
+import { useNavigate } from "react-router";
+
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Skeleton } from "./ui/skeleton";
+
+import { useSession } from "@/hooks/use-session";
+import { useWallet } from "@/hooks/use-wallet";
+import { SessionContextValue } from "@/types/session";
 
 export function Header() {
-  const { data: session, status } = useSession();
+  const session = useSession();
   return (
     <header className="flex justify-between py-4">
       <div className="mr-4 flex">
         <Link
-          href={session ? "/home" : "/"}
-          className="mr-6 flex items-center space-x-1 hover:scale-105 transition-all duration-300"
+          to={session.user ? "/home" : "/"}
+          className="mr-6 flex items-center space-x-1 transition-all duration-300 hover:scale-105"
         >
           <>
             <span className="font-bold text-purple-500">GX</span>
@@ -26,13 +27,11 @@ export function Header() {
           </>
         </Link>
       </div>
-      <div className="flex items-centers space-x-4">
-        {status === "loading" ? (
-          <Skeleton className="w-20 h-8" />
-        ) : session && status === "authenticated" ? (
+      <div className="items-centers flex space-x-4">
+        {session.user ? (
           <ProfileMenu session={session} />
         ) : (
-          <Link href="/app" className="mr-6 flex items-center space-x-2">
+          <Link to="/" className="mr-6 flex items-center space-x-2">
             <span className="font-bold sm:inline-block">Login</span>
           </Link>
         )}
@@ -42,12 +41,14 @@ export function Header() {
   );
 }
 
-function ProfileMenu({ session }: { session: Session }) {
+function ProfileMenu({ session }: { session: SessionContextValue }) {
   const { dAppClient } = useWallet();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await dAppClient?.clearActiveAccount();
-    await logout();
+    await session.logout();
+    navigate("/");
   };
   return (
     <Popover>
@@ -59,8 +60,8 @@ function ProfileMenu({ session }: { session: Session }) {
       <PopoverContent className="w-full space-y-4">
         <div className="grid gap-2">
           <p className="font-semibold">Logged in as:</p>{" "}
-          <code className="inline-block w-auto bg-secondary px-1 rounded-md">
-            {session.user?.id}
+          <code className="bg-secondary inline-block w-auto rounded-md px-1">
+            {session.user?.pkh}
           </code>
         </div>
         <Button
@@ -68,7 +69,7 @@ function ProfileMenu({ session }: { session: Session }) {
           onClick={() => handleLogout()}
           className="w-full"
         >
-          <ExitIcon className="w-4 h-4 mr-2" />
+          <ExitIcon className="mr-2 h-4 w-4" />
           Logout
         </Button>
       </PopoverContent>

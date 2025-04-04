@@ -29,7 +29,7 @@ export const ApplicationController = {
         type,
       );
 
-      if (!applications || applications.length === 0) {
+      if (!applications) {
         res.status(404).json({ message: "No applications found" });
         return;
       }

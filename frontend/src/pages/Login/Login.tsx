@@ -1,14 +1,12 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-import LoginButton from '@/components/LoginButton';
-import { SebisLogo } from '@/components/sebis-logo';
-import { HeroHighlight } from '@/components/ui/hero-highlight';
+import LoginButton from "@/components/LoginButton";
+import { SebisLogo } from "@/components/sebis-logo";
+import { HeroHighlight } from "@/components/ui/hero-highlight";
 
 export default function Home() {
-  //TODO: forward user if he has a session already
-
   return (
     <div className="items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
       <HeroHighlight>

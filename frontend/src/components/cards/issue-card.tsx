@@ -1,5 +1,15 @@
 "use client";
 
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import { PersonIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "lucide-react";
+import { useMemo } from "react";
+import { Link } from "react-router";
+
+import { Button } from "../ui/button";
+
+import { Application } from "@/model/application";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardDescription,
@@ -7,14 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { Application } from "@/model/application";
-import { Separator } from "@radix-ui/react-dropdown-menu";
-import { PersonIcon } from "@radix-ui/react-icons";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { useMemo } from "react";
-import { Button } from "../ui/button";
 
 type Props = {
   companyName: string;
@@ -25,44 +27,44 @@ const IssueCard = ({ companyName, allApplications }: Props) => {
   const openApplications = useMemo(
     () =>
       allApplications?.filter(
-        (app) =>
-          app.status === "open" && app.metadata?.companyName === companyName,
+        app =>
+          app.status === "open" && app.metadata?.companyName === companyName
       ).length,
-    [allApplications, companyName],
+    [allApplications, companyName]
   );
 
   const colorIndex = getColorIndexFromString(companyName);
   const borderColorClass = tailwindColors[colorIndex];
 
   return (
-    <Link href={`/issue?company=${companyName}&type=employee`}>
+    <Link to={`/issue?company=${companyName}&type=employee`}>
       <Card
         className={cn(
-          "cursor-pointer transition-all duration-300 h-full w-[18rem] border-2",
-          "hover:shadow-lg hover:scale-105 hover:bg-secondary",
-          borderColorClass,
+          "h-full w-[18rem] cursor-pointer border-2 transition-all duration-300",
+          "hover:bg-secondary hover:scale-105 hover:shadow-lg",
+          borderColorClass
         )}
       >
         <CardHeader>
           <CardTitle className="flex items-center">
-            <PersonIcon className="size-6 mr-2" />
+            <PersonIcon className="mr-2 size-6" />
             {`${companyName}`}
           </CardTitle>
           <Separator className="w-full" />
-          <CardDescription className="text-pretty truncate">
+          <CardDescription className="truncate text-pretty">
             Manage employee credentials for {companyName}.
             {openApplications ? (
               <p className="text-xs text-amber-500">
                 {openApplications} open applications
               </p>
             ) : (
-              <p className="text-xs text-secondary">No open applications</p>
+              <p className="text-secondary text-xs">No open applications</p>
             )}
           </CardDescription>
         </CardHeader>
         <CardFooter>
           <Button variant="outline" className="w-full">
-            Manage <ArrowRightIcon className="w-4 h-4 ml-1" />
+            Manage <ArrowRightIcon className="ml-1 h-4 w-4" />
           </Button>
         </CardFooter>
       </Card>

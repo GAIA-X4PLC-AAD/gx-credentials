@@ -1,4 +1,5 @@
 "use client";
+import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -6,6 +7,7 @@ import { useWallet } from "@/hooks/use-wallet";
 
 const LoginButton = () => {
   const { connect, account: activeAccount, sign } = useWallet();
+  const navigate = useNavigate();
 
   const handleLogin = async (): Promise<void> => {
     try {
@@ -29,7 +31,7 @@ const LoginButton = () => {
         throw Error("No login signature");
       }
 
-      const loginResponse = await fetch(backendURL + "/auth/login", {
+      await fetch(backendURL + "/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,10 +44,10 @@ const LoginButton = () => {
           challenge,
           signature,
         }),
-      }).then(res => res.json());
-      console.log(loginResponse);
+      });
 
-      //TODO: save session info
+      //session will be automatically sset from the user endpoint
+      navigate("/home");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

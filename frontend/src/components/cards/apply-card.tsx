@@ -1,5 +1,13 @@
 "use client";
 
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import { BackpackIcon, PersonIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "lucide-react";
+import { Link } from "react-router";
+
+import { Button } from "../ui/button";
+
+import { capitalize, cn } from "@/lib/utils";
 import {
   Card,
   CardDescription,
@@ -7,12 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { capitalize, cn } from "@/lib/utils";
-import { Separator } from "@radix-ui/react-dropdown-menu";
-import { BackpackIcon, PersonIcon } from "@radix-ui/react-icons";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
 
 type Props = {
   type: "company" | "employee";
@@ -20,22 +22,22 @@ type Props = {
 
 const ApplyCard = ({ type }: Props) => {
   return (
-    <Link href={`/apply/${type}`}>
+    <Link to={`/apply/${type}`}>
       <Card
         className={cn(
-          "cursor-pointer transition-all duration-300 h-full",
-          "hover:shadow-lg hover:scale-105",
+          "h-full cursor-pointer transition-all duration-300",
+          "hover:scale-105 hover:shadow-lg",
           type === "company"
-            ? "bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/40"
-            : "bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/40",
+            ? "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/40"
+            : "bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/40"
         )}
       >
         <CardHeader className="min-h-[9.25rem]">
           <CardTitle className="flex items-center">
             {type === "company" ? (
-              <BackpackIcon className="size-6 mr-2" />
+              <BackpackIcon className="mr-2 size-6" />
             ) : (
-              <PersonIcon className="size-6 mr-2" />
+              <PersonIcon className="mr-2 size-6" />
             )}{" "}
             {`Apply as ${capitalize(type)}`}
           </CardTitle>
@@ -46,7 +48,7 @@ const ApplyCard = ({ type }: Props) => {
         </CardHeader>
         <CardFooter>
           <Button variant="outline" className="w-full">
-            Apply <ArrowRightIcon className="w-4 h-4 ml-1" />
+            Apply <ArrowRightIcon className="ml-1 h-4 w-4" />
           </Button>
         </CardFooter>
       </Card>

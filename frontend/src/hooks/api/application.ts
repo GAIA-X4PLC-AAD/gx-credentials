@@ -1,85 +1,44 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { APIResponse, baseURL } from "./base";
+
 import {
   Application,
   ApplicationStatus,
   ApplicationType,
   CreateApplication,
 } from "@/model/application";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
-import { APIResponse, baseURL } from "./base";
 
 type GetApplicationsProps = {
+  pkh: string;
   type?: ApplicationType;
 };
 
-export const useGetApplications = ({ type }: GetApplicationsProps) => {
-  const { data: session } = useSession();
-
-  const fetchApplications = async () => {
-    const url = new URL("application", baseURL);
-    if (type) url.searchParams.append("type", type);
-
-    return fetch(url, {
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
-      },
-    }).then((res) => res.json() as Promise<Application[]>);
-  };
-
-  const { isLoading, isError, data, refetch, isFetching } = useQuery({
-    queryKey: ["getApplications", type],
-    queryFn: fetchApplications,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60_000,
-  });
-
-  return {
-    isLoading,
-    isError,
-    applications: data,
-    refetch,
-    isFetching,
-  };
-};
-
-type GetApplicationByIdProps = GetApplicationsProps & {
-  id: string;
-};
-
-export const useGetApplicationsByPkh = ({
+export const useGetApplicationsByApplicant = ({
   type,
-  id,
-}: Partial<GetApplicationByIdProps>) => {
-  const { data: session } = useSession();
-
+  pkh,
+}: Partial<GetApplicationsProps>) => {
   const fetchApplication = async () => {
-    const url = new URL(`application/${id}`, baseURL);
+    const url = new URL(`application/applicant/${pkh}`, baseURL);
     if (type) url.searchParams.append("type", type);
 
     return fetch(url, {
       mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
-      },
+      credentials: "include",
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message) {
-          throw new Error(data.message);
-        }
+      .then(res => res.json())
+      .then(data => {
+        if (data.error || data.message) return [];
         return data as Application[];
       });
   };
 
   const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
-    queryKey: ["getApplicationById", id],
+    queryKey: ["getApplicationByApplicant", pkh],
     queryFn: fetchApplication,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
-    enabled: !!id,
+    enabled: !!pkh,
   });
 
   return {
@@ -92,48 +51,30 @@ export const useGetApplicationsByPkh = ({
   };
 };
 
-type GetAppsForIssuerProps = Partial<
-  GetApplicationByIdProps & {
-    companyName: string;
-  }
->;
-
-// TODO: could probably be more efficient
-// and also allow only getting applications for one company or for registrars
-// NOTE: right now this only fetches company applications
-export const useGetApplicationsForIssuer = ({
-  companyName,
-  type,
-}: GetAppsForIssuerProps) => {
-  const { data: session } = useSession();
-
+export const useGetApplicationsForIssuer = ({ pkh }: { pkh: string }) => {
   const fetchApplication = async () => {
-    const url = new URL(`application`, baseURL);
-    if (type) url.searchParams.append("type", type);
-    if (companyName) url.searchParams.append("company", companyName);
+    const url = new URL(`application/issuer/${pkh}`, baseURL);
 
     return fetch(url, {
       mode: "cors",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
       },
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message) {
-          throw new Error(data.message);
-        }
+      .then(res => res.json())
+      .then(data => {
+        if (data.error || data.message) return [];
         return data as Application[];
       });
   };
 
   const { isLoading, isError, error, data, refetch, isFetching } = useQuery({
-    queryKey: ["getApplicationsForIssuer", session?.user.pkh],
+    queryKey: ["getApplicationsForIssuer", pkh],
     queryFn: fetchApplication,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,
-    enabled: !!session?.user.pkh,
+    enabled: !!pkh,
     retry: false,
   });
 
@@ -149,7 +90,6 @@ export const useGetApplicationsForIssuer = ({
 
 export const useCreateApplication = () => {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
   const createApplication = async (application: CreateApplication) => {
     const url = new URL("application", baseURL);
@@ -157,12 +97,12 @@ export const useCreateApplication = () => {
     return fetch(url, {
       method: "POST",
       mode: "cors",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify(application),
-    }).then((res) => res.json() as Promise<APIResponse<Application>>);
+    }).then(res => res.json() as Promise<APIResponse<Application>>);
   };
 
   return useMutation({
@@ -175,14 +115,15 @@ export const useCreateApplication = () => {
   });
 };
 
-type UpdateApplicationProps = Required<GetApplicationByIdProps> & {
+type UpdateApplicationProps = {
+  id: string;
+  type: ApplicationType;
   status: ApplicationStatus;
   metadata?: string;
 };
 
 export const useUpdateApplication = () => {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
   const updateApplication = async ({
     status,
@@ -196,55 +137,22 @@ export const useUpdateApplication = () => {
     return fetch(url, {
       method: "PUT",
       mode: "cors",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
       },
       body: JSON.stringify({ status, metadata }),
-    }).then((res) => res.json() as Promise<APIResponse<Application>>);
+    }).then(res => res.json() as Promise<APIResponse<Application>>);
   };
 
   return useMutation({
     mutationFn: updateApplication,
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["getApplicationById"],
+        queryKey: ["getApplicationByApplicant"],
       });
       void queryClient.invalidateQueries({
         queryKey: ["getApplicationsForIssuer"],
-      });
-    },
-  });
-};
-
-type DeleteApplicationProps = {
-  type: "employee"; // Only employee applications can be deleted
-  id: string;
-};
-
-export const useDeleteApplication = () => {
-  const queryClient = useQueryClient();
-  const { data: session } = useSession();
-
-  const deleteApplication = async ({ type, id }: DeleteApplicationProps) => {
-    const url = new URL(`application/${id}`, baseURL);
-    url.searchParams.append("type", type);
-
-    return fetch(url, {
-      method: "DELETE",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.jwt}`,
-      },
-    }).then((res) => res.json() as Promise<APIResponse<Application>>);
-  };
-
-  return useMutation({
-    mutationFn: deleteApplication,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["getApplicationById"],
       });
     },
   });

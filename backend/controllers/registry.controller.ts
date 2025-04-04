@@ -17,8 +17,8 @@ if (!process.env.TEZOS_REGISTRY_CONTRACT) {
   throw new Error("TEZOS_REGISTRY_CONTRACT is not defined");
 }
 
-const RPC_URL = process.env.NEXT_PUBLIC_TEZOS_RPC_URL;
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_TEZOS_REGISTRY_CONTRACT;
+const RPC_URL = process.env.TEZOS_RPC_URL;
+const CONTRACT_ADDRESS = process.env.TEZOS_REGISTRY_CONTRACT;
 
 const tezos = new TezosToolkit(RPC_URL);
 
