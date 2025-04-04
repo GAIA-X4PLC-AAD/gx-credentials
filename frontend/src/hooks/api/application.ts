@@ -82,7 +82,7 @@ export const useGetApplicationsForIssuer = ({ pkh }: { pkh: string }) => {
     isLoading,
     isError,
     error,
-    applications: data,
+    applicationsForIssuer: data,
     refetch,
     isFetching,
   };

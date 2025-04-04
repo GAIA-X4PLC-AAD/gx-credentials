@@ -6,7 +6,10 @@ import ApplyCard from "@/components/cards/apply-card";
 import IssueCard from "@/components/cards/issue-card";
 import TakeoutCard from "@/components/cards/takeout-card";
 import { Separator } from "@/components/ui/separator";
-import { useGetApplicationsByApplicant } from "@/hooks/api/application";
+import {
+  useGetApplicationsByApplicant,
+  useGetApplicationsForIssuer,
+} from "@/hooks/api/application";
 import { useGetCredentialsByPkh } from "@/hooks/api/credential";
 import { useSession } from "@/hooks/use-session";
 import { useWallet } from "@/hooks/use-wallet";
@@ -22,6 +25,10 @@ function Home() {
 
   const { applications, isLoading: isLoadingApps } =
     useGetApplicationsByApplicant({
+      pkh,
+    });
+  const { applicationsForIssuer, isLoading: isLoadingAppsForIssuer } =
+    useGetApplicationsForIssuer({
       pkh,
     });
   const { credentials, isLoading: isLoadingCreds } = useGetCredentialsByPkh({
@@ -52,7 +59,7 @@ function Home() {
       );
   }, [credentials]);
 
-  if (isLoadingApps || isLoadingCreds) {
+  if (isLoadingApps || isLoadingAppsForIssuer || isLoadingCreds) {
     return <div className="space-y-4 py-8">Loading...</div>;
   }
 
@@ -62,24 +69,31 @@ function Home() {
       <p>Manage credentials and applications here.</p>
       <Separator className="my-4 w-full" />
       <div className="flex flex-wrap gap-4">
-        {companies &&
-          companies.length > 0 &&
-          companies.map(company => (
-            <IssueCard
-              key={company}
-              companyName={company}
-              allApplications={applications ?? []}
-            />
+        {session.user?.isRegistrar && (
+          <IssueCard
+            companyName="The Registrar"
+            applications={applicationsForIssuer ?? []}
+          />
+        )}
+
+        {companies && companies.length > 0 && (
+          <IssueCard
+            companyName={companies[0]}
+            applications={applications ?? []}
+          />
+        )}
+
+        {!session.user?.isRegistrar &&
+          (["company", "employee"] as const).map(type => (
+            <ApplyCard key={type} type={type} />
           ))}
 
-        {(["company", "employee"] as const).map(type => (
-          <ApplyCard key={type} type={type} />
-        ))}
-
-        <TakeoutCard
-          numApps={openApplications}
-          numCreds={credentials?.length}
-        />
+        {!session.user?.isRegistrar && (
+          <TakeoutCard
+            numApps={openApplications}
+            numCreds={credentials?.length}
+          />
+        )}
       </div>
     </div>
   );

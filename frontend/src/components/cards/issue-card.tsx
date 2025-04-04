@@ -20,24 +20,20 @@ import {
 
 type Props = {
   companyName: string;
-  allApplications: Application[];
+  applications: Application[];
 };
 
-const IssueCard = ({ companyName, allApplications }: Props) => {
+const IssueCard = ({ companyName, applications }: Props) => {
   const openApplications = useMemo(
-    () =>
-      allApplications?.filter(
-        app =>
-          app.status === "open" && app.metadata?.companyName === companyName
-      ).length,
-    [allApplications, companyName]
+    () => applications?.filter(app => app.status === "open").length,
+    [applications]
   );
 
   const colorIndex = getColorIndexFromString(companyName);
   const borderColorClass = tailwindColors[colorIndex];
 
   return (
-    <Link to={`/issue?company=${companyName}&type=employee`}>
+    <Link to={`/issue`}>
       <Card
         className={cn(
           "h-full w-[18rem] cursor-pointer border-2 transition-all duration-300",
@@ -52,7 +48,7 @@ const IssueCard = ({ companyName, allApplications }: Props) => {
           </CardTitle>
           <Separator className="w-full" />
           <CardDescription className="truncate text-pretty">
-            Manage employee credentials for {companyName}.
+            Issue and manage credentials for {companyName}.
             {openApplications ? (
               <p className="text-xs text-amber-500">
                 {openApplications} open applications

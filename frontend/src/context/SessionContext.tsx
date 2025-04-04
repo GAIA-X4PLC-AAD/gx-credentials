@@ -6,6 +6,7 @@ import { SessionContextValue } from "@/types/session";
 
 const DEFAULT_CONTEXT: SessionContextValue = {
   user: undefined,
+  status: "loading",
   logout: async () => {
     console.log("not loaded");
   },

@@ -43,28 +43,24 @@ export const ApplicationController = {
 
   getByIssuer: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { pkh } = req.params;
-      const type = req.query.type as "employee" | "company";
-
-      if (pkh !== req.user?.pkh) {
-        res.status(401).json({ error: "Unauthorized" });
-        return;
-      }
+      let { pkh } = req.params;
 
       if (!pkh) {
         res.status(400).json({ message: "Public key hash is required" });
         return;
       }
 
-      const validTypes = ["employee", "company"] as const;
-      if (type && !validTypes.includes(type)) {
-        res.status(400).json({ message: "Invalid application type" });
+      if (pkh !== req.user?.pkh) {
+        res.status(401).json({ error: "Unauthorized" });
         return;
       }
 
+      if (req.user?.isRegistrar) {
+        pkh = "registrar";
+      }
       const applications = await ApplicationRepository.getByIssuer(pkh);
 
-      if (!applications || applications.length === 0) {
+      if (!applications) {
         res.status(404).json({ message: "No applications found" });
         return;
       }
