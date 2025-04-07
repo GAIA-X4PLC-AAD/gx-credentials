@@ -1,10 +1,10 @@
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
     autoprefixer: {},
-    'postcss-pxtorem': {
+    "postcss-pxtorem": {
       rootValue: 16,
-      propList: ['*'],
+      propList: ["*"],
     },
   },
-}
+};
