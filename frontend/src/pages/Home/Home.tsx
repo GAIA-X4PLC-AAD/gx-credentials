@@ -48,7 +48,7 @@ function Home() {
     return credentials
       ?.filter(
         cred =>
-          ((cred.credential?.type as string[])[1] as string) ===
+          ((cred.credential.payload["type"] as string[])[1] as string) ===
           "Company Credential"
       )
       .map(
@@ -59,7 +59,12 @@ function Home() {
       );
   }, [credentials]);
 
-  if (isLoadingApps || isLoadingAppsForIssuer || isLoadingCreds) {
+  if (
+    isLoadingApps ||
+    isLoadingAppsForIssuer ||
+    isLoadingCreds ||
+    session.status === "loading"
+  ) {
     return <div className="space-y-4 py-8">Loading...</div>;
   }
 
@@ -76,10 +81,11 @@ function Home() {
           />
         )}
 
+        {/* should only ever be one company active */}
         {companies && companies.length > 0 && (
           <IssueCard
             companyName={companies[0]}
-            applications={applications ?? []}
+            applications={applicationsForIssuer ?? []}
           />
         )}
 

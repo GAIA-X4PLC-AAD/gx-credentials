@@ -1,5 +1,11 @@
 "use client";
 
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { Row } from "@tanstack/react-table";
+import React from "react";
+
+import ApplicationFormDisplay from "./view-application";
+
 import {
   Dialog,
   DialogClose,
@@ -21,7 +27,6 @@ import {
   ApplicationMetadata,
   ApplicationStatus,
 } from "@/model/application";
-
 import { Button } from "@/components/ui/button";
 import { useUpdateApplication } from "@/hooks/api/application";
 import { useCreateCredential } from "@/hooks/api/credential";
@@ -29,10 +34,6 @@ import { useIssueCredential } from "@/hooks/use-issue-credential";
 import { toast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/use-wallet";
 import { CreateCredential, CredentialFormat } from "@/model/credential";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { Row } from "@tanstack/react-table";
-import React from "react";
-import ApplicationFormDisplay from "./view-application";
 
 type DisplayApplicationMenu = {
   row: Row<Application>;
@@ -50,7 +51,7 @@ export const DisplayApplicationMenu = ({
 
   const entityType = Object.prototype.hasOwnProperty.call(
     row.getValue("metadata"),
-    "role",
+    "role"
   )
     ? "employee"
     : "company";
@@ -65,7 +66,7 @@ export const DisplayApplicationMenu = ({
 
   const handleIssuance = async (
     status: ApplicationStatus,
-    format?: CredentialFormat,
+    format?: CredentialFormat
   ): Promise<void> => {
     try {
       if (!dAppClient) {
@@ -81,8 +82,7 @@ export const DisplayApplicationMenu = ({
         const credential = (await issueCredential(
           row.original as Application,
           credentialType,
-          format,
-          dAppClient,
+          dAppClient
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as any; // Credential
 
@@ -91,10 +91,13 @@ export const DisplayApplicationMenu = ({
         }
 
         console.log("Credential issued:", credential);
+        // we know that our use DIDs are pkh:tezos, so we can just split
         const credentialPayload = {
-          holder_pkh: credential.credentialSubject?.id,
-          subject: credential.id,
-          issuer: credential.issuer,
+          holder_pkh: credential.payload.credentialSubject.id.split(":")[3],
+          subject: credential.payload.credentialSubject.id,
+          issuer: credential.payload.issuer,
+          issuer_pkh: credential.payload.issuer.split(":")[3],
+          name: credential.payload.credentialSubject["gx:legalName"],
           format,
           credential: credential,
           application_id: applicationId,
@@ -103,8 +106,8 @@ export const DisplayApplicationMenu = ({
         console.log("Storing credential DB...", credentialPayload);
 
         const createCredentialResponse = await createCredential(
-          credentialPayload,
-        ).then((res) => res.message);
+          credentialPayload
+        ).then(res => res.message);
 
         console.log("Credential stored:", createCredentialResponse);
 
@@ -113,7 +116,7 @@ export const DisplayApplicationMenu = ({
           type: entityType,
           status,
           metadata: JSON.stringify(metadata),
-        }).then((res) => res.message);
+        }).then(res => res.message);
 
         if (!updateResponse) {
           throw new Error("Failed to update application.");
@@ -139,7 +142,7 @@ export const DisplayApplicationMenu = ({
         type: entityType,
         status: ApplicationStatus.Rejected,
         metadata: JSON.stringify(metadata),
-      }).then((res) => res.message);
+      }).then(res => res.message);
 
       if (!updateResponse) {
         throw new Error("Failed to update application.");
@@ -192,7 +195,7 @@ function ViewDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem onSelect={e => e.preventDefault()}>
           View
         </DropdownMenuItem>
       </DialogTrigger>
@@ -216,7 +219,7 @@ function IssueDialog({
   row: Row<Application>;
   handleIssuance: (
     status: ApplicationStatus,
-    format?: CredentialFormat,
+    format?: CredentialFormat
   ) => Promise<void>;
 }): React.JSX.Element {
   return (
@@ -224,7 +227,7 @@ function IssueDialog({
       <DialogTrigger asChild>
         <DropdownMenuItem
           className="text-green-500"
-          onSelect={(e) => e.preventDefault()}
+          onSelect={e => e.preventDefault()}
         >
           Approve
         </DropdownMenuItem>
@@ -248,34 +251,17 @@ function IssueDialog({
             onClick={async () => {
               await handleIssuance(
                 ApplicationStatus.Accepted,
-                CredentialFormat.LD,
+                CredentialFormat.JWT
               ).then(() => {
                 toast({
-                  title: "Accepted: LD",
-                  description:
-                    "Application has been accepted and the credential has been issued in LD format.",
-                });
-              });
-            }}
-          >
-            Issue LD
-          </Button>
-          <Button
-            type="button"
-            onClick={async () => {
-              await handleIssuance(
-                ApplicationStatus.Accepted,
-                CredentialFormat.JWT,
-              ).then(() => {
-                toast({
-                  title: "Accepted: JWT",
+                  title: "Accepted",
                   description:
                     "Application has been accepted and the credential has been issued in JWT format.",
                 });
               });
             }}
           >
-            Issue JWT
+            Issue Credential
           </Button>
         </DialogFooter>
       </DialogContent>

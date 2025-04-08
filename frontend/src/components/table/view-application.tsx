@@ -1,6 +1,7 @@
+import { Textarea } from "../ui/textarea";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea";
 
 interface ApplicationFormDisplayProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

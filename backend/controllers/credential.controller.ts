@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { CredentialRepository } from "../repositories/credential";
+import addOffer from "../lib/vci";
 
 type CredentialType = "employee" | "company";
 
@@ -19,7 +20,8 @@ export const CredentialController = {
         return;
       }
 
-      res.status(200).json(credential);
+      // precompute the takeout link to make the frontend simpler
+      res.status(200).json(addOffer(credential));
     } catch (error) {
       console.error("Error fetching credential by ID:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -39,17 +41,17 @@ export const CredentialController = {
         CredentialRepository.getByHolder("company_credentials", pkh),
       ]);
 
-      const credential = [
+      const credentials = [
         ...(employeeCredential || []),
         ...(companyCredential || []),
       ];
 
-      if (!credential) {
+      if (!credentials) {
         res.status(404).json({ message: "No credentials found" });
         return;
       }
 
-      res.status(200).json(credential);
+      res.status(200).json(credentials.map(addOffer));
     } catch (error) {
       console.error("Error fetching credential by ID:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -77,6 +79,7 @@ export const CredentialController = {
 
       const credentialPayload = {
         holder_pkh,
+        revoked: false,
         ...credentialData,
       };
 

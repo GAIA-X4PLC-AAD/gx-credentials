@@ -1,0 +1,103 @@
+import { Request, Response } from "express";
+import { CredentialRepository } from "../repositories/credential";
+import { base64url } from "jose";
+
+export const TakeoutController = {
+  wellKnownIssuer: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
+      }
+
+      const credential = await CredentialRepository.get(id);
+
+      const data = {
+        credential_issuer: process.env.GLOBAL_SERVER_URL + "/api/vci/" + id,
+        credential_endpoint:
+          process.env.GLOBAL_SERVER_URL + "/api/vci/" + id + "/credential",
+        credential_configurations_supported: {
+          ProofOfEmploymentCredential: {
+            format: "jwt_vc_json",
+            credential_definition: {
+              "@context": credential?.credential.payload["@context"],
+              type: credential?.credential.payload["type"],
+            },
+          },
+        },
+      };
+
+      res.status(200).json(data);
+    } catch (_error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  authorization: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
+      }
+
+      const credential = await CredentialRepository.get(id);
+      const data = {
+        issuer: process.env.GLOBAL_SERVER_URL + "/api/vci/" + id,
+        token_endpoint:
+          process.env.GLOBAL_SERVER_URL + "/api/vci/" + id + "/token",
+        response_types_supported: ["vp_token", "id_token"],
+        grant_types_supported: [
+          "urn:ietf:params:oauth:grant-type:pre-authorized_code",
+        ],
+      };
+
+      res.status(200).json(data);
+    } catch (_error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  token: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
+      }
+
+      const data = {
+        // since we grant access based on knowing the internal credential id, the token does not matter
+        access_token: "secureToken",
+        token_type: "bearer",
+        expires_in: 3600,
+      };
+
+      res.status(200).json(data);
+    } catch (_error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  download: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ message: "Credential ID is required" });
+        return;
+      }
+
+      const credential = await CredentialRepository.get(id);
+      const encodedCredential =
+        base64url(JSON.stringify(credential?.credential.header)) +
+        "." +
+        base64url(JSON.stringify(credential?.credential.payload)) +
+        "." +
+        base64url(credential?.credential.signature);
+
+      console.log(encodedCredential);
+      res.status(200).json({ credential: encodedCredential });
+    } catch (error) {
+      console.error("Error fetching credential by ID:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+};

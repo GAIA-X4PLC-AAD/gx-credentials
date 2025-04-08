@@ -1,22 +1,23 @@
 "use client";
 
+import { ColumnDef } from "@tanstack/react-table";
+
+import { DisplayApplicationMenu } from "../display-application-menu";
+
 import { StatusPill } from "@/components/status-pill";
 import {
   Application,
   ApplicationMetadata,
   ApplicationStatus,
 } from "@/model/application";
-
 import { EntityType, EntityTypePill } from "@/components/type-pill";
-import { ColumnDef } from "@tanstack/react-table";
-import { DisplayApplicationMenu } from "../display-application-menu";
 
 export const applicationColumns: ColumnDef<Application>[] = [
   {
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="sm:max-w-[12rem] lg:max-w-full truncate">
+      <div className="truncate sm:max-w-[12rem] lg:max-w-full">
         <code>{row.getValue("id")}</code>
       </div>
     ),
@@ -41,7 +42,7 @@ export const applicationColumns: ColumnDef<Application>[] = [
     cell: ({ row }) => {
       const entityType = Object.prototype.hasOwnProperty.call(
         row.getValue("metadata"),
-        "role",
+        "role"
       )
         ? "employee"
         : "company";

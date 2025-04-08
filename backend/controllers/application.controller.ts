@@ -135,11 +135,18 @@ export const ApplicationController = {
       }
 
       const app = await ApplicationRepository.get(id);
-      if (!app) {
+      if (
+        !app ||
+        (type === "company" && app.issuer_pkh !== "registrar") ||
+        (type === "employee" && app.issuer_pkh === "registrar")
+      ) {
         res.status(400).json({ message: "Application not found" });
         return;
       }
-      if (app.pkh !== req.user?.pkh) {
+      if (
+        (type === "company" && !req.user?.isRegistrar) ||
+        (type !== "company" && app.pkh !== req.user?.pkh)
+      ) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }

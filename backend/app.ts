@@ -9,6 +9,7 @@ import { createTablesIfNotExist } from "./db/migrations";
 import authRouter from "./routes/auth.routes";
 import applicationRouter from "./routes/application.routes";
 import credentialRouter from "./routes/credential.routes";
+import takeoutRouter from "./routes/takeout.routes";
 import indexRouter from "./routes/index";
 import passport from "passport";
 import session from "express-session";
@@ -53,6 +54,7 @@ app.use("/", indexRouter);
 app.use("/auth", authRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/credential", credentialRouter);
+app.use("/api/vci", takeoutRouter);
 
 // Error handler
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars

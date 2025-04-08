@@ -8,6 +8,8 @@ import ApplyWrapper from "./components/apply-wrapper";
 
 import Login from "@/pages/Login/Login";
 import Home from "@/pages/Home/Home";
+import Issue from "@/pages/Issue/Issue";
+import Takeout from "@/pages/Takeout/Takeout";
 import ApplyCompany from "@/pages/ApplyCompany/ApplyCompany";
 
 function AppRouter() {
@@ -29,6 +31,8 @@ function AppRouter() {
         <Route element={<SessionProvider />}>
           <Route element={<BracketDiv />}>
             <Route path="home" element={<Home />} />
+            <Route path="issue" element={<Issue />} />
+            <Route path="takeout" element={<Takeout />} />
             <Route path="apply" element={<ApplyWrapper />}>
               <Route path="company" element={<ApplyCompany />} />
             </Route>

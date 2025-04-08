@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { initResponsive } from "./lib/responsive.ts";
 import AppRouter from "./AppRouter.tsx";
+import { Toaster } from "./components/ui/toaster.tsx";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import WalletProvider from "@/components/providers/wallet-provider.tsx";
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <WalletProvider>
           <AppRouter />
+          <Toaster />
         </WalletProvider>
       </ThemeProvider>
     </QueryClientProvider>

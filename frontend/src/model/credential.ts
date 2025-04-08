@@ -3,9 +3,8 @@ export enum CredentialFormat {
   JWT = "JWT",
 }
 
-type CredentialData = {
-  [key: string]: string | number | boolean | object;
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CredentialData = any;
 
 type CredentialType = "employee" | "company";
 
@@ -14,6 +13,7 @@ type TCredential = {
   holder_pkh?: string;
   issuer_pkh?: string;
   subject?: string;
+  name?: string;
   issuer?: string;
   format?: CredentialFormat;
   revoked?: boolean;
@@ -21,13 +21,16 @@ type TCredential = {
   application_id?: string; // UUID
   created_at?: string;
   updated_at?: string;
+  offer?: string;
 };
 
 type CreateCredential = Pick<
   TCredential,
   | "holder_pkh"
+  | "issuer_pkh"
   | "subject"
   | "issuer"
+  | "name"
   | "format"
   | "credential"
   | "application_id"

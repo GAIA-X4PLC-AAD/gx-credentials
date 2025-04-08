@@ -1,6 +1,7 @@
 import { Kysely, sql } from "kysely";
 import { db } from "./index";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function up(db: Kysely<any>): Promise<void> {
   // Create employee_applications table
   await db.schema
@@ -52,6 +53,7 @@ async function up(db: Kysely<any>): Promise<void> {
     .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())
+    .addColumn("name", "varchar", (col) => col.notNull())
     .addColumn("format", "varchar", (col) =>
       col.notNull().check(sql`format IN ('LD', 'JWT')`),
     )
@@ -78,6 +80,7 @@ async function up(db: Kysely<any>): Promise<void> {
     .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
     .addColumn("subject", "varchar", (col) => col.notNull())
     .addColumn("issuer", "varchar", (col) => col.notNull())
+    .addColumn("name", "varchar", (col) => col.notNull())
     .addColumn("format", "varchar", (col) =>
       col.notNull().check(sql`format IN ('LD', 'JWT')`),
     )
@@ -108,6 +111,7 @@ async function up(db: Kysely<any>): Promise<void> {
     .execute();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function down(db: Kysely<any>): Promise<void> {
   // Drop indexes first to avoid foreign key constraint issues
   await db.schema

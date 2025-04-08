@@ -1,5 +1,9 @@
 "use client";
 
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { ColumnDef } from "@tanstack/react-table";
+import { QRCodeSVG } from "qrcode.react";
+
 import { EntityType, EntityTypePill } from "@/components/type-pill";
 import {
   Dialog,
@@ -17,17 +21,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Credential, CredentialData } from "@/model/credential";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { ColumnDef } from "@tanstack/react-table";
 
 export const credentialColumns: ColumnDef<Credential>[] = [
   {
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => {
-      const id = row.original?.credential?.id as string;
+      const id = row.original?.credential?.payload.id as string;
       return (
-        <div className="sm:max-w-[12rem] lg:max-w-full truncate">
+        <div className="truncate sm:max-w-[12rem] lg:max-w-full">
           <code>{id}</code>
         </div>
       );
@@ -35,7 +37,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
   },
   {
     accessorKey: "created_at",
-    header: "Created At",
+    header: "Created",
     cell: ({ row }) =>
       new Date(row.getValue("created_at")).toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -44,11 +46,11 @@ export const credentialColumns: ColumnDef<Credential>[] = [
       }),
   },
   {
-    accessorKey: "format",
-    header: "Format",
+    accessorKey: "name",
+    header: "Name",
     cell: ({ row }) => {
-      const format = row.original?.format as string;
-      return <code className="font-semibold">{format}</code>;
+      const name = row.original?.name as string;
+      return <code className="font-semibold">{name}</code>;
     },
   },
   {
@@ -69,7 +71,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
     cell: ({ row }) => {
       const appId = row.getValue("application_id") as string;
       return (
-        <div className="sm:max-w-[12rem] lg:max-w-full truncate">
+        <div className="truncate sm:max-w-[12rem] lg:max-w-full">
           <code>{appId}</code>
         </div>
       );
@@ -80,14 +82,14 @@ export const credentialColumns: ColumnDef<Credential>[] = [
     cell: ({ row }) => {
       const credential = row.original.credential as CredentialData;
       return (
-        <Dialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <DotsHorizontalIcon />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <DotsHorizontalIcon />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <Dialog>
               <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={e => e.preventDefault()}>
                   View
                 </DropdownMenuItem>
               </DialogTrigger>
@@ -95,21 +97,44 @@ export const credentialColumns: ColumnDef<Credential>[] = [
                 <DialogHeader>
                   <DialogTitle>View Credential</DialogTitle>
                   <DialogDescription>
-                    Credential ID: {credential?.id as string}
+                    Credential ID: {credential?.payload.id as string}
                   </DialogDescription>
                 </DialogHeader>
                 <Textarea
-                  className="w-full min-h-[65vh]"
+                  className="min-h-[65vh] w-full"
                   value={JSON.stringify(credential, null, 2)}
                   disabled
                 />
               </DialogContent>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                Takeout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </Dialog>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                  Takeout
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Download Credential</DialogTitle>
+                  <DialogDescription>
+                    Credential ID: {credential?.payload.id as string}
+                  </DialogDescription>
+                </DialogHeader>
+                <p>
+                  Scan the QR Code below with the SSI wallet of your choice:
+                </p>
+                <div className="my-4 flex justify-center">
+                  <QRCodeSVG
+                    value={row.original?.offer || ""}
+                    bgColor="#00000000"
+                    fgColor="#6D28D9"
+                    size={256}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },
