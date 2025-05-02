@@ -17,14 +17,14 @@ export const TakeoutController = {
         credential_issuer: process.env.GLOBAL_SERVER_URL + "/api/vci/" + id,
         credential_endpoint:
           process.env.GLOBAL_SERVER_URL + "/api/vci/" + id + "/credential",
-        credential_configurations_supported: {
-          ProofOfEmploymentCredential: {
-            format: "jwt_vc_json",
-            credential_definition: {
-              "@context": credential?.credential.payload["@context"],
-              type: credential?.credential.payload["type"],
-            },
-          },
+        credential_configurations_supported: {},
+      };
+      data.credential_configurations_supported[
+        credential?.credential.payload.vc.type[1]
+      ] = {
+        format: "jwt_vc_json",
+        credential_definition: {
+          type: credential?.credential.payload.vc["type"],
         },
       };
 
@@ -67,7 +67,7 @@ export const TakeoutController = {
 
       const data = {
         // since we grant access based on knowing the internal credential id, the token does not matter
-        access_token: "secureToken",
+        access_token: id,
         token_type: "bearer",
         expires_in: 3600,
       };
@@ -87,11 +87,11 @@ export const TakeoutController = {
 
       const credential = await CredentialRepository.get(id);
       const encodedCredential =
-        base64url(JSON.stringify(credential?.credential.header)) +
+        base64url.encode(JSON.stringify(credential?.credential.header)) +
         "." +
-        base64url(JSON.stringify(credential?.credential.payload)) +
+        base64url.encode(JSON.stringify(credential?.credential.payload)) +
         "." +
-        base64url(credential?.credential.signature);
+        credential?.credential.signature;
 
       console.log(encodedCredential);
       res.status(200).json({ credential: encodedCredential });

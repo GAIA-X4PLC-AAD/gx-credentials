@@ -48,7 +48,7 @@ function Home() {
     return credentials
       ?.filter(
         cred =>
-          ((cred.credential.payload["type"] as string[])[1] as string) ===
+          ((cred.credential.payload.vc["type"] as string[])[1] as string) ===
           "Company Credential"
       )
       .map(
