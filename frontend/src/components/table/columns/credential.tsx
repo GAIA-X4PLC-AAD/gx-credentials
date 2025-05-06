@@ -27,7 +27,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => {
-      const id = row.original?.credential?.payload.id as string;
+      const id = row.original?.id as string;
       return (
         <div className="truncate sm:max-w-[12rem] lg:max-w-full">
           <code>{id}</code>
@@ -58,8 +58,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
     header: "Type",
     cell: ({ row }) => {
       const type =
-        row.original?.credential?.type ===
-        "VerifiableCredentialEmployee Credential"
+        row.original?.credential?.payload?.vc?.type[1] === "EmployeeCredential"
           ? "employee"
           : "company";
       return <EntityTypePill type={type as EntityType} />;

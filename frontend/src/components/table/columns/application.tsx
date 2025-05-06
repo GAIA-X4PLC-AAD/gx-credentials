@@ -12,7 +12,9 @@ import {
 } from "@/model/application";
 import { EntityType, EntityTypePill } from "@/components/type-pill";
 
-export const applicationColumns: ColumnDef<Application>[] = [
+export const applicationColumns: ColumnDef<Application>[] = (
+  editable: boolean
+) => [
   {
     accessorKey: "id",
     header: "ID",
@@ -51,7 +53,7 @@ export const applicationColumns: ColumnDef<Application>[] = [
   },
   {
     accessorKey: "created_at",
-    header: "Created At",
+    header: "Created",
     cell: ({ row }) =>
       new Date(row.getValue("created_at")).toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -67,6 +69,7 @@ export const applicationColumns: ColumnDef<Application>[] = [
         <DisplayApplicationMenu
           row={row}
           metadata={metadata as ApplicationMetadata}
+          editable={editable}
         />
       );
     },

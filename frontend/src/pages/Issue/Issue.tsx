@@ -72,7 +72,7 @@ const Page = () => {
 
       {applicationsForIssuer && applicationsForIssuer.length > 0 && (
         <DataTable
-          columns={applicationColumns}
+          columns={applicationColumns(true)}
           data={sortedApplications as Application[]}
         />
       )}

@@ -28,8 +28,8 @@ const ApplyCard = ({ type }: Props) => {
           "h-full cursor-pointer transition-all duration-300",
           "hover:scale-105 hover:shadow-lg",
           type === "company"
-            ? "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/40"
-            : "bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/40"
+            ? "bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/40"
+            : "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/40"
         )}
       >
         <CardHeader className="min-h-[9.25rem]">

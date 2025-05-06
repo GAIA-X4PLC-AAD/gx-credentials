@@ -15,7 +15,7 @@ const Page = () => {
   const session = useSession();
   const pkh = useMemo(() => {
     if (session.user) return session.user.pkh as string;
-    // since auth is enforced at api, we can guess that wallet pkh will be session pkh
+    // since auth is enforced at api, we can safely guess that wallet pkh will be session pkh
     return "OxO" as string;
   }, [session]);
   const { applications } = useGetApplicationsByApplicant({
@@ -48,7 +48,10 @@ const Page = () => {
 
         <TabsContent value="applications">
           {applications && applications.length > 0 && (
-            <DataTable columns={applicationColumns} data={applications} />
+            <DataTable
+              columns={applicationColumns(false)}
+              data={applications}
+            />
           )}
           {applications && applications.length === 0 && (
             <div className="flex justify-center space-y-4">

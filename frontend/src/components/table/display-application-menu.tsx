@@ -43,6 +43,7 @@ type DisplayApplicationMenu = {
 export const DisplayApplicationMenu = ({
   row,
   metadata,
+  editable = false,
 }: DisplayApplicationMenu) => {
   const { mutateAsync: updateApplication, isPending } = useUpdateApplication();
   const { mutateAsync: createCredential } = useCreateCredential();
@@ -60,9 +61,8 @@ export const DisplayApplicationMenu = ({
     return <div>Updating...</div>;
   }
 
-  if (row.getValue("status") !== ApplicationStatus.Open) {
-    return null;
-  }
+  const showEditButtons =
+    editable && row.getValue("status") === ApplicationStatus.Open;
 
   const handleIssuance = async (
     status: ApplicationStatus,
@@ -166,20 +166,24 @@ export const DisplayApplicationMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <ViewDialog row={row} metadata={metadata} />
-        <IssueDialog row={row} handleIssuance={handleIssuance} />
-        <DropdownMenuItem
-          className="text-red-500"
-          onClick={async () => {
-            await handleReject().then(() => {
-              toast({
-                title: "Rejected",
-                description: "Application has been rejected.",
+        {showEditButtons && (
+          <IssueDialog row={row} handleIssuance={handleIssuance} />
+        )}
+        {showEditButtons && (
+          <DropdownMenuItem
+            className="text-red-500"
+            onClick={async () => {
+              await handleReject().then(() => {
+                toast({
+                  title: "Rejected",
+                  description: "Application has been rejected.",
+                });
               });
-            });
-          }}
-        >
-          Reject
-        </DropdownMenuItem>
+            }}
+          >
+            Reject
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -237,7 +241,7 @@ function IssueDialog({
           <DialogTitle>Approve Application</DialogTitle>
           <DialogDescription>
             You are about to approve an application with the ID:{" "}
-            {row.getValue("id")}. Pick a credential format to issue.
+            {row.getValue("id")}.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-start">

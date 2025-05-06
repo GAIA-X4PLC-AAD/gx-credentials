@@ -49,13 +49,15 @@ function Home() {
       ?.filter(
         cred =>
           ((cred.credential.payload.vc["type"] as string[])[1] as string) ===
-          "Company Credential"
+          "CompanyCredential"
       )
       .map(
         cred =>
-          (cred.credential?.credentialSubject as { "gx:legalName": string })[
-            "gx:legalName"
-          ]
+          (
+            cred.credential.payload.vc.credentialSubject as {
+              "gx:legalName": string;
+            }
+          )["gx:legalName"]
       );
   }, [credentials]);
 
