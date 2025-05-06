@@ -20,7 +20,6 @@ export const useGetApplicationsByApplicant = ({
 }: Partial<GetApplicationsProps>) => {
   const fetchApplication = async () => {
     const url = new URL(`application/applicant/${pkh}`, baseURL);
-    if (type) url.searchParams.append("type", type);
 
     return fetch(url, {
       mode: "cors",

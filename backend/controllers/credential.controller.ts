@@ -58,6 +58,31 @@ export const CredentialController = {
     }
   },
 
+  getAllCompanies: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const credentials = await CredentialRepository.getAll(
+        "company_credentials",
+      );
+
+      if (!credentials) {
+        res.status(404).json({ message: "No companies found" });
+        return;
+      }
+
+      const companies = credentials
+        .filter((cred) => cred.revoked === false)
+        .map((cred) => ({
+          name: cred.name,
+          pkh: cred.issuer_pkh,
+        }));
+
+      res.status(200).json(companies);
+    } catch (error) {
+      console.error(`Error fetching all companies`, error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
   create: async (req: Request, res: Response): Promise<void> => {
     try {
       const { holder_pkh, type, ...credentialData } = req.body;

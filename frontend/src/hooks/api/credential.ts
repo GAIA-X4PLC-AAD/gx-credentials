@@ -13,6 +13,11 @@ type GetCredentialsByPkhProps = {
   type?: CredentialType;
 };
 
+type CompanyEntry = {
+  pkh: string;
+  name: string;
+};
+
 export const useGetCredentialsByPkh = ({
   pkh,
   type,
@@ -45,6 +50,39 @@ export const useGetCredentialsByPkh = ({
     isLoading,
     isError,
     credentials: data,
+    refetch,
+    isFetching,
+  };
+};
+
+export const useGetAllCompanies = () => {
+  const fetchCompanies = async () => {
+    const url = new URL(`credential/all/companies`, baseURL);
+    return fetch(url, {
+      mode: "cors",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error || data.message) return [];
+        return data as CompanyEntry[];
+      });
+  };
+
+  const { isLoading, isError, data, refetch, isFetching } = useQuery({
+    queryKey: ["useGetAllCompanies"],
+    queryFn: fetchCompanies,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60_000,
+  });
+
+  return {
+    isLoading,
+    isError,
+    companies: data,
     refetch,
     isFetching,
   };

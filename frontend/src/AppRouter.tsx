@@ -11,6 +11,7 @@ import Home from "@/pages/Home/Home";
 import Issue from "@/pages/Issue/Issue";
 import Takeout from "@/pages/Takeout/Takeout";
 import ApplyCompany from "@/pages/ApplyCompany/ApplyCompany";
+import ApplyEmployee from "@/pages/ApplyEmployee/ApplyEmployee";
 
 function AppRouter() {
   const BracketDiv = () => {
@@ -35,6 +36,7 @@ function AppRouter() {
             <Route path="takeout" element={<Takeout />} />
             <Route path="apply" element={<ApplyWrapper />}>
               <Route path="company" element={<ApplyCompany />} />
+              <Route path="employee" element={<ApplyEmployee />} />
             </Route>
           </Route>
         </Route>

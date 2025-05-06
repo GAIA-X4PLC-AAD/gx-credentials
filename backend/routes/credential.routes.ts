@@ -7,6 +7,7 @@ router.use(authMiddleware);
 
 router.post("/", CredentialController.create);
 router.get("/:id", CredentialController.get);
+router.get("/all/companies", CredentialController.getAllCompanies);
 router.get("/holder/:pkh", CredentialController.getByHolder);
 router.put("/:id", CredentialController.update);
 
