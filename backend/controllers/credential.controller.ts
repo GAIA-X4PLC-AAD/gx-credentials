@@ -73,7 +73,7 @@ export const CredentialController = {
         .filter((cred) => cred.revoked === false)
         .map((cred) => ({
           name: cred.name,
-          pkh: cred.issuer_pkh,
+          pkh: cred.holder_pkh,
         }));
 
       res.status(200).json(companies);
