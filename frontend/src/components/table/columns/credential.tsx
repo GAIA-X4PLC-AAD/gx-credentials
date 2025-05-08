@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Credential, CredentialData } from "@/model/credential";
+import { useTheme } from "@/components/providers/theme-provider";
 
 export const credentialColumns: ColumnDef<Credential>[] = [
   {
@@ -96,7 +97,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
                 <DialogHeader>
                   <DialogTitle>View Credential</DialogTitle>
                   <DialogDescription>
-                    Credential ID: {credential?.payload.id as string}
+                    Credential ID: {credential?.payload.jti as string}
                   </DialogDescription>
                 </DialogHeader>
                 <Textarea
@@ -116,7 +117,7 @@ export const credentialColumns: ColumnDef<Credential>[] = [
                 <DialogHeader>
                   <DialogTitle>Download Credential</DialogTitle>
                   <DialogDescription>
-                    Credential ID: {credential?.payload.id as string}
+                    Credential ID: {credential?.payload.jti as string}
                   </DialogDescription>
                 </DialogHeader>
                 <p>
@@ -126,7 +127,9 @@ export const credentialColumns: ColumnDef<Credential>[] = [
                   <QRCodeSVG
                     value={row.original?.offer || ""}
                     bgColor="#00000000"
-                    fgColor="#6D28D9"
+                    fgColor={
+                      useTheme().theme === "dark" ? "#FFFFFF" : "#000000"
+                    }
                     size={256}
                   />
                 </div>
