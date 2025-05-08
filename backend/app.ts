@@ -57,7 +57,7 @@ app.use("/api/credential", credentialRouter);
 app.use("/api/vci", takeoutRouter);
 
 // Error handler
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};

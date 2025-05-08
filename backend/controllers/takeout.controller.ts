@@ -41,7 +41,6 @@ export const TakeoutController = {
         return;
       }
 
-      const credential = await CredentialRepository.get(id);
       const data = {
         issuer: process.env.GLOBAL_SERVER_URL + "/api/vci/" + id,
         token_endpoint:

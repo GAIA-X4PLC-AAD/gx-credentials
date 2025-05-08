@@ -143,7 +143,6 @@ export const CredentialController = {
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { holder_pkh, ...credentialData } = req.body;
 
       if (!id) {
