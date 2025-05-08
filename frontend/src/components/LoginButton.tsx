@@ -19,6 +19,12 @@ const LoginButton = () => {
         console.log("New connection:", permissions.address);
       }
 
+      if (!activeAccount?.address.startsWith("tz1")) {
+        throw new Error(
+          "Only tz1 addresses and their signatures are supported."
+        );
+      }
+
       const backendURL = import.meta.env.VITE_DIRECT_BACKEND_URL;
       const response = await fetch(backendURL + "/auth/challenge", {
         mode: "cors",

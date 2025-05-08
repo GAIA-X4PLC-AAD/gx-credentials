@@ -73,7 +73,7 @@ export function useIssueCredential(): IssueCredential {
       jti: "urn:uuid:" + crypto.randomUUID(),
     };
     const jwtHeader = {
-      alg: "EdDSA", // TODO: check this
+      alg: "EdDSA",
       typ: "JWT",
       kid: did,
     };
