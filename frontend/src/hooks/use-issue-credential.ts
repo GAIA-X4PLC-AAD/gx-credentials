@@ -60,10 +60,9 @@ export function useIssueCredential(): IssueCredential {
           type == "company" ? "CompanyCredential" : "EmployeeCredential",
         ],
         credentialSubject: {
-          type: "gx:LegalParticipant",
+          type:
+            type == "company" ? "gx:LegalParticipant" : "gx:NaturalParticipant",
           "gx:legalName": application.metadata?.legalName,
-          "gx-terms-and-conditions:gaiaxTermsAndConditions":
-            "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700",
         },
       },
       iss: did,
@@ -71,6 +70,24 @@ export function useIssueCredential(): IssueCredential {
       nbf: iat,
       sub: `did:pkh:tezos:` + application?.pkh,
       jti: "urn:uuid:" + crypto.randomUUID(),
+    };
+    let additionalPayload;
+    if (type == "company") {
+      additionalPayload = {
+        "gx:registrationNumber": application.metadata?.registrationNumber,
+        "gx:headquarterAddress": application.metadata?.headquarterAddress,
+        "gx:legalAddress": application.metadata?.legalAddress,
+        "gx:parentOrganization": application.metadata?.parentOrganization,
+        "gx:subOrganization": application.metadata?.subOrganization,
+      };
+    } else {
+      additionalPayload = {
+        "gx:email": application.metadata?.email,
+      };
+    }
+    payload.vc.credentialSubject = {
+      ...payload.vc.credentialSubject,
+      ...additionalPayload,
     };
     const jwtHeader = {
       alg: "EdDSA",
