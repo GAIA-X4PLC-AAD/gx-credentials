@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
@@ -7,21 +6,25 @@ import morgan from "morgan";
 import { fileURLToPath } from "node:url";
 import path from "path";
 import { createTablesIfNotExist } from "./db/migrations";
+import authRouter from "./routes/auth.routes";
 import applicationRouter from "./routes/application.routes";
 import credentialRouter from "./routes/credential.routes";
-import indexRouter from "./routes/index";
+import takeoutRouter from "./routes/takeout.routes";
+import indexRouter from "./routes/index.routes";
+import passport from "passport";
+import session from "express-session";
+import strategy from "./middleware/signatureStrategy";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
+// const PORT = process.env.PORT || 3000;
 
 // Middleware setup
 app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.NEXTAUTH_SECRET)); // uses the same secret as NextAuth for parsing session token
+// TODO: make origin env variable
 app.use(
   cors({
     origin: ["http://localhost:3000"],
@@ -29,27 +32,39 @@ app.use(
     credentials: true,
   }),
 );
+app.use(
+  session({
+    secret: process.env.AUTH_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
+passport.use(strategy);
+app.use(express.json());
+
+// Initialize passport.js with session
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
 app.use("/", indexRouter);
+app.use("/auth", authRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/credential", credentialRouter);
+app.use("/api/vci", takeoutRouter);
 
 // Error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   res.status(err.status || 500);
   res.render("error");
 });
-
-// View engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
 
 // Init DB
 (async () => {

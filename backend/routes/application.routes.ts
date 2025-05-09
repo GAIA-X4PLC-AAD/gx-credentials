@@ -5,10 +5,9 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const router = express.Router();
 router.use(authMiddleware);
 
-router.get("/", ApplicationController.getAll);
-router.get("/:pkh", ApplicationController.getByPkh);
+router.get("/applicant/:pkh", ApplicationController.getByApplicant);
+router.get("/issuer/:pkh", ApplicationController.getByIssuer);
 router.post("/", ApplicationController.create);
 router.put("/:id", ApplicationController.update);
-router.delete("/:id", ApplicationController.delete);
 
 export default router;

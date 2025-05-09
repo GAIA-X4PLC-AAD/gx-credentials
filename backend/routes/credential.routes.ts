@@ -6,9 +6,9 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.post("/", CredentialController.create);
-router.get("/", CredentialController.getAll);
-router.get("/:pkh", CredentialController.getByPkh);
+router.get("/:id", CredentialController.get);
+router.get("/all/companies", CredentialController.getAllCompanies);
+router.get("/holder/:pkh", CredentialController.getByHolder);
 router.put("/:id", CredentialController.update);
-router.delete("/:id", CredentialController.delete);
 
 export default router;
