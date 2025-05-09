@@ -1,9 +1,8 @@
 import express from "express";
 const router = express.Router();
 
-/* GET home page. */
 router.get("/", (_req, res) => {
-  res.render("index", { title: "GX Credentials API Server" });
+  res.status(200).send("GX Credentials API Server");
 });
 
 export default router;

@@ -10,7 +10,7 @@ import authRouter from "./routes/auth.routes";
 import applicationRouter from "./routes/application.routes";
 import credentialRouter from "./routes/credential.routes";
 import takeoutRouter from "./routes/takeout.routes";
-import indexRouter from "./routes/index";
+import indexRouter from "./routes/index.routes";
 import passport from "passport";
 import session from "express-session";
 import strategy from "./middleware/signatureStrategy";
@@ -65,10 +65,6 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   res.status(err.status || 500);
   res.render("error");
 });
-
-// View engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
 
 // Init DB
 (async () => {
