@@ -1,4 +1,5 @@
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
+
 import { SebisLogo } from "./sebis-logo";
 
 export default function Footer() {

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetApplicationsByApplicant } from "@/hooks/api/application";
 import { useGetCredentialsByPkh } from "@/hooks/api/credential";
 import { useSession } from "@/hooks/use-session";
+import { useTheme } from "@/components/providers/theme-provider";
 
 const Page = () => {
   const session = useSession();
@@ -24,6 +25,11 @@ const Page = () => {
   const { credentials } = useGetCredentialsByPkh({
     pkh,
   });
+
+  const theme = useTheme();
+  const primaryColor = useMemo(() => {
+    return theme.theme === "dark" ? "#FFFFFF" : "#000000";
+  }, [theme]);
 
   if (session.status === "loading") {
     return <div className="space-y-4 py-8">Loading...</div>;
@@ -62,7 +68,10 @@ const Page = () => {
 
         <TabsContent value="credentials">
           {credentials && credentials.length > 0 && (
-            <DataTable columns={credentialColumns} data={credentials} />
+            <DataTable
+              columns={credentialColumns(primaryColor)}
+              data={credentials}
+            />
           )}
           {credentials && credentials.length === 0 && (
             <div className="flex justify-center space-y-4">

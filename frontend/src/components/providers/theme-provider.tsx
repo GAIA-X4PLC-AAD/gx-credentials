@@ -63,6 +63,8 @@ export function ThemeProvider({
   );
 }
 
+// Not really wanting to rewrite shadcn, although this may not be ideal
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 

@@ -38,6 +38,7 @@ import { CreateCredential, CredentialFormat } from "@/model/credential";
 type DisplayApplicationMenu = {
   row: Row<Application>;
   metadata: ApplicationMetadata;
+  editable: boolean;
 };
 
 export const DisplayApplicationMenu = ({

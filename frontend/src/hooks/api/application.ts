@@ -15,7 +15,6 @@ type GetApplicationsProps = {
 };
 
 export const useGetApplicationsByApplicant = ({
-  type,
   pkh,
 }: Partial<GetApplicationsProps>) => {
   const fetchApplication = async () => {
