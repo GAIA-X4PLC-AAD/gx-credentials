@@ -91,10 +91,9 @@ function Home() {
           />
         )}
 
-        {!session.user?.isRegistrar &&
-          (["company", "employee"] as const).map(type => (
-            <ApplyCard key={type} type={type} />
-          ))}
+        {(!companies || companies.length === 0) && <ApplyCard type="company" />}
+
+        <ApplyCard type="employee" />
 
         {!session.user?.isRegistrar && (
           <TakeoutCard

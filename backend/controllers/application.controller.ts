@@ -92,6 +92,14 @@ export const ApplicationController = {
         return;
       }
 
+      // making logic overall simpler by enforcing a max of 1 company VC per pkh
+      if (req.user?.isRegistrar || req.user?.companyCredential) {
+        res
+          .status(400)
+          .json({ message: "More than one issuing role not permitted" });
+        return;
+      }
+
       const newApp = await ApplicationRepository.create(type, {
         pkh,
         issuer_pkh: type === "company" ? "registrar" : metadata.companyAddress,
