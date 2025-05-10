@@ -6,8 +6,12 @@ COPY package.json package-lock.json tsconfig.json ./
 
 RUN npm ci
 
+RUN npm i -g serve
+
 COPY . .
 
-EXPOSE 8080
+RUN npm run build
 
-CMD ["npm", "start"]
+EXPOSE 3000
+
+CMD ["serve","-s", "dist"]
