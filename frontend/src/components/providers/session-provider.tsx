@@ -10,16 +10,9 @@ const backendURL = import.meta.env.VITE_DIRECT_BACKEND_URL;
 
 const SessionProvider = () => {
   const [user, setUser] = useState<User | undefined>(undefined);
-  const getUser = async () => {
-    if (user) return user;
-    fetch(backendURL + "/auth/user", {
-      credentials: "include",
-      mode: "cors",
-    })
-      .then(res => res.json())
-      .then(data => setUser(data.user))
-      .catch(e => console.error(e));
-  };
+  const [status, setStatus] = useState<
+    "loading" | "authenticated" | "unauthenticated"
+  >("loading");
 
   // we assume performance is not an issue and just get session state from the api whenever
   useEffect(() => {
@@ -29,7 +22,10 @@ const SessionProvider = () => {
         mode: "cors",
       })
         .then(res => res.json())
-        .then(data => setUser(data.user))
+        .then(data => {
+          setUser(data.user);
+          setStatus(data.user ? "authenticated" : "unauthenticated");
+        })
         .catch(e => console.error(e));
   });
 
@@ -38,6 +34,7 @@ const SessionProvider = () => {
       return;
     }
     try {
+      setStatus("unauthenticated");
       await fetch(backendURL + "/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -50,7 +47,7 @@ const SessionProvider = () => {
   }, [user]);
 
   return (
-    <SessionContext.Provider value={{ user, getUser, logout }}>
+    <SessionContext.Provider value={{ user, logout, status }}>
       <Outlet />
     </SessionContext.Provider>
   );

@@ -11,17 +11,24 @@ const LoginButton = () => {
 
   const handleLogin = async (): Promise<void> => {
     try {
+      let address, pk;
       if (!activeAccount) {
         const permissions = await connect();
         if (!permissions) {
           throw Error("No permissions granted");
         }
+        address = permissions.address;
+        pk = permissions.publicKey;
         console.log("New connection:", permissions.address);
+      } else {
+        address = activeAccount.address;
+        pk = activeAccount.publicKey;
       }
 
-      if (!activeAccount?.address.startsWith("tz1")) {
+      if (!address.startsWith("tz1")) {
         throw new Error(
-          "Only tz1 addresses and their signatures are supported."
+          "Only tz1 addresses and their signatures are supported. Incompatible: " +
+            address
         );
       }
 
@@ -45,8 +52,8 @@ const LoginButton = () => {
         credentials: "include",
         mode: "cors",
         body: JSON.stringify({
-          pk: activeAccount?.publicKey,
-          pkh: activeAccount?.address,
+          pk: pk,
+          pkh: address,
           challenge,
           signature,
         }),

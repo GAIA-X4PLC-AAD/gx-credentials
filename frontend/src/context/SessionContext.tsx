@@ -10,10 +10,6 @@ const DEFAULT_CONTEXT: SessionContextValue = {
   logout: async () => {
     console.log("not loaded");
   },
-  getUser: async () => {
-    console.log("not loaded");
-    return undefined;
-  },
 };
 
 export const SessionContext =

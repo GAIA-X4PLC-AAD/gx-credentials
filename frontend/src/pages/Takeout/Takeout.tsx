@@ -11,14 +11,16 @@ import { useGetApplicationsByApplicant } from "@/hooks/api/application";
 import { useGetCredentialsByPkh } from "@/hooks/api/credential";
 import { useSession } from "@/hooks/use-session";
 import { useTheme } from "@/components/providers/theme-provider";
+import { useWallet } from "@/hooks/use-wallet";
 
 const Page = () => {
   const session = useSession();
+  const wallet = useWallet();
   const pkh = useMemo(() => {
     if (session.user) return session.user.pkh as string;
     // since auth is enforced at api, we can safely guess that wallet pkh will be session pkh
-    return "OxO" as string;
-  }, [session]);
+    return wallet.account?.address as string;
+  }, [session, wallet]);
   const { applications } = useGetApplicationsByApplicant({
     pkh,
   });

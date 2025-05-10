@@ -23,6 +23,7 @@ export const useGetCredentialsByPkh = ({
   type,
 }: GetCredentialsByPkhProps) => {
   const fetchCredential = async () => {
+    if (!pkh) return [];
     const url = new URL(`credential/holder/${pkh}`, baseURL);
     if (type) url.searchParams.append("type", type);
     return fetch(url, {
