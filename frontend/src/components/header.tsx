@@ -42,11 +42,11 @@ export function Header() {
 }
 
 function ProfileMenu({ session }: { session: SessionContextValue }) {
-  const { dAppClient } = useWallet();
+  const { disconnect } = useWallet();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await dAppClient?.clearActiveAccount();
+    disconnect();
     await session.logout();
     navigate("/");
   };
