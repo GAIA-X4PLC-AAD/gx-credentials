@@ -63,7 +63,7 @@ const strategy = new CustomStrategy(function (req, done) {
     return done("PK and PKH do not match");
   }
 
-  //TODO: pull url from env
+  //TODO: url should ideally come from env
   const dappUrl = "gx-credentials.example.com";
   const input = "GX Credentials Login";
   const inputSplit = (challenge as string).substring(22).split(" ");

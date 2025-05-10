@@ -109,8 +109,7 @@ export const useCreateCredential = () => {
     mutationFn: createCredential,
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        //TODO: update issued credentials query once added
-        queryKey: [],
+        queryKey: ["getCredentials"],
       });
     },
   });
