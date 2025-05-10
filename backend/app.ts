@@ -59,11 +59,8 @@ app.use("/api/vci", takeoutRouter);
 // Error handler
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-
   res.status(err.status || 500);
-  res.render("error");
+  res.send(err.message);
 });
 
 // Init DB
