@@ -6,10 +6,12 @@ COPY package.json package-lock.json tsconfig.json ./
 
 RUN npm ci
 
+RUN npm i -g serve
+
 COPY . .
 
 RUN npm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev:docker"]
+CMD ["serve","-s", "dist"]
