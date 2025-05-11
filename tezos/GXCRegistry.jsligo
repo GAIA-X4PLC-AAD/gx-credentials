@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2025, Software Engineering for Business Information Systems (sebis) <matthes@tum.de>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+namespace GXCRegistry {
+    export type storage = { owner: address, registrars: set<address>, companies: set<address> };
+    type ret = [list<operation>, storage];
+    @entry
+    const add_registrar = (acc: address, store: storage): ret => {
+        if (Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, registrars: Set.add(acc, store.registrars) }
+            ];
+        };
+    }
+    @entry
+    const remove_registrar = (acc: address, store: storage): ret => {
+        if (Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, registrars: Set.remove(acc, store.registrars) }
+            ];
+        };
+    }
+    @entry
+    const add_company = (acc: address, store: storage): ret => {
+        if (Set.mem(Tezos.get_sender(),store.registrars) && Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, companies: Set.add(acc, store.companies) }
+            ];
+        };
+    }
+    @entry
+    const remove_company = (acc: address, store: storage): ret => {
+        if (Set.mem(Tezos.get_sender(),store.registrars) && Tezos.get_sender() != store.owner) {
+            return failwith("Access denied.");
+        } else {
+            return [
+                list([]),
+                { ...store, companies: Set.remove(acc, store.companies) }
+            ];
+        };
+    }
+}

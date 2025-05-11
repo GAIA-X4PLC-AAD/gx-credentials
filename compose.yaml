@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_DB_ROOT_USERNAME}
+      PGUSER: ${PG_DB_ROOT_USERNAME}
+      POSTGRES_PASSWORD: ${PG_DB_ROOT_PASSWORD}
+      POSTGRES_DB: ${PG_DB_DATABASE}
+    ports:
+      - "5435:5432"
+    expose:
+      - "5435"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "$${PG_DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - PG_DB_ROOT_USERNAME=${PG_DB_ROOT_USERNAME}
+      - PG_DB_ROOT_PASSWORD=${PG_DB_ROOT_PASSWORD}
+      - PG_DB_DATABASE=${PG_DB_DATABASE}
+      - PG_DB_PORT=${PG_DB_DOCKER_PORT}
+      - PG_DB_HOST=db
+    develop:
+      watch:
+        - path: ./backend
+          target: /app
+          action: rebuild
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    environment:
+      - GLOBAL_SERVER_URL=${GLOBAL_SERVER_URL}
+    env_file:
+      - .env
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+  redis:
+    image: redis:7.2.2
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

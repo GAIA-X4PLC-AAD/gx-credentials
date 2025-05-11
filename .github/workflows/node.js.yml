@@ -1,0 +1,41 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    name: Build, test, and lint
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        working-directory: ["frontend", "backend"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+      - name: Build ${{ matrix.working-directory }}
+        run: npm run build --if-present
+        working-directory: ${{ matrix.working-directory }}
+      # - name: Test ${{ matrix.working-directory }}
+      #   run: npm test
+      #   working-directory: ${{ matrix.working-directory }}
+      - name: Lint ${{ matrix.working-directory }}
+        run: npm run lint
+        working-directory: ${{ matrix.working-directory }}
