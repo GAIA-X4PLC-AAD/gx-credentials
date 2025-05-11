@@ -10,20 +10,24 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        working-directory: ["frontend", "backend"]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          # Make sure the actual branch is checked out when running on pull requests
           ref: ${{ github.head_ref }}
 
-      - name: Prettify code
-        uses: creyD/prettier_action@v4.3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          # This part is also where you can pass other options, for example:
-          prettier_options: --write **/*.{js,ts,tsx,md}
-          working_directory: ${{ github.workspace }}/${{ matrix.working-directory }}/
+          node-version: 18
+
+      - name: Install Prettier
+        run: npm install -g prettier
+
+      - name: Run Prettier for frontend
+        run: prettier --write "**/*.{js,ts,tsx,md}"
+        working-directory: frontend
+
+      - name: Run Prettier for backend
+        run: prettier --write "**/*.{js,ts,tsx,md}"
+        working-directory: backend
