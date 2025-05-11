@@ -10,6 +10,10 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        working-directory: ["frontend", "backend"]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,10 +28,10 @@ jobs:
       - name: Install Prettier
         run: npm install -g prettier
 
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+
       - name: Run Prettier for frontend
         run: prettier --write "**/*.{js,ts,tsx,md}"
-        working-directory: frontend
-
-      - name: Run Prettier for backend
-        run: prettier --write "**/*.{js,ts,tsx,md}"
-        working-directory: backend
+        working-directory: ${{ matrix.working-directory }}
