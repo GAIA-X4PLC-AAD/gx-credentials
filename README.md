@@ -65,11 +65,15 @@ This use case parallels the previous one. Now, an **Employee** applies through t
 
 ## Limitations, Warnings, and Considerations
 
-This software is experimental. Anyone attempting to use it in production should have good technical understanding and be open to open issues and PRs if necessary.
+This software is experimental. Anyone attempting to use it in production should have good technical understanding and be willing to open issues and PRs if necessary.
 
 ### Data Fields
 
 The data fields used for application forms and subsequent credential creation are just placeholder data. Since they are written to the database as JSON, frontends can just choose different ones (except for `name`).
+
+### Verifiable Credential Format
+
+The verifiable credential format used is `jwt`, more specifically `jwt_vc_json`, but `jwt_vc_json-ld` should be possible with no changes (assuming the JSON-LD does not need to be validated). The frontend dictates how the application data is transformed into a credential, keeping the backend generic.
 
 ### Verifiable Credential Revocation
 
@@ -91,7 +95,7 @@ Since the project consists of two different subprojects, using docker for develo
 
 Install a tunneling tool like [ngrok](https://ngrok.com). You will need it to easily use a smartphone wallet with the application or to demo the application to someone outside your local network.
 
-Install a wallet software that supports the Beacon protocol. For the best experience, we currently recommend using [Altme](https://altme.io). Be aware that you can choose a wallet that is not SSI compatible here.
+Install a wallet software that supports Tezos and the Beacon protocol. For the best experience, we currently recommend using [Altme](https://altme.io). Be aware that you can choose a wallet that is not an SSI wallet here.
 
 Install an SSI wallet software that supports the OID4VCI protocol, if your previous wallet choice does not support it already.
 
