@@ -2,9 +2,7 @@
 
 ![build workflow](https://github.com/GAIA-X4PLC-AAD/gx-credentials/actions/workflows/node.js.yml/badge.svg)
 
-**Disclaimer: This repository is in active development and not production software.**
-
-This application explores an approach for issuing Verifiable Credentials to companies and their employees in a Gaia-X ecosystem. Employees could then use these credentials to authenticate with different services in the ecosystem.
+This application explores an approach for issuing Verifiable Credentials to companies and their employees in a Gaia-X ecosystem. Employees could then use these credentials to authenticate with different services in the ecosystem. A key feature is that the signature process necessary for issuance is done on personal devices of administrative staff. That way, no keys are ever in the system.
 
 The operator of this web application hosts it as a trust anchor to enable identity management among a dataspace or consortium. The operator only directly certifies company identities. This application supports companies in employee credential issuance, but that could be done entirely inside each company with custom software.
 
@@ -166,3 +164,9 @@ If you want to develop locally with hot reloading, you can uncomment the below l
 Then run the following command (Assuming you have already built the image using `docker compose build`):
 
 `docker compose watch`
+
+## Limitations
+
+Currently, the issued credentials are not compatible with the Gaia-X Digital Clearing House, because that demands a signature performed with a `did:web`.
+
+This version has no built-in revocation mechanism.
