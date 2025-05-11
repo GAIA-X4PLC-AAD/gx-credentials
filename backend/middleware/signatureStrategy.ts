@@ -27,7 +27,7 @@ passport.deserializeUser(async function (id, done) {
   const isRegistrar = registrars.includes(pkh);
   const companyCredentials = (await CredentialRepository.getByHolder(
     "company_credentials",
-    pkh,
+    pkh
   )) as CompanyCredential[] | undefined;
   const companyCredential = companyCredentials ? companyCredentials[0] : null;
   done(null, { pkh, isRegistrar, companyCredential });
@@ -52,7 +52,7 @@ const strategy = new CustomStrategy(function (req, done) {
   const isVerified = verifySignature(
     payloadBytesFromString(challenge),
     pk as string,
-    signature as string,
+    signature as string
   );
 
   if (!isVerified) {

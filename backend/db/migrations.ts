@@ -6,94 +6,94 @@ async function up(db: Kysely<any>): Promise<void> {
   // Create employee_applications table
   await db.schema
     .createTable("employee_applications")
-    .addColumn("id", "uuid", (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`),
+    .addColumn("id", "uuid", col =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
-    .addColumn("pkh", "varchar", (col) => col.notNull())
-    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
-    .addColumn("status", "varchar", (col) =>
-      col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`),
+    .addColumn("pkh", "varchar", col => col.notNull())
+    .addColumn("issuer_pkh", "varchar", col => col.notNull())
+    .addColumn("status", "varchar", col =>
+      col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`)
     )
-    .addColumn("metadata", "jsonb", (col) => col.notNull())
-    .addColumn("created_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("metadata", "jsonb", col => col.notNull())
+    .addColumn("created_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn("updated_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("updated_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     .execute();
 
   // Create company_applications table
   await db.schema
     .createTable("company_applications")
-    .addColumn("id", "uuid", (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`),
+    .addColumn("id", "uuid", col =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
-    .addColumn("pkh", "varchar", (col) => col.notNull())
-    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
-    .addColumn("status", "varchar", (col) =>
-      col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`),
+    .addColumn("pkh", "varchar", col => col.notNull())
+    .addColumn("issuer_pkh", "varchar", col => col.notNull())
+    .addColumn("status", "varchar", col =>
+      col.notNull().check(sql`status IN ('open', 'rejected', 'accepted')`)
     )
-    .addColumn("metadata", "jsonb", (col) => col.notNull())
-    .addColumn("created_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("metadata", "jsonb", col => col.notNull())
+    .addColumn("created_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn("updated_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("updated_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     .execute();
 
   // Create employee_credentials table
   await db.schema
     .createTable("employee_credentials")
-    .addColumn("id", "uuid", (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`),
+    .addColumn("id", "uuid", col =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
-    .addColumn("holder_pkh", "varchar", (col) => col.notNull())
-    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
-    .addColumn("subject", "varchar", (col) => col.notNull())
-    .addColumn("issuer", "varchar", (col) => col.notNull())
-    .addColumn("name", "varchar", (col) => col.notNull())
-    .addColumn("format", "varchar", (col) =>
-      col.notNull().check(sql`format IN ('LD', 'JWT')`),
+    .addColumn("holder_pkh", "varchar", col => col.notNull())
+    .addColumn("issuer_pkh", "varchar", col => col.notNull())
+    .addColumn("subject", "varchar", col => col.notNull())
+    .addColumn("issuer", "varchar", col => col.notNull())
+    .addColumn("name", "varchar", col => col.notNull())
+    .addColumn("format", "varchar", col =>
+      col.notNull().check(sql`format IN ('LD', 'JWT')`)
     )
-    .addColumn("revoked", "boolean", (col) => col.notNull())
-    .addColumn("credential", "jsonb", (col) => col.notNull())
-    .addColumn("application_id", "uuid", (col) =>
-      col.references("employee_applications.id").onDelete("cascade").notNull(),
+    .addColumn("revoked", "boolean", col => col.notNull())
+    .addColumn("credential", "jsonb", col => col.notNull())
+    .addColumn("application_id", "uuid", col =>
+      col.references("employee_applications.id").onDelete("cascade").notNull()
     )
-    .addColumn("created_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("created_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn("updated_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("updated_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     .execute();
 
   // Create company_credentials table
   await db.schema
     .createTable("company_credentials")
-    .addColumn("id", "uuid", (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`),
+    .addColumn("id", "uuid", col =>
+      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
-    .addColumn("holder_pkh", "varchar", (col) => col.notNull())
-    .addColumn("issuer_pkh", "varchar", (col) => col.notNull())
-    .addColumn("subject", "varchar", (col) => col.notNull())
-    .addColumn("issuer", "varchar", (col) => col.notNull())
-    .addColumn("name", "varchar", (col) => col.notNull())
-    .addColumn("format", "varchar", (col) =>
-      col.notNull().check(sql`format IN ('LD', 'JWT')`),
+    .addColumn("holder_pkh", "varchar", col => col.notNull())
+    .addColumn("issuer_pkh", "varchar", col => col.notNull())
+    .addColumn("subject", "varchar", col => col.notNull())
+    .addColumn("issuer", "varchar", col => col.notNull())
+    .addColumn("name", "varchar", col => col.notNull())
+    .addColumn("format", "varchar", col =>
+      col.notNull().check(sql`format IN ('LD', 'JWT')`)
     )
-    .addColumn("revoked", "boolean", (col) => col.notNull())
-    .addColumn("credential", "jsonb", (col) => col.notNull())
-    .addColumn("application_id", "uuid", (col) =>
-      col.references("company_applications.id").onDelete("cascade").notNull(),
+    .addColumn("revoked", "boolean", col => col.notNull())
+    .addColumn("credential", "jsonb", col => col.notNull())
+    .addColumn("application_id", "uuid", col =>
+      col.references("company_applications.id").onDelete("cascade").notNull()
     )
-    .addColumn("created_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("created_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn("updated_at", "timestamp", (col) =>
-      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),
+    .addColumn("updated_at", "timestamp", col =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     .execute();
 
@@ -130,7 +130,7 @@ async function down(db: Kysely<any>): Promise<void> {
 
 export async function createTablesIfNotExist(): Promise<void> {
   const tables = await db.introspection.getTables();
-  const tableNames = tables.map((table) => table.name);
+  const tableNames = tables.map(table => table.name);
   const requiredTables = [
     "employee_applications",
     "company_applications",
@@ -139,7 +139,7 @@ export async function createTablesIfNotExist(): Promise<void> {
   ];
 
   const missingTables = requiredTables.filter(
-    (table) => !tableNames.includes(table),
+    table => !tableNames.includes(table)
   );
 
   if (missingTables.length > 0) {

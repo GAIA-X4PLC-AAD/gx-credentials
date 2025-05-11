@@ -29,7 +29,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="legalName"
           value={data.legalName}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
       <div className="space-y-2">
@@ -38,7 +38,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="role"
           value={data.role}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
       <div className="space-y-2">
@@ -47,7 +47,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="email"
           value={data.email}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
       <div className="space-y-2">
@@ -56,7 +56,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="companyName"
           value={data.companyName}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
       <div className="space-y-2">
@@ -65,7 +65,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="companyAddress"
           value={data.companyAddress}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
       <div className="space-y-2">
@@ -74,7 +74,7 @@ function EmployeeDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="applicationText"
           value={data.applicationText}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
     </div>
@@ -90,7 +90,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="legalName"
           value={data.legalName}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
 
@@ -100,7 +100,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="legalAddress"
           value={data.legalAddress}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
 
@@ -110,7 +110,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="subOrganization"
           value={data.subOrganization}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
 
@@ -120,7 +120,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="headquarterAddress"
           value={data.headquarterAddress}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
 
@@ -130,7 +130,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="parentOrganization"
           value={data.parentOrganization}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
 
@@ -140,7 +140,7 @@ function CompanyDisplayForm({ data }: ApplicationFormDisplayProps) {
           id="registrationNumber"
           value={data.registrationNumber}
           readOnly
-          className="bg-muted cursor-default focus:ring-0"
+          className="cursor-default bg-muted focus:ring-0"
         />
       </div>
     </div>

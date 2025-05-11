@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Link } from 'react-router';
+import { Link } from "react-router";
 
-import { Highlight } from '@/components/ui/hero-highlight';
+import { Highlight } from "@/components/ui/hero-highlight";
 
 export const SebisLogo = () => (
   <Link
@@ -12,7 +12,7 @@ export const SebisLogo = () => (
     rel="noopener noreferrer"
   >
     <span className="text-base font-medium">
-      <Highlight className="text-black dark:text-white">sebis</Highlight> @{' '}
+      <Highlight className="text-black dark:text-white">sebis</Highlight> @{" "}
       <span className="font-extrabold text-sky-700 transition-all duration-300 hover:scale-105">
         TUM
       </span>

@@ -5,11 +5,11 @@ const router = express.Router();
 
 router.get(
   "/:id/.well-known/openid-credential-issuer",
-  TakeoutController.wellKnownIssuer,
+  TakeoutController.wellKnownIssuer
 );
 router.get(
   "/:id/.well-known/oauth-authorization-server",
-  TakeoutController.authorization,
+  TakeoutController.authorization
 );
 router.post("/:id/token", TakeoutController.token);
 router.post("/:id/credential", TakeoutController.download);

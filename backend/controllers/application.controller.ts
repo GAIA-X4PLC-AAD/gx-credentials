@@ -26,7 +26,7 @@ export const ApplicationController = {
 
       const applications = await ApplicationRepository.getByApplicant(
         pkh,
-        type,
+        type
       );
 
       if (!applications) {
@@ -163,7 +163,7 @@ export const ApplicationController = {
         type,
         id,
         status,
-        metadata,
+        metadata
       );
 
       if (!application) {

@@ -17,8 +17,16 @@ jobs:
           # Make sure the actual branch is checked out when running on pull requests
           ref: ${{ github.head_ref }}
 
-      - name: Prettify code
+      - name: Prettify frontend code
         uses: creyD/prettier_action@v4.3
         with:
           # This part is also where you can pass other options, for example:
           prettier_options: --write **/*.{js,ts,tsx,md}
+          working-directory: frontend
+
+      - name: Prettify backend code
+        uses: creyD/prettier_action@v4.3
+        with:
+          # This part is also where you can pass other options, for example:
+          prettier_options: --write **/*.{js,ts,tsx,md}
+          working-directory: backend

@@ -60,7 +60,7 @@ function ProfileMenu({ session }: { session: SessionContextValue }) {
       <PopoverContent className="w-full space-y-4">
         <div className="grid gap-2">
           <p className="font-semibold">Logged in as:</p>{" "}
-          <code className="bg-secondary inline-block w-auto rounded-md px-1">
+          <code className="inline-block w-auto rounded-md bg-secondary px-1">
             {session.user?.pkh}
           </code>
         </div>

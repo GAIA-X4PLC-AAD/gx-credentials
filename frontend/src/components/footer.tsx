@@ -4,7 +4,7 @@ import { SebisLogo } from "./sebis-logo";
 
 export default function Footer() {
   return (
-    <footer className="border-t py-6 md:py-8 mt-auto">
+    <footer className="mt-auto border-t py-6 md:py-8">
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} <SebisLogo />

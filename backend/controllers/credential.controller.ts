@@ -61,7 +61,7 @@ export const CredentialController = {
   getAllCompanies: async (req: Request, res: Response): Promise<void> => {
     try {
       const credentials = await CredentialRepository.getAll(
-        "company_credentials",
+        "company_credentials"
       );
 
       if (!credentials) {
@@ -70,8 +70,8 @@ export const CredentialController = {
       }
 
       const companies = credentials
-        .filter((cred) => cred.revoked === false)
-        .map((cred) => ({
+        .filter(cred => cred.revoked === false)
+        .map(cred => ({
           name: cred.name,
           pkh: cred.holder_pkh,
         }));
@@ -112,13 +112,13 @@ export const CredentialController = {
         case "employee":
           await CredentialRepository.create(
             "employee_credentials",
-            credentialPayload,
+            credentialPayload
           );
           break;
         case "company":
           await CredentialRepository.create(
             "company_credentials",
-            credentialPayload,
+            credentialPayload
           );
           break;
         default:
@@ -155,12 +155,12 @@ export const CredentialController = {
         CredentialRepository.update(
           "employee_credentials",
           id,
-          credentialData,
+          credentialData
         ).catch(() => false),
         CredentialRepository.update(
           "company_credentials",
           id,
-          credentialData,
+          credentialData
         ).catch(() => false),
       ]);
 

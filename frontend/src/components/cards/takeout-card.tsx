@@ -30,7 +30,7 @@ const TakeoutCard = ({
       <Card
         className={cn(
           "cursor-pointer transition-all duration-300",
-          "hover:bg-secondary hover:scale-105 hover:shadow-lg"
+          "hover:scale-105 hover:bg-secondary hover:shadow-lg"
         )}
       >
         <CardHeader>

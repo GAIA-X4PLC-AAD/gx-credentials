@@ -58,5 +58,5 @@ const throttle = <T extends (...args: unknown[]) => void>(
 
 export const initResponsive = (): void => {
   updateRootFontSize();
-  window.addEventListener('resize', throttle(updateRootFontSize, 16));
+  window.addEventListener("resize", throttle(updateRootFontSize, 16));
 };

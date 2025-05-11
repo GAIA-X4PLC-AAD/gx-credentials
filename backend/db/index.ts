@@ -16,7 +16,7 @@ if (
   !process.env.PG_DB_ROOT_PASSWORD
 ) {
   throw new Error(
-    "Missing required database configuration in environment variables.",
+    "Missing required database configuration in environment variables."
   );
 }
 

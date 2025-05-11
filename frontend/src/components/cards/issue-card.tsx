@@ -37,7 +37,7 @@ const IssueCard = ({ companyName, applications }: Props) => {
       <Card
         className={cn(
           "h-full w-[18rem] cursor-pointer border-2 transition-all duration-300",
-          "hover:bg-secondary hover:scale-105 hover:shadow-lg",
+          "hover:scale-105 hover:bg-secondary hover:shadow-lg",
           borderColorClass
         )}
       >
@@ -54,7 +54,7 @@ const IssueCard = ({ companyName, applications }: Props) => {
                 {openApplications} open applications
               </p>
             ) : (
-              <p className="text-secondary text-xs">No open applications</p>
+              <p className="text-xs text-secondary">No open applications</p>
             )}
           </CardDescription>
         </CardHeader>
