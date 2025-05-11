@@ -22,11 +22,4 @@ jobs:
         with:
           # This part is also where you can pass other options, for example:
           prettier_options: --write **/*.{js,ts,tsx,md}
-          working_directory: frontend/
-
-      - name: Prettify backend code
-        uses: creyD/prettier_action@v4.3
-        with:
-          # This part is also where you can pass other options, for example:
-          prettier_options: --write **/*.{js,ts,tsx,md}
-          working_directory: backend/
+          prettier_plugins: prettier-plugin-tailwind
