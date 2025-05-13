@@ -93,7 +93,10 @@ export const ApplicationController = {
       }
 
       // making logic overall simpler by enforcing a max of 1 company VC per pkh
-      if (req.user?.isRegistrar || req.user?.companyCredential) {
+      if (
+        type === "company" &&
+        (req.user?.isRegistrar || req.user?.companyCredential)
+      ) {
         res
           .status(400)
           .json({ message: "More than one issuing role not permitted" });
