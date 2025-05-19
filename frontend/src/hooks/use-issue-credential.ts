@@ -11,6 +11,8 @@ import { useState } from "react";
 import { Application } from "@/model/application";
 import { payloadBytesFromString } from "@/lib/utils";
 
+const tezosNetworkId = import.meta.env.VITE_CAIP2_TEZOS_NETWORK;
+
 type IssueCredential = {
   issueCredential: (
     application: Application,
@@ -34,8 +36,12 @@ export function useIssueCredential(): IssueCredential {
     setError(null);
     try {
       const account = await dAppClient?.getActiveAccount();
-      const did = `did:pkh:tezos:` + account?.address;
-      const rawCredential = await constructPayload(application, type, did);
+      if (!account || !account.publicKey) {
+        throw new Error("No account connected");
+      }
+      const pk = account.publicKey;
+      const did = `did:pkh:tezos:${tezosNetworkId}:${account?.address}`;
+      const rawCredential = await constructPayload(application, type, did, pk);
       return await issue(rawCredential, dAppClient);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Unknown error"));
@@ -49,7 +55,8 @@ export function useIssueCredential(): IssueCredential {
   const constructPayload = async (
     application: Application,
     type: "employee" | "company",
-    did: string
+    did: string,
+    pk: string
   ) => {
     const date = new Date();
     const iat = Math.floor(date.getTime() / 1000);
@@ -68,8 +75,8 @@ export function useIssueCredential(): IssueCredential {
       iss: did,
       iat: iat,
       nbf: iat,
-      sub: `did:pkh:tezos:` + application?.pkh,
-      jti: "urn:uuid:" + crypto.randomUUID(),
+      sub: `did:pkh:tezos:${tezosNetworkId}:${application?.pkh}`,
+      jti: `urn:uuid:${crypto.randomUUID()}`,
     };
     let additionalPayload;
     if (type == "company") {
@@ -92,7 +99,8 @@ export function useIssueCredential(): IssueCredential {
     const jwtHeader = {
       alg: "EdDSA",
       typ: "JWT",
-      kid: did,
+      // not using the did here because otherwise a verifier would have no guaranteed way of getting the pk
+      kid: pk,
     };
     const totalPayload =
       base64url.encode(JSON.stringify(jwtHeader)) +

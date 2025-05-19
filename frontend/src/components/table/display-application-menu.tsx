@@ -94,10 +94,10 @@ export const DisplayApplicationMenu = ({
         console.log("Credential issued:", credential);
         // we know that our use DIDs are pkh:tezos, so we can just split
         const credentialPayload = {
-          holder_pkh: credential.payload.sub.split(":")[3],
+          holder_pkh: credential.payload.sub.split(":")[4],
           subject: credential.payload.sub,
           issuer: credential.payload.iss,
-          issuer_pkh: credential.payload.iss.split(":")[3],
+          issuer_pkh: credential.payload.iss.split(":")[4],
           name: credential.payload.vc.credentialSubject["gx:legalName"],
           format,
           credential: credential,
