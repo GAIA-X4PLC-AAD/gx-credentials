@@ -75,6 +75,8 @@ The data fields used for application forms and subsequent credential creation ar
 
 The verifiable credential format used is `jwt`, more specifically `jwt_vc_json`, but `jwt_vc_json-ld` should be possible with no changes (assuming the JSON-LD does not need to be validated). The frontend dictates how the application data is transformed into a credential, keeping the backend generic.
 
+The signature is making the credentials technically not true JWTs. For security reasons, wallets only allow signing data with prefixes. A generic JWT verifier that does not know this, will fail to verify the signature. But transport protocols and wallets seem to have no issues.
+
 ### Verifiable Credential Revocation
 
 This version has no built-in revocation mechanism.
