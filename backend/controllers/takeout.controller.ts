@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { CredentialRepository } from "../repositories/credential";
-import { base64url } from "jose";
 
 export const TakeoutController = {
   wellKnownIssuer: async (req: Request, res: Response): Promise<void> => {
@@ -85,15 +84,13 @@ export const TakeoutController = {
       }
 
       const credential = await CredentialRepository.get(id);
-      const encodedCredential =
-        base64url.encode(JSON.stringify(credential?.credential.header)) +
-        "." +
-        base64url.encode(JSON.stringify(credential?.credential.payload)) +
-        "." +
-        credential?.credential.signature;
+      if (!credential) {
+        res.status(400).json({ message: "Credential not found" });
+        return;
+      }
 
-      console.log(encodedCredential);
-      res.status(200).json({ credential: encodedCredential });
+      console.log(credential.jwt);
+      res.status(200).json({ credential: credential.jwt });
     } catch (error) {
       console.error("Error fetching credential by ID:", error);
       res.status(500).json({ message: "Internal server error" });

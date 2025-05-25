@@ -1,5 +1,6 @@
 export interface CredentialEntry {
   id: string; // UUID
+  jwt: string;
   holder_pkh: string;
   issuer_pkh: string;
   subject: string;

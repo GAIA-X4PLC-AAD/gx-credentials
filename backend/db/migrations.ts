@@ -49,6 +49,7 @@ async function up(db: Kysely<any>): Promise<void> {
     .addColumn("id", "uuid", col =>
       col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
+    .addColumn("jwt", "varchar", col => col.notNull())
     .addColumn("holder_pkh", "varchar", col => col.notNull())
     .addColumn("issuer_pkh", "varchar", col => col.notNull())
     .addColumn("subject", "varchar", col => col.notNull())
@@ -76,6 +77,7 @@ async function up(db: Kysely<any>): Promise<void> {
     .addColumn("id", "uuid", col =>
       col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
+    .addColumn("jwt", "varchar", col => col.notNull())
     .addColumn("holder_pkh", "varchar", col => col.notNull())
     .addColumn("issuer_pkh", "varchar", col => col.notNull())
     .addColumn("subject", "varchar", col => col.notNull())
