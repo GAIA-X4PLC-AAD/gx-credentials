@@ -3,6 +3,7 @@
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
 import React from "react";
+import { base64url } from "jose";
 
 import ApplicationFormDisplay from "./view-application";
 
@@ -80,20 +81,32 @@ export const DisplayApplicationMenu = ({
 
       // Only attempt credential issuance for accepted applications
       if (status === ApplicationStatus.Accepted && format) {
-        const credential = (await issueCredential(
+        const credentialJWT = (await issueCredential(
           row.original as Application,
           credentialType,
           dAppClient
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as any; // Credential
 
-        if (!credential) {
+        if (!credentialJWT) {
           throw new Error("Failed to issue credential.");
         }
+
+        const [header, vcPayload, signature] = credentialJWT.split(".");
+        const credential = {
+          header: JSON.parse(
+            Buffer.from(base64url.decode(header)).toString("utf-8")
+          ),
+          payload: JSON.parse(
+            Buffer.from(base64url.decode(vcPayload)).toString("utf-8")
+          ),
+          signature: Buffer.from(base64url.decode(signature)).toString("utf-8"),
+        };
 
         console.log("Credential issued:", credential);
         // we know that our use DIDs are pkh:tezos, so we can just split
         const credentialPayload = {
+          jwt: credentialJWT,
           holder_pkh: credential.payload.sub.split(":")[4],
           subject: credential.payload.sub,
           issuer: credential.payload.iss,

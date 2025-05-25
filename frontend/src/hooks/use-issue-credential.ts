@@ -113,7 +113,6 @@ export function useIssueCredential(): IssueCredential {
     rawCredentialString: string,
     dAppClient: DAppClient
   ): Promise<unknown> => {
-    let credentialString = "";
     const account = await dAppClient?.getActiveAccount();
     console.log("Generating credential...");
     console.log("account", account);
@@ -136,19 +135,7 @@ export function useIssueCredential(): IssueCredential {
     console.log(response);
     console.log("jwtvc", jwtvc);
 
-    const [header, vcPayload, signature] = jwtvc.split(".");
-    credentialString = JSON.stringify({
-      header: JSON.parse(
-        Buffer.from(base64url.decode(header)).toString("utf-8")
-      ),
-      payload: JSON.parse(
-        Buffer.from(base64url.decode(vcPayload)).toString("utf-8")
-      ),
-      signature,
-    });
-    console.log("JWT credential string", credentialString);
-
-    return JSON.parse(credentialString);
+    return jwtvc;
   };
 
   return {

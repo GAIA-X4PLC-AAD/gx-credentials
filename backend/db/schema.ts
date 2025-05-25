@@ -24,11 +24,12 @@ interface BaseApplication {
 
 interface BaseCredential {
   id: Generated<string>; // UUID
+  jwt: string; // full jwt serialization
   holder_pkh: string;
   issuer_pkh: string;
   subject: string;
   issuer: string;
-  name: string; // humand-readable name of the subject
+  name: string; // human-readable name of the subject
   format: CredentialFormat;
   revoked: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
